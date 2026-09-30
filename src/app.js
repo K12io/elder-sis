@@ -1,14 +1,8 @@
 import path from "node:path";
+import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import { pool, query, applyDb } from "./db.js";
-import studentsRouter from "./routes/students.js";
-import schedulingRouter from "./routes/scheduling.js";
-import attendanceRouter from "./routes/attendance.js";
-import gradingRouter from "./routes/grading.js";
-import gradesRouter from "./routes/grades.js";
-import reportsRouter from "./routes/reports.js";
-import adminRouter from "./routes/admin.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -45,14 +39,23 @@ app.get("/healthz", async (req, res) => {
   }
 });
 
-app.use("/students", studentsRouter);
-app.use("/scheduling", schedulingRouter);
-app.use("/attendance", attendanceRouter);
-app.use("/grading", gradingRouter);
-app.use("/grades", gradesRouter);
-app.use("/reports", reportsRouter);
-app.use("/admin", adminRouter);
-app.use('/administration', adminRouter);
+
+// ---- Route auto-mount -------------------------------------------------------
+// Every module slice owns ONE file in src/routes/. It is mounted automatically at
+// "/<basename>", so parallel slices never edit this file. Extra paths are aliases.
+const ROUTES_DIR = path.join(__dirname, "routes");
+const ROUTE_ALIASES = { admin: ["/administration"] };
+{
+  const files = readdirSync(ROUTES_DIR).filter((f) => f.endsWith(".js")).sort();
+  for (const file of files) {
+    const name = file.replace(/\.js$/, "");
+    const mod = await import(path.join(ROUTES_DIR, file));
+    const router = mod.default;
+    if (!router) continue;
+    app.use(`/${name}`, router);
+    for (const alias of ROUTE_ALIASES[name] ?? []) app.use(alias, router);
+  }
+}
 
 const port = Number(process.env.PORT) || 3000;
 

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
@@ -21,6 +21,21 @@ export function query(text, params) {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_DIR = path.resolve(__dirname, "..", "db");
+const MIGRATIONS_DIR = path.join(DB_DIR, "migrations");
+
+/**
+ * Slice-owned migrations: db/migrations/*.sql applied in filename order, inside the
+ * same transaction as schema.sql. Each slice adds its own file (must be idempotent,
+ * e.g. CREATE TABLE IF NOT EXISTS) so parallel slices never edit schema.sql.
+ */
+function migrationsSql() {
+  if (!existsSync(MIGRATIONS_DIR)) return "";
+  return readdirSync(MIGRATIONS_DIR)
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .map((f) => `-- ==== ${f} ====\n${readFileSync(path.join(MIGRATIONS_DIR, f), "utf8")}`)
+    .join("\n");
+}
 
 // ---- Deterministic synthetic seed data (no randomness) ----
 
@@ -237,6 +252,7 @@ export async function applyDb() {
   try {
     await client.query("BEGIN");
     await client.query(schemaSql);
+    await client.query(migrationsSql());
     const { rows } = await client.query(
       "SELECT count(*)::int AS n FROM students"
     );
