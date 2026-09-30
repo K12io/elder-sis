@@ -467,3 +467,17 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   so this is real parallelism, not pseudo-parallelism. Coordinator-only work queued for after
   F1 lands: wiring `attachUser` into `src/app.js` and adding the new nav tabs to
   `src/views/partials/header.ejs` (shared files stay coordinator-owned).
+- 2026-09-30 · tick 22 (coordinator) · **Free-lane reality check: OpenRouter ':free' models
+  rate-limit under concurrency.** Two of the six wave-3 agents (F3 qwen3.8-27b:free, F5
+  gemma-4-31b:free) died within **15 seconds with 0 tokens**, both returning
+  `429 upstream_provider_shared_pool` — the models that answered cleanly when I swept them
+  serially are drawn from a **shared upstream pool** that throttles under parallel load. The
+  other four (F1/F6 flash-fleet, F2 space-bunny free on Zen, F4 nemotron free on OpenRouter)
+  are still running. Both failed slices were re-dispatched on flash-fleet, and the constraint
+  is now **ADR-004a**: at most 2 concurrent agents per free model and no more than 3 free-lane
+  agents per wave; free lanes are for serial work (sweeps, single-file verification,
+  first-pass reviews), with flash-fleet carrying wide parallel waves. No code was produced by
+  the dead attempts, so nothing had to be unwound. Honest summary of free capacity so far:
+  free is genuinely usable (space-bunny + six OpenRouter models passed real tool-calling
+  tests), but it is *rate-limited*, not *unlimited* — the plan leans free where it fits
+  and pays for reliability where it matters.

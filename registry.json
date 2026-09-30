@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 21,
+  "tick": 22,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -489,8 +489,8 @@
       "status": "in-progress",
       "vet": null,
       "evidence": [],
-      "failedTicks": 0,
-      "notes": "Read-only portal views without login (auth lands separately); linked from home. Lane: free-qwen (qwen3.8-27b:free)."
+      "failedTicks": 1,
+      "notes": "Read-only portal views without login (auth lands separately); linked from home. Lane: free-qwen (qwen3.8-27b:free). | RE-DISPATCH: qwen3.8-27b:free died instantly on an upstream 429 from OpenRouter's shared free pool (0 tokens, 15s). Re-dispatched on flash-fleet (reliable paid lane); no code was produced by the failed attempt."
     },
     {
       "id": "F4",
@@ -529,8 +529,8 @@
       "status": "in-progress",
       "vet": null,
       "evidence": [],
-      "failedTicks": 0,
-      "notes": "Fee catalog, assignment, payment recording, balance per student. Lane: free-gemma (gemma-4-31b:free)."
+      "failedTicks": 1,
+      "notes": "Fee catalog, assignment, payment recording, balance per student. Lane: free-gemma (gemma-4-31b:free). | RE-DISPATCH: gemma-4-31b:free died instantly on an upstream 429 from OpenRouter's shared free pool (0 tokens, 15s). Re-dispatched on flash-fleet (reliable paid lane); no code was produced by the failed attempt."
     },
     {
       "id": "F6",
@@ -554,7 +554,7 @@
     }
   ],
   "metrics": {
-    "ticks": 21,
+    "ticks": 22,
     "firstPassVetPass": 8,
     "firstPassVetTotal": 15,
     "retries": 3,
@@ -649,6 +649,10 @@
     {
       "tick": 21,
       "note": "wave 3 dispatched: F1 auth, F2 teacher, F3 portal, F4 communications, F5 fees, F6 assessment \u2014 4 free lanes + 2 flash-fleet"
+    },
+    {
+      "tick": 22,
+      "note": "F3/F5 free lanes died on upstream 429 (shared pool); re-dispatched on flash-fleet; ADR-004a records the free-lane concurrency limit"
     }
   ],
   "guidance": [
@@ -690,6 +694,16 @@
         "tool-calling sweep results (6 free OpenRouter models + space-bunny)",
         "pi -p resolution tests for two free OpenRouter models"
       ]
+    },
+    {
+      "id": "ADR-004a",
+      "date": "2026-09-30",
+      "title": "Free-lane concurrency limit (OpenRouter shared pool)",
+      "decision": "OpenRouter ':free' models work but draw on a SHARED upstream pool and return 429 under parallel load: two of six wave-3 agents died within 15s with 0 tokens while the same models answered fine when tested serially. Rule for free lanes: at most 2 concurrent per free model, and never more than 3 free-lane agents in one wave; route the remainder to flash-fleet. Zen's space-bunny-free did not show this (separate provider) but is likewise unproven at high concurrency. Free lanes remain ideal for serial work \u2014 sweeps, single-file verification, first-pass reviews.",
+      "evidence": [
+        "two 429 'upstream_provider_shared_pool' errors at 15s / 0 tokens",
+        "serial sweep of the same models passed"
+      ]
     }
   ],
   "knownGaps": [
@@ -721,13 +735,13 @@
   "wave": {
     "active": [
       "F1 auth (flash-fleet)",
-      "F2 teacher (free-worker)",
-      "F3 portal (free-qwen)",
+      "F2 teacher (free-worker/space-bunny)",
       "F4 communications (free-nemotron)",
-      "F5 fees (free-gemma)",
-      "F6 assessment (flash-fleet)"
+      "F6 assessment (flash-fleet)",
+      "F3 portal (flash-fleet, re-dispatch)",
+      "F5 fees (flash-fleet, re-dispatch)"
     ],
-    "note": "wave 3: build-out",
-    "dispatchedAt": "tick 21"
+    "note": "wave 3 (amended): qwen + gemma free lanes died on upstream 429",
+    "dispatchedAt": "tick 21/22"
   }
 }
