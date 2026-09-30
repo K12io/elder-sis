@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 18,
+  "tick": 19,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -426,7 +426,7 @@
     }
   ],
   "metrics": {
-    "ticks": 18,
+    "ticks": 19,
     "firstPassVetPass": 7,
     "firstPassVetTotal": 14,
     "retries": 3,
@@ -509,6 +509,10 @@
     {
       "tick": 18,
       "note": "QA dispatched (qa-final, flash-fleet): attendance roster fix + run-wide sweep + gap walk + BUILD-REPORT.md"
+    },
+    {
+      "tick": 19,
+      "note": "no-op tick: wave sentinel listed qa-final (still running, healthy: 29 tool uses / 29k tokens / 97s, mid attendance-roster fix). Nothing else outstanding. No verification, no dispatch, no writes to QA-owned files."
     }
   ],
   "guidance": [

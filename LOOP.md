@@ -412,3 +412,12 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · vet: pending · status: 12 done, 1 in-progress (QA) · metrics 7/14 first-pass
   · next up: verify QA by execution, close the run (BUILD-REPORT.md + LOOP.md CLOSED),
   cancel the heartbeat.
+- 2026-09-30 · tick 19 (fired tick) · **NO-OP, by design.** The sentinel listed
+  `qa-final` as in flight and it is genuinely working — 29 tool uses / 29.3k tokens in 97
+  seconds (a healthy pace; contrast glm-swarm's 300k+ spins), actively mid-fix with
+  `src/routes/attendance.js` and `src/views/attendance/grid.ejs` written in the last 90
+  seconds and `BUILD-REPORT.md` not yet produced. Every other slice is closed, so there was
+  nothing legitimate to verify and no replacement to dispatch: per the in-flight guard this
+  tick's correct action was to record itself and stop. This is the guard working as
+  intended — a tick that abstains instead of grading mid-write work and generating a false
+  FAIL (which is exactly what happened at tick 11 before the guard existed).
