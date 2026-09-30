@@ -1,0 +1,87 @@
+<%- include('../partials/header', { pageTitle: 'Sign In', activeTab: '' }) %>
+
+<div class="sis-page-title">Valley View SIS &mdash; Sign In</div>
+
+<table class="layout">
+  <tbody>
+    <tr>
+      <td class="col-left">
+
+        <div class="sis-box">
+          <div class="sis-box-title">Staff Login</div>
+          <div class="sis-box-body">
+
+            <% if (error) { %>
+              <div class="sis-metabar" style="border-color:#c98a8a;background:#f7dede;color:#7a1f1f;">
+                <span class="meta-strong"><%= error %></span>
+              </div>
+              <p>&nbsp;</p>
+            <% } %>
+
+            <form action="/auth/login" method="post">
+              <input type="hidden" name="next" value="<%= next || '' %>">
+              <table class="sis-table kv">
+                <tbody>
+                  <tr>
+                    <th style="width:110px;">Username</th>
+                    <td>
+                      <input type="text" name="username" size="22"
+                             value="<%= username || '' %>" autocomplete="username" autofocus>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Password</th>
+                    <td>
+                      <input type="password" name="password" size="22" autocomplete="current-password">
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>&nbsp;</th>
+                    <td>
+                      <button type="submit" class="sis-button-go">Sign In</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </form>
+
+          </div>
+        </div>
+
+      </td>
+      <td class="col-right">
+
+        <div class="sis-box">
+          <div class="sis-box-title">Demo Credentials</div>
+          <div class="sis-box-body">
+            <p class="fineprint">
+              This is a synthetic demonstration system. Every seeded staff account
+              shares the password below.
+            </p>
+            <table class="sis-table">
+              <thead>
+                <tr><th>Username</th><th>Role</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>registrar</td><td>Registrar</td></tr>
+                <tr><td>teacher</td><td>Teacher</td></tr>
+                <tr><td>admin</td><td>Administrator</td></tr>
+              </tbody>
+            </table>
+            <p>
+              <span class="meta-label">Password:</span>
+              <span class="meta-strong"><%= demoPassword %></span>
+            </p>
+            <p class="fineprint">
+              Sessions expire after 12 hours. Signing in records the time on the
+              account's last-login stamp.
+            </p>
+          </div>
+        </div>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<%- include('../partials/footer') %>

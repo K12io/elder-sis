@@ -1,0 +1,166 @@
+<%- include('../partials/header', { pageTitle: 'Assign Fees', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">Assign Fees</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box" style="border:2px solid #a94442;">
+  <div class="sis-box-body"><strong>Error:</strong> <%= error %></div>
+</div>
+<% } %>
+
+<% if (result) { %>
+<div class="sis-metabar" style="margin-bottom: 8px;">
+  <% if (result.mode === 'preview') { %>
+    <span class="meta-label">Preview:</span>
+    <span class="meta-strong"><%= result.toAssign %></span> row(s) would be assigned to
+    <span class="meta-strong"><%= result.studentCount %></span> student(s);
+    <span class="meta-strong"><%= result.skipped %></span> would be skipped (already assigned)
+    for <%= result.term.name %>.
+  <% } else { %>
+    <span class="meta-label">Applied:</span>
+    <span class="meta-strong"><%= result.assigned %></span> assigned &middot;
+    <span class="meta-strong"><%= result.skipped %></span> skipped for
+    <%= result.term.name %> over <%= result.studentCount %> student(s).
+  <% } %>
+</div>
+<% } %>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Bulk Assignment</div>
+    <div class="sis-box-body">
+      <form method="post" action="/fees/assign">
+        <table class="kv">
+          <tr>
+            <th>Term</th>
+            <td>
+              <select name="term_id">
+                <% terms.forEach(function (t) { %>
+                <option value="<%= t.id %>"<% if (selected.term_id == t.id) { %> selected<% } %>><%= t.name %><% if (t.is_current) { %> (current)<% } %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>School</th>
+            <td>
+              <select name="school_id">
+                <option value=""<% if (!selected.school_id) { %> selected<% } %>>All schools</option>
+                <% schools.forEach(function (s) { %>
+                <option value="<%= s.id %>"<% if (String(selected.school_id) === String(s.id)) { %> selected<% } %>><%= s.name %> (<%= s.code %>)</option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Grade filter</th>
+            <td>
+              <select name="grade_level">
+                <option value=""<% if (selected.grade_level === '') { %> selected<% } %>>All grades</option>
+                <% grades.forEach(function (g) { %>
+                <option value="<%= g %>"<% if (String(selected.grade_level) === String(g)) { %> selected<% } %>><%= g === 0 ? 'K' : g %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Fees (active)</th>
+            <td>
+              <% if (!fees.length) { %>
+              <span class="fineprint">No active fees. Add one in the <a href="/fees/catalog">catalog</a>.</span>
+              <% } %>
+              <% fees.forEach(function (f) { %>
+              <label style="display:block;">
+                <input type="checkbox" name="fee_id" value="<%= f.id %>"<% if (selected.fee_ids.indexOf(f.id) !== -1) { %> checked<% } %>>
+                <%= f.name %> &mdash; <%= money(f.amount) %> <span class="fineprint">(<%= f.applies_to %>)</span>
+              </label>
+              <% }); %>
+            </td>
+          </tr>
+        </table>
+        <p>
+          <button type="submit" name="mode" value="preview" class="sis-button">Preview</button>
+          <button type="submit" name="mode" value="apply" class="sis-button-go">Apply Assignment</button>
+        </p>
+        <p class="fineprint">
+          Preview shows which students would receive which fees and how many.
+          Apply inserts in one transaction and skips any student+fee+term that already exists.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <% if (result && result.perFee && result.perFee.length) { %>
+  <div class="sis-box">
+    <div class="sis-box-title">Per-Fee Result</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr><th>Fee</th><th class="num">Amount</th><th class="num">Eligible</th><th class="num">To assign</th><th class="num">Skipped</th></tr>
+        </thead>
+        <tbody>
+          <% result.perFee.forEach(function (p) { %>
+          <tr>
+            <td><%= p.fee.name %></td>
+            <td class="num"><%= money(p.fee.amount) %></td>
+            <td class="num"><%= p.eligible %></td>
+            <td class="num"><%= p.toAssign %></td>
+            <td class="num"><%= p.skipped %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
+
+</td>
+<td class="col-right">
+
+  <% if (result && result.mode === 'preview') { %>
+  <div class="sis-box">
+    <div class="sis-box-title">Preview &mdash; <%= result.previewRows.length %> of <%= result.toAssign %> row(s)</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr><th>Student</th><th>Grade</th><th>School</th><th>Fee</th><th class="num">Amount</th></tr>
+        </thead>
+        <tbody>
+          <% if (!result.previewRows.length) { %>
+          <tr><td colspan="5">Nothing to assign &mdash; every selected pair already exists.</td></tr>
+          <% } %>
+          <% result.previewRows.forEach(function (p) { %>
+          <tr>
+            <td><%= p.student.last_name %>, <%= p.student.first_name %></td>
+            <td><%= p.student.grade_level === 0 ? 'K' : p.student.grade_level %></td>
+            <td><%= p.student.school_name %></td>
+            <td><%= p.fee.name %></td>
+            <td class="num"><%= money(p.fee.amount) %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <p class="fineprint">Total value of rows shown: <%= money(result.totalAmount) %>.</p>
+    </div>
+  </div>
+  <% } %>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-body">
+      <ul class="links">
+        <li><a href="/fees">Fees dashboard</a> &mdash; totals and per-fee rollups</li>
+        <li><a href="/fees/catalog">Fee Catalog</a> &mdash; add, edit, and retire fees</li>
+        <li><a href="/fees/balances">Balances</a> &mdash; school-wide report and CSV export</li>
+      </ul>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

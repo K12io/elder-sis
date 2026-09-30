@@ -1,0 +1,146 @@
+<%- include('../partials/header', { pageTitle: 'Announcement: ' + announcement.title, activeTab: 'communications' }) %>
+
+<div class="sis-page-title">Announcement: <%= announcement.title %></div>
+
+<% if (notice) { %>
+  <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
+    <span class="meta-strong">Success:</span> <%= notice %>
+  </div>
+<% } %>
+<% if (message) { %>
+  <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
+    <span class="meta-strong">Saved:</span> <%= message %>
+  </div>
+<% } %>
+<% if (error) { %>
+  <div class="sis-metabar" style="border-color:#d8a0a0;background:#fbeaea;">
+    <span class="meta-strong">Error:</span> <%= error %>
+  </div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Details</div>
+  <div class="sis-box-body">
+    <table class="sis-table kv">
+      <tr>
+        <th>Title</th>
+        <td><%= announcement.title %></td>
+      </tr>
+      <tr>
+        <th>Body</th>
+        <td style="white-space:pre-wrap; font-family:inherit;"><%= announcement.body %></td>
+      </tr>
+      <tr>
+        <th>Audience</th>
+        <td><%= audienceLabel(announcement.audience_type, announcement.audience_value) %></td>
+      </tr>
+      <tr>
+        <th>Channel</th>
+        <td><%= announcement.channel %></td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><%= announcement.status %></td>
+      </tr>
+      <tr>
+        <th>Author</th>
+        <td><%= announcement.created_by || '—' %></td>
+      </tr>
+      <tr>
+        <th>Created</th>
+        <td><%= formatDate(announcement.created_at) %></td>
+      </tr>
+      <tr>
+        <th>Published</th>
+        <td><%= announcement.published_at ? formatDate(announcement.published_at) : '—' %></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<% if (announcement.status === 'draft') { %>
+  <div class="sis-box">
+    <div class="sis-box-title">Actions</div>
+    <div class="sis-box-body">
+      <form action="/communications/publish" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= announcement.id %>">
+        <button type="submit" class="sis-button-go">Publish</button>
+      </form>
+      &nbsp;
+      <form action="/communications/deliver" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= announcement.id %>">
+        <button type="submit" class="sis-button-warn">Mark all delivered</button>
+      </form>
+    </div>
+  </div>
+<% } else { %>
+  <div class="sis-box">
+    <div class="sis-box-title">Actions</div>
+    <div class="sis-box-body">
+      <form action="/communications/deliver" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= announcement.id %>">
+        <button type="submit" class="sis-button-warn">Mark all delivered</button>
+      </form>
+    </div>
+  </div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">
+    Recipients (<%= totalRecipients %> total)
+    <% if (totalPages > 1) { %>
+      <span class="fineprint" style="float:right;">
+        Page <%= page %> of <%= totalPages %>
+        <% if (page > 1) { %><a href="/communications/show?id=<%= announcement.id %>&page=<%= page - 1 %>">&laquo; Prev</a><% } %>
+        <% if (page < totalPages) { %>&nbsp;<a href="/communications/show?id=<%= announcement.id %>&page=<%= page + 1 %>">Next &raquo;</a><% } %>
+      </span>
+    <% } %>
+  </div>
+  <div class="sis-box-body">
+    <% if (recipients.length === 0) { %>
+      <p><em>No recipients yet.</em></p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th>ID / Grade / School</th>
+            <th class="num">Delivered</th>
+            <th class="num">Read</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recipients.forEach(function (r) { %>
+          <tr>
+            <td><%= r.student_id ? 'Student' : 'Staff' %></td>
+            <td>
+              <% if (r.student_id) { %>
+                <a href="/students/<%= r.student_id %>"><%= r.last_name %>, <%= r.first_name %></a>
+              <% } else { %>
+                <%= r.display_name || r.username %>
+              <% } %>
+            </td>
+            <td>
+              <% if (r.student_id) { %>
+                <%= r.state_id %> | Gr. <%= r.grade_level === 0 ? 'K' : r.grade_level %> | <%= r.school_name || '' %>
+              <% } else { %>
+                Staff
+              <% } %>
+            </td>
+            <td class="num"><%= r.delivered_at ? formatDate(r.delivered_at) : '—' %></td>
+            <td class="num"><%= r.read_at ? formatDate(r.read_at) : '—' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% if (totalRecipients > recipients.length) { %>
+        <p class="fineprint">Showing <%= recipients.length %> of <%= totalRecipients %> recipients.</p>
+      <% } %>
+    <% } %>
+  </div>
+</div>
+
+<p><a href="/communications">&laquo; Back to announcements</a></p>
+
+<%- include('../partials/footer') %>

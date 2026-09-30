@@ -1,0 +1,88 @@
+<%- include('../partials/header', { pageTitle: 'Fees', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">Fees</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box"><div class="sis-box-body"><strong>Error:</strong> <%= error %></div></div>
+<% } %>
+
+<div class="sis-metabar" style="margin-bottom: 8px;">
+  <span class="meta-label">Fees assigned:</span> <span class="meta-strong"><%= totals.feesAssigned %></span>
+  &nbsp; <span class="meta-label">Billed:</span> <span class="meta-strong"><%= money(totals.billed) %></span>
+  &nbsp; <span class="meta-label">Collected:</span> <span class="meta-strong"><%= money(totals.collected) %></span>
+  &nbsp; <span class="meta-label">Outstanding:</span> <span class="meta-strong"><%= money(totals.outstanding) %></span>
+  &nbsp; <span class="meta-label">Waived:</span> <span class="meta-strong"><%= totals.waivedCount %></span>
+</div>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Catalog Fees</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Fee</th>
+            <th class="num">Amount</th>
+            <th>Applies to</th>
+            <th>Active</th>
+            <th class="num">Assigned</th>
+            <th class="num">Collected</th>
+            <th class="num">Outstanding</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!feeRows.length) { %>
+          <tr><td colspan="7">No fees in the catalog yet.</td></tr>
+          <% } %>
+          <% feeRows.forEach(function (f) { %>
+          <tr>
+            <td><a href="/fees/catalog?edit=<%= f.id %>"><%= f.name %></a></td>
+            <td class="num"><%= money(f.amount) %></td>
+            <td><%= f.applies_to %></td>
+            <td><%= f.active ? 'Yes' : 'No' %></td>
+            <td class="num"><%= f.assigned %></td>
+            <td class="num"><%= money(f.collected) %></td>
+            <td class="num"><%= money(f.outstanding) %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-body">
+      <ul class="links">
+        <li><a href="/fees/catalog">Fee Catalog</a> &mdash; add, edit, and retire fees</li>
+        <li><a href="/fees/assign">Assign Fees</a> &mdash; bulk assign to a school/term</li>
+        <li><a href="/fees/balances">Balances</a> &mdash; school-wide report and CSV export</li>
+      </ul>
+      <p class="fineprint">
+        Outstanding balances exclude waived fees and are computed as
+        <code>amount - payments</code> in SQL with numeric(10,2).
+      </p>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Quick Links</div>
+    <div class="sis-box-body">
+      <ul class="links">
+        <li><a href="/students">Student Records</a> &mdash; find a student ID</li>
+        <li><a href="/admin">Administration</a> &mdash; schools and terms</li>
+      </ul>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,134 @@
+<%- include('../partials/header', { pageTitle: 'Assessment Summary', activeTab: activeTab || '' }) %>
+
+<div class="sis-page-title">Assessment &mdash; Group Summary</div>
+
+<% if (typeof noAssessment !== 'undefined' && noAssessment) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Notice</div>
+  <div class="sis-box-body">
+    <p><%= typeof message !== 'undefined' ? message : '' %> <% if (typeof error !== 'undefined' && error) { %><strong><%= error %></strong><% } %></p>
+    <p><a href="/assessment">&laquo; Back to Assessment dashboard</a></p>
+  </div>
+</div>
+<% } else { %>
+
+<div class="sis-metabar">
+  <strong><%= assessment.name %></strong> &middot;
+  Subject: <%= assessment.subject %> &middot;
+  Grades: <%= assessment.grade_levels %> &middot;
+  Administered: <%= String(assessment.administered_on).slice(0, 10) %> &middot;
+  Window: <%= assessment.test_window || '&mdash;' %> &middot;
+  Assessed: <strong><%= assessed %></strong> of <strong><%= eligible %></strong> eligible &middot;
+  Avg scale: <strong><%= avg === null ? '&mdash;' : avg.toFixed(2) %></strong> &middot;
+  % proficient: <strong><%= pctProficient === null ? '&mdash;' : pctProficient.toFixed(1) + '%' %></strong>
+</div>
+
+<div style="margin-top:6px;">
+  <a href="/assessment/summary?assessment=<%= assessment.id %>&format=csv" class="sis-button-go">Export CSV</a>
+  &nbsp;
+  <a href="/assessment/scores?assessment=<%= assessment.id %>">Enter scores</a>
+  &nbsp;
+  <a href="/assessment">&laquo; Back to dashboard</a>
+</div>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Performance Levels (Overall)</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Performance level</th>
+          <th class="num">Students</th>
+          <th class="num">Percent</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% levelStats.forEach(function (l) { %>
+          <tr>
+            <td><%= l.level %></td>
+            <td class="num"><%= l.count %></td>
+            <td class="num"><%= l.pct.toFixed(1) %>%</td>
+          </tr>
+        <% }); %>
+        <tr>
+          <td><strong>Total assessed</strong></td>
+          <td class="num"><strong><%= assessed %></strong></td>
+          <td class="num"><strong>100.0%</strong></td>
+        </tr>
+        <% if (missing > 0) { %>
+          <tr>
+            <td>Eligible but not assessed</td>
+            <td class="num"><%= missing %></td>
+            <td class="num">&mdash;</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">By School</div>
+  <div class="sis-box-body">
+    <% if (!schools.length) { %>
+      <p><em>No scores recorded yet for this assessment.</em></p>
+    <% } else { %>
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>School</th>
+          <th class="num">Students assessed</th>
+          <th class="num">Avg scale</th>
+          <th class="num">Proficient+</th>
+          <th class="num">% proficient</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% schools.forEach(function (s) { %>
+          <tr>
+            <td><%= s.school %></td>
+            <td class="num"><%= s.assessed %></td>
+            <td class="num"><%= s.avg === null ? '&mdash;' : s.avg.toFixed(2) %></td>
+            <td class="num"><%= s.proficient %></td>
+            <td class="num"><%= s.pct_proficient === null ? '&mdash;' : s.pct_proficient.toFixed(1) + '%' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+
+<% if (multiGrade) { %>
+<div class="sis-box">
+  <div class="sis-box-title">By Grade</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th class="num">Grade</th>
+          <th class="num">Students assessed</th>
+          <th class="num">Avg scale</th>
+          <th class="num">Proficient+</th>
+          <th class="num">% proficient</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% grades.forEach(function (g) { %>
+          <tr>
+            <td class="num"><%= g.grade_label %></td>
+            <td class="num"><%= g.assessed %></td>
+            <td class="num"><%= g.avg === null ? '&mdash;' : g.avg.toFixed(2) %></td>
+            <td class="num"><%= g.proficient %></td>
+            <td class="num"><%= g.pct_proficient === null ? '&mdash;' : g.pct_proficient.toFixed(1) + '%' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>
+
+<% } %>
+
+<%- include('../partials/footer') %>

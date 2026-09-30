@@ -1,0 +1,97 @@
+<%- include('../partials/header', { pageTitle: 'Assessment', activeTab: activeTab || '' }) %>
+
+<div class="sis-page-title">Assessment &mdash; Benchmarks &amp; State Tests</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Assessments:</span> <span class="meta-strong"><%= totals.assessments %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Students assessed:</span> <span class="meta-strong"><%= totals.scored %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Proficient or above:</span> <span class="meta-strong"><%= totals.proficient %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Percent proficient (district):</span>
+  <span class="meta-strong"><%= totals.pctProficient === null ? '&mdash;' : totals.pctProficient.toFixed(1) + '%' %></span>
+</div>
+
+<form method="get" action="/assessment" class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <label for="subject">Subject:</label>
+    <select id="subject" name="subject">
+      <option value="">All subjects</option>
+      <% subjects.forEach(function (s) { %>
+        <option value="<%= s %>" <%= subjectFilter === s ? 'selected' : '' %>><%= s %></option>
+      <% }); %>
+    </select>
+    &nbsp;
+    <label for="window">Test window:</label>
+    <select id="window" name="window">
+      <option value="">All windows</option>
+      <% windows.forEach(function (w) { %>
+        <option value="<%= w %>" <%= windowFilter === w ? 'selected' : '' %>><%= w %></option>
+      <% }); %>
+    </select>
+    &nbsp;
+    <button type="submit" class="sis-button-go">Apply</button>
+    &nbsp;
+    <a href="/assessment">Reset</a>
+  </div>
+</form>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Error</div>
+  <div class="sis-box-body"><strong><%= error %></strong></div>
+</div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Assessments</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Assessment</th>
+          <th>Subject</th>
+          <th>Grades</th>
+          <th>Window</th>
+          <th>Administered</th>
+          <th class="num">Scores entered</th>
+          <th class="num">Avg scale</th>
+          <th class="num">% proficient</th>
+          <th>Entry</th>
+          <th>Summary</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!assessments.length) { %>
+          <tr><td colspan="10"><em>No assessments match the current filters.</em></td></tr>
+        <% } %>
+        <% assessments.forEach(function (a) { %>
+          <tr<%= a.active ? '' : ' style="color:#888;"' %>>
+            <td><a href="/assessment/summary?assessment=<%= a.id %>"><%= a.name %></a><%= a.active ? '' : ' (inactive)' %></td>
+            <td><%= a.subject %></td>
+            <td class="num"><%= a.grade_levels %></td>
+            <td><%= a.test_window || '' %></td>
+            <td class="num"><%= String(a.administered_on).slice(0, 10) %></td>
+            <td class="num">
+              <a href="/assessment/scores?assessment=<%= a.id %>"><%= a.scores_entered %></a>
+              <span class="fineprint">of <%= a.eligible %></span>
+            </td>
+            <td class="num"><%= a.avg_score === null ? '&mdash;' : a.avg_score.toFixed(2) %></td>
+            <td class="num"><%= a.pct_proficient === null ? '&mdash;' : a.pct_proficient.toFixed(1) + '%' %></td>
+            <td><a href="/assessment/scores?assessment=<%= a.id %>">Enter scores</a></td>
+            <td><a href="/assessment/summary?assessment=<%= a.id %>">Summary</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="fineprint">
+      &ldquo;% proficient&rdquo; counts <strong>Proficient</strong> and <strong>Advanced</strong> against entered scores.
+      Proficiency bands derive from each assessment's cut score (see the module comment in
+      <code>22-assessment.sql</code>).
+    </p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

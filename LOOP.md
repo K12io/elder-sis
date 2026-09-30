@@ -543,3 +543,21 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
 3. **Refresh `BUILD-REPORT.md`** to cover the five new modules (screens, verification
    commands, limitations drawn from the workers' honest caveats), then run the final
    whole-app sweep and close the run and cancel this heartbeat.
+- 2026-09-30 · tick 24 (coordinator) · **F8 DONE — authentication is wired and enforced.** The
+  middleware is now mounted ahead of the route auto-mount, and three modules carry real
+  server-side gates: `/admin` (Administrator), `/fees` (Administrator|Registrar), `/discipline`
+  (Administrator|Counselor|Teacher|Registrar). Signed-out requests redirect to
+  `/auth/login?next=<page>`; signed-in requests without the role get the styled 403; the rest of
+  the app stays public so the demo remains walkable. The header gained five tabs (Teacher
+  Workspace, Family Portal, Communications, Assessment, Fees) filtered per role, plus a Login
+  link or a logout button with the user's name.
+  Verification by execution, all green: 12 public routes 200 while signed out; `/admin`, `/fees`,
+  `/discipline` 302 with `?next=`; nav hides Administration/Fees and shows Login when anonymous;
+  admin login 302 -> `/auth/me` returns roles ["Administrator"] -> gated routes 200 and the nav
+  shows Administration + Fees + Logout; **teacher login gives 403 on `/admin` and `/fees` while
+  `/teacher` and `/attendance` stay 200** (the correct "signed in, wrong role" semantics); logout
+  re-locks; and wrong password vs unknown user return byte-identical messages, so accounts cannot
+  be enumerated. Also corrected copy that this change falsified: `admin/users.ejs` (two places
+  claiming passwords were out of scope) and `admin/roles.ejs` (three "descriptive only" claims —
+  module visibility now actually drives the nav). **This closes knownGaps 1 and 2.**
+  Remaining wave 4: F7 (seed coherence) then the BUILD-REPORT refresh + final sweep.

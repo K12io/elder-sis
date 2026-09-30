@@ -1,0 +1,122 @@
+<%- include('../partials/header', { pageTitle: 'Student Assessment History', activeTab: activeTab || '' }) %>
+
+<div class="sis-page-title">Assessment &mdash; Student History</div>
+
+<% if (typeof noStudent !== 'undefined' && noStudent) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Notice</div>
+  <div class="sis-box-body">
+    <p><%= typeof message !== 'undefined' ? message : '' %> <% if (typeof error !== 'undefined' && error) { %><strong><%= error %></strong><% } %></p>
+    <p><a href="/assessment">&laquo; Back to Assessment dashboard</a></p>
+  </div>
+</div>
+<% } else { %>
+
+<div class="sis-metabar">
+  <strong><%= student.last_name %>, <%= student.first_name %></strong>
+  <%= student.middle_name ? ' ' + student.middle_name : '' %> &middot;
+  State ID: <%= student.state_id %> &middot;
+  Grade: <strong><%= student.grade_level === 0 ? 'K' : student.grade_level %></strong> &middot;
+  School: <%= student.school_name || '' %> &middot;
+  Status: <%= student.status %>
+</div>
+
+<% if (!rows.length) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Assessment History</div>
+  <div class="sis-box-body">
+    <p><em>No assessment scores on record for this student.</em> Scores appear here once an
+    assessment covering grade <strong><%= student.grade_level === 0 ? 'K' : student.grade_level %></strong>
+    has been administered and entered.</p>
+  </div>
+</div>
+<% } else { %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Assessment History (<%= rows.length %>)</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Assessment</th>
+          <th>Subject</th>
+          <th>Window</th>
+          <th class="num">Administrated</th>
+          <th class="num">Scale score</th>
+          <th class="num">% of max</th>
+          <th>Performance level</th>
+          <th class="num">Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+          <tr>
+            <td><a href="/assessment/summary?assessment=<%= r.assessment_id %>"><%= r.name %></a></td>
+            <td><%= r.subject %></td>
+            <td><%= r.test_window || '' %></td>
+            <td class="num"><%= String(r.administered_on).slice(0, 10) %></td>
+            <td class="num"><strong><%= r.scale_score === null ? '&mdash;' : Number(r.scale_score).toFixed(2) %></strong></td>
+            <td class="num"><%= r.pct === null ? '&mdash;' : r.pct.toFixed(1) + '%' %></td>
+            <td><%= r.performance_level || '&mdash;' %></td>
+            <td class="num">
+              <% if (r.delta === null) { %>&mdash;<% } else if (r.delta > 0) { %>
+                <strong>+<%= r.delta.toFixed(2) %></strong>
+              <% } else if (r.delta < 0) { %>
+                <strong><%= r.delta.toFixed(2) %></strong>
+              <% } else { %>
+                0.00
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="fineprint">Change is versus the student's previous score in the <em>same subject</em> (positive = improved).</p>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Progress by Subject</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th class="num">Assessments</th>
+          <th class="num">First score</th>
+          <th class="num">Latest score</th>
+          <th>Progress note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% subjectSummary.forEach(function (s) { %>
+          <tr>
+            <td><%= s.subject %></td>
+            <td class="num"><%= s.count %></td>
+            <td class="num"><%= s.first ? Number(s.first.scale_score).toFixed(2) : '&mdash;' %></td>
+            <td class="num"><%= s.last ? Number(s.last.scale_score).toFixed(2) : '&mdash;' %></td>
+            <td>
+              <% if (s.change === null) { %>
+                Single assessment on record &mdash; no trend yet.
+              <% } else if (s.change > 0) { %>
+                Improved <strong>+<%= s.change.toFixed(2) %></strong> from
+                <%= String(s.first.administered_on).slice(0, 10) %> to <%= String(s.last.administered_on).slice(0, 10) %>.
+              <% } else if (s.change < 0) { %>
+                Declined <strong><%= s.change.toFixed(2) %></strong> from
+                <%= String(s.first.administered_on).slice(0, 10) %> to <%= String(s.last.administered_on).slice(0, 10) %>.
+              <% } else { %>
+                No change (<%= s.last.performance_level %>) across assessments.
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<% } %>
+
+<% } %>
+
+<%- include('../partials/footer') %>

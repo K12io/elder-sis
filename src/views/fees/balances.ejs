@@ -1,0 +1,106 @@
+<%- include('../partials/header', { pageTitle: 'Fee Balances', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">Fee Balances</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box" style="border:2px solid #a94442;"><div class="sis-box-body"><strong>Error:</strong> <%= error %></div></div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <form method="get" action="/fees/balances">
+      <span class="ctx-label">School:</span>
+      <select name="school">
+        <option value="">All schools</option>
+        <% schools.forEach(function (s) { %>
+        <option value="<%= s.id %>"<% if (String(filters.school) === String(s.id)) { %> selected<% } %>><%= s.name %> (<%= s.code %>)</option>
+        <% }); %>
+      </select>
+      &nbsp;
+      <span class="ctx-label">Grade:</span>
+      <select name="grade">
+        <option value="">All grades</option>
+        <% gradeLabels.forEach(function (g) { %>
+        <option value="<%= g %>"<% if (String(filters.grade) === String(g)) { %> selected<% } %>><%= g === 0 ? 'K' : g %></option>
+        <% }); %>
+      </select>
+      &nbsp;
+      <label><input type="checkbox" name="only" value="1"<% if (filters.only) { %> checked<% } %>> Only with balance</label>
+      &nbsp;
+      <button type="submit" class="sis-button">Apply Filters</button>
+      &nbsp;
+      <a class="sis-button" href="/fees/balances?school=<%= filters.school %>&grade=<%= filters.grade %>&only=<%= filters.only ? '1' : '0' %>&format=csv"
+         style="display:inline-block;text-decoration:none;padding:1px 10px;border:1px solid #7f7f7f;background:#e6e2da;color:#1a1a1a;">Export CSV</a>
+    </form>
+    <p class="fineprint">
+      Showing <strong><%= studentCount %></strong> student(s) &mdash; <%= filters.schoolName %>, <%= filters.gradeName %><% if (filters.only) { %>, only with balance<% } %>.
+    </p>
+  </div>
+</div>
+
+<div class="sis-metabar" style="margin-bottom: 8px;">
+  <span class="meta-label">Billed:</span> <span class="meta-strong"><%= money(totals.billed) %></span>
+  &nbsp; <span class="meta-label">Paid:</span> <span class="meta-strong"><%= money(totals.paid) %></span>
+  &nbsp; <span class="meta-label">Waived:</span> <span class="meta-strong"><%= money(totals.waived) %></span>
+  &nbsp; <span class="meta-label">Outstanding:</span> <span class="meta-strong"><%= money(totals.outstanding) %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Student Balances (<%= rows.length %>)</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>State ID</th>
+          <th>Student</th>
+          <th>Grade</th>
+          <th>School</th>
+          <th class="num">Billed</th>
+          <th class="num">Paid</th>
+          <th class="num">Waived</th>
+          <th class="num">Outstanding</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!rows.length) { %>
+        <tr><td colspan="9">No students match the current filters.</td></tr>
+        <% } %>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td class="num"><%= r.id %></td>
+          <td><%= r.state_id %></td>
+          <td><a href="/fees/student?student=<%= r.id %>"><%= r.last_name %>, <%= r.first_name %></a></td>
+          <td><%= gradeLabel(r.grade_level) %></td>
+          <td><%= r.school_name || '' %></td>
+          <td class="num"><%= money(r.billed) %></td>
+          <td class="num"><%= money(r.paid) %></td>
+          <td class="num"><%= money(r.waived_amount) %></td>
+          <td class="num"><%= money(r.outstanding) %></td>
+        </tr>
+        <% }); %>
+        <tr style="font-weight: bold;">
+          <td colspan="5" style="text-align: right;">TOTAL</td>
+          <td class="num"><%= money(totals.billed) %></td>
+          <td class="num"><%= money(totals.paid) %></td>
+          <td class="num"><%= money(totals.waived) %></td>
+          <td class="num"><%= money(totals.outstanding) %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Module Contents</div>
+  <div class="sis-box-body">
+    <ul class="links">
+      <li><a href="/fees">Fees dashboard</a> &mdash; totals and per-fee rollups</li>
+      <li><a href="/fees/catalog">Fee Catalog</a> &mdash; add, edit, and retire fees</li>
+      <li><a href="/fees/assign">Assign Fees</a> &mdash; bulk assign to a school/term</li>
+    </ul>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

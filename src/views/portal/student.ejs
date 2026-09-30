@@ -1,0 +1,217 @@
+<%- include('../partials/header', { pageTitle: notFound ? 'Student Not Found' : (student.last_name + ', ' + student.first_name), activeTab: 'portal' }) %>
+
+<% if (notFound) { %>
+
+<div class="sis-page-title">Student Not Found</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">No Matching Record</div>
+  <div class="sis-box-body">
+    <p>No student exists with the requested identifier
+       (<code><%= studentId %></code>).</p>
+    <p><a href="/portal">&laquo; Back to portal search</a></p>
+    <p class="fineprint">The record may have been removed, or the ID may be
+       mistyped. Search by last name, first name, or state ID.</p>
+  </div>
+</div>
+
+<% } else { %>
+
+<div class="sis-page-title">
+  Student Portal &mdash; <%= student.last_name %>, <%= student.first_name %>
+</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Student:</span>
+  <span class="meta-strong"><%= student.last_name %>, <%= student.first_name %><% if (student.middle_name) { %> <%= student.middle_name %><% } %></span>
+  &nbsp;&nbsp;<span class="meta-label">State ID:</span>
+  <span class="meta-strong"><%= student.state_id %></span>
+  &nbsp;&nbsp;<span class="meta-label">Grade:</span>
+  <span class="meta-strong"><%= gradeLabel(student.grade_level) %></span>
+  &nbsp;&nbsp;<span class="meta-label">School:</span>
+  <span class="meta-strong"><%= student.school_name || '—' %></span>
+  &nbsp;&nbsp;<span class="meta-label">Term:</span>
+  <span class="meta-strong"><%= term ? term.name : 'No current term' %></span>
+  &nbsp;&nbsp;<span class="meta-label">Status:</span>
+  <span class="meta-strong"><%= student.status %></span>
+</div>
+
+<p style="margin:6px 0 8px;">
+  <a href="/portal/print?student=<%= student.id %>" class="sis-button">Print view</a>
+  <a href="/portal" style="margin-left:8px;">&laquo; Back to portal search</a>
+</p>
+
+<div class="sis-box">
+  <div class="sis-box-title">Current Schedule</div>
+  <div class="sis-box-body">
+    <% if (!schedule.length) { %>
+      <p>No classes are on this student&rsquo;s schedule for the current term.</p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Course</th>
+            <th>Section</th>
+            <th>Teacher</th>
+            <th>Room</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% schedule.forEach(function (r) { %>
+          <tr>
+            <td class="num"><%= r.period == null ? '—' : r.period %></td>
+            <td><%= r.course_name %></td>
+            <td><%= r.section_code %></td>
+            <td><%= r.teacher_name || '—' %></td>
+            <td><%= r.room || '—' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Grades &mdash; <%= term ? term.name : 'Current Term' %></div>
+  <div class="sis-box-body">
+    <% if (!finalGrades.length && !standings.length) { %>
+      <p>No grades have been posted and no scores have been recorded for the
+         current term.</p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Section</th>
+            <th>Percent</th>
+            <th>Letter</th>
+            <th>Basis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% finalGrades.forEach(function (g) { %>
+          <tr>
+            <td><%= g.course_name %></td>
+            <td><%= g.section_code %></td>
+            <td class="num"><%= g.percent == null ? '—' : Number(g.percent).toFixed(2) + '%' %></td>
+            <td class="num"><%= g.letter || '—' %></td>
+            <td>Posted final</td>
+          </tr>
+          <% }); %>
+          <% standings.forEach(function (g) { %>
+          <tr>
+            <td><%= g.course_name %></td>
+            <td><%= g.section_code %></td>
+            <td class="num"><%= g.percent == null ? '—' : g.percent.toFixed(2) + '%' %></td>
+            <td class="num"><%= g.letter || '—' %></td>
+            <td>Current standing</td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <p class="fineprint">Posted final grades are shown as recorded. &ldquo;Current
+         standing&rdquo; is computed from recorded scores weighted by category and
+         is not official until posted.</p>
+    <% } %>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Attendance Summary</div>
+  <div class="sis-box-body">
+    <% if (totalMarked === 0) { %>
+      <p>No attendance recorded yet.</p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Days</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% attendance.forEach(function (a) { %>
+          <tr>
+            <td class="num"><%= a.code %></td>
+            <td><%= a.label %><% if (a.counts_absent) { %> <span class="fineprint">(counts absent)</span><% } %></td>
+            <td class="num"><%= a.n %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;">
+        <strong>Attendance rate:</strong>
+        <%= attendanceRate == null ? '—' : attendanceRate.toFixed(1) + '%' %>
+        <span class="fineprint">(<%= totalMarked %> day<%= totalMarked === 1 ? '' : 's' %> recorded,
+        <%= absentCount %> counted absent)</span>
+      </p>
+    <% } %>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Contacts</div>
+  <div class="sis-box-body">
+    <% if (!contacts.length) { %>
+      <p>No contacts on file.</p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Relationship</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Primary</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% contacts.forEach(function (c) { %>
+          <tr>
+            <td><%= c.name %></td>
+            <td><%= c.relationship || '—' %></td>
+            <td><%= c.phone || '—' %></td>
+            <td><%= c.email || '—' %></td>
+            <td class="num"><%= c.is_primary ? 'Yes' : '' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Alerts</div>
+  <div class="sis-box-body">
+    <% if (!alerts.length) { %>
+      <p>No alerts on file.</p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% alerts.forEach(function (a) { %>
+          <tr>
+            <td class="num"><%= a.alert_date ? new Date(a.alert_date).toISOString().slice(0, 10) : '—' %></td>
+            <td><%= a.alert_type || '—' %></td>
+            <td><%= a.message || '—' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

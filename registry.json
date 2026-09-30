@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 23,
+  "tick": 24,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -643,15 +643,27 @@
         "global chrome + access control"
       ],
       "refweight": 0,
-      "status": "queued",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 implemented and verified by execution in the same tick.",
+        "notes": "Wired attachUser into src/app.js ahead of the route auto-mount; added server-side gates (/admin -> Administrator, /fees -> Administrator|Registrar, /discipline -> Administrator|Counselor|Teacher|Registrar) using the existing requireAuth + requireRole (redirect when signed out, styled 403 when the role is wrong); added five nav tabs (Teacher Workspace, Family Portal, Communications, Assessment, Fees) with per-role visibility and a Login link / logout button + user name in the control cluster; corrected falsified copy in admin/users.ejs (passwords) and admin/roles.ejs (three 'descriptive only' claims).",
+        "evidence": [
+          "coordinator tick verification: logged-out gating 302 with ?next= for /admin /fees /discipline; 12 public routes 200 logged out; admin login -> gated routes 200 and nav shows Administration+Fees+Logout; teacher login -> /admin and /fees 403 while /teacher and /attendance 200; logout re-locks; wrong password and unknown user return identical messages"
+        ]
+      },
+      "evidence": [
+        "src/app.js gated mounts",
+        "src/views/partials/header.ejs role-filtered nav"
+      ],
       "failedTicks": 0,
       "notes": "Coordinator-owned integration after wave 3: (1) insert app.use(attachUser) before the route auto-mount in src/app.js; (2) add nav tabs for Teacher, Portal, Communications, Fees, Assessment; (3) gate nav items by the signed-in user's roles/modules (app_roles.visible_modules) and wrap the sensitive module mounts in requireRole where appropriate; (4) update src/views/admin/users.ejs, which still claims passwords are out of scope \u2014 false since F1 landed. Closes knownGaps 1 and 2 (auth, role-gated nav)."
     }
   ],
   "metrics": {
-    "ticks": 23,
+    "ticks": 24,
     "firstPassVetPass": 14,
     "firstPassVetTotal": 21,
     "retries": 3,
@@ -762,6 +774,10 @@
     {
       "tick": 23,
       "note": "wave 3 closed: F1-F6 verified and done (21/21 new routes 200, idempotent). Remaining: F7 seed coherence, F8 auth integration."
+    },
+    {
+      "tick": 24,
+      "note": "F8 done: auth wired, nav gated by role, admin copy corrected (verification green)"
     }
   ],
   "guidance": [

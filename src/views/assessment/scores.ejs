@@ -1,0 +1,113 @@
+<%- include('../partials/header', { pageTitle: 'Score Entry', activeTab: activeTab || '' }) %>
+
+<div class="sis-page-title">Assessment &mdash; Score Entry</div>
+
+<% if (typeof noAssessment !== 'undefined' && noAssessment) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Notice</div>
+  <div class="sis-box-body">
+    <p><%= typeof message !== 'undefined' ? message : '' %> <% if (typeof error !== 'undefined' && error) { %><strong><%= error %></strong><% } %></p>
+    <p><a href="/assessment">&laquo; Back to Assessment dashboard</a></p>
+  </div>
+</div>
+<% } else { %>
+
+<div class="sis-metabar">
+  <strong><%= assessment.name %></strong> &middot;
+  Subject: <%= assessment.subject %> &middot;
+  Grades: <%= assessment.grade_levels %> &middot;
+  Administered: <%= String(assessment.administered_on).slice(0, 10) %> &middot;
+  Window: <%= assessment.test_window || '&mdash;' %> &middot;
+  Max score: <%= Number(assessment.max_score).toFixed(2) %> &middot;
+  Proficiency cut: <%= Number(assessment.proficiency_cut).toFixed(2) %>
+</div>
+
+<% if (typeof savedFlag !== 'undefined' && savedFlag) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Saved</div>
+  <div class="sis-box-body">
+    <strong>Saved <%= (savedCount === null ? '' : savedCount) %> score<%= (savedCount === 1 ? '' : 's') %>.</strong>
+    <% if (missingAfter !== null) { %>
+      <strong><%= missingAfter %></strong> student<%= (missingAfter === 1 ? '' : 's') %> still missing a score for this assessment.
+    <% } %>
+  </div>
+</div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Not Saved</div>
+  <div class="sis-box-body"><strong><%= error %></strong></div>
+</div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Students in Range (<%= assessment.grade_levels %>)</div>
+  <div class="sis-box-body">
+    <p>
+      Listed: <strong><%= students.length %></strong> &middot;
+      entered: <strong><%= enteredCount %></strong> &middot;
+      missing: <strong><%= missingCount %></strong>
+    </p>
+    <form method="post" action="/assessment/scores">
+      <input type="hidden" name="assessment_id" value="<%= assessment.id %>">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>State ID</th>
+            <th class="num">Grade</th>
+            <th class="num">Scale score (0&ndash;<%= Number(assessment.max_score).toFixed(0) %>)</th>
+            <th>Performance level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!students.length) { %>
+            <tr><td colspan="5"><em>No students fall in this assessment's grade range.</em></td></tr>
+          <% } %>
+          <% students.forEach(function (st) { %>
+            <tr>
+              <td><%= st.last_name %>, <%= st.first_name %></td>
+              <td class="num"><%= st.state_id %></td>
+              <td class="num"><%= st.grade_level === 0 ? 'K' : st.grade_level %></td>
+              <td class="num">
+                <input type="text" inputmode="decimal" size="7"
+                       id="score_<%= st.id %>" name="score_<%= st.id %>"
+                       value="<%= st.scale_score === null ? '' : st.scale_score %>">
+              </td>
+              <td>
+                <select name="level_<%= st.id %>" disabled>
+                  <% levels.forEach(function (lvl) { %>
+                    <option<%= st.performance_level === lvl ? ' selected' : '' %>><%= lvl %></option>
+                  <% }); %>
+                  <% if (!st.performance_level) { %>
+                    <option selected>(choose a score)</option>
+                  <% } %>
+                </select>
+                <span class="fineprint">
+                  <% if (st.entered) { %>saved: <%= st.performance_level %><% } else { %>no score yet <%= '&mdash;' %> level implied by score on save<% } %>
+                </span>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;">
+        <button type="submit" class="sis-button-go">Save scores</button>
+        &nbsp;
+        <a href="/assessment/summary?assessment=<%= assessment.id %>">View summary</a>
+        &nbsp;
+        <a href="/assessment">&laquo; Back to dashboard</a>
+      </p>
+      <p class="fineprint">
+        The performance-level dropdown is informational only; the level is recomputed from
+        <%= Number(assessment.proficiency_cut).toFixed(2) %> (the cut score) when you save.
+        Blank rows are left untouched. Leaving a saved score blank does not clear it.
+      </p>
+    </form>
+  </div>
+</div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

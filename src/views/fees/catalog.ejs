@@ -1,0 +1,124 @@
+<%- include('../partials/header', { pageTitle: 'Fee Catalog', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">Fee Catalog</div>
+
+<% if (typeof savedMsg !== 'undefined' && savedMsg) { %>
+<div class="sis-metabar" style="margin-bottom: 8px;"><span class="meta-label">Status:</span> <span class="meta-strong"><%= savedMsg %></span></div>
+<% } %>
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box" style="border:2px solid #a94442;">
+  <div class="sis-box-body"><strong>Error:</strong> <%= error %></div>
+</div>
+<% } %>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Fees (<%= fees.length %>)</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Fee</th>
+            <th class="num">Amount</th>
+            <th>Applies to</th>
+            <th>Active</th>
+            <th class="num">Assigned</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!fees.length) { %>
+          <tr><td colspan="6">No fees in the catalog yet.</td></tr>
+          <% } %>
+          <% fees.forEach(function (f) { %>
+          <tr>
+            <td><%= f.name %><% if (f.description) { %> <span class="fineprint"><%= f.description %></span><% } %></td>
+            <td class="num"><%= money(f.amount) %></td>
+            <td><%= f.applies_to %></td>
+            <td><%= f.active ? 'Yes' : 'No' %></td>
+            <td class="num"><%= f.assigned %></td>
+            <td><a href="/fees/catalog?edit=<%= f.id %>">Edit</a></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <%
+    var f = typeof form !== 'undefined' && form ? form
+          : (editing ? { id: editing.id, name: editing.name, amount: String(editing.amount),
+                         description: editing.description || '', applies_to: editing.applies_to,
+                         active: editing.active }
+                     : { id: null, name: '', amount: '', description: '', applies_to: 'all', active: true });
+  %>
+  <div class="sis-box">
+    <div class="sis-box-title"><%= editing ? 'Edit Fee' : 'Add Fee' %></div>
+    <div class="sis-box-body">
+      <form method="post" action="/fees/catalog">
+        <% if (editing) { %>
+        <input type="hidden" name="id" value="<%= editing.id %>">
+        <% } %>
+        <table class="kv">
+          <tr>
+            <th>Name</th>
+            <td><input type="text" name="name" size="26" maxlength="120" value="<%= f.name %>"></td>
+          </tr>
+          <tr>
+            <th>Amount</th>
+            <td><input type="text" name="amount" size="10" maxlength="12" placeholder="0.00" value="<%= f.amount %>"></td>
+          </tr>
+          <tr>
+            <th>Applies to</th>
+            <td>
+              <select name="applies_to">
+                <% appliesTo.forEach(function (a) { %>
+                <option value="<%= a %>"<% if (f.applies_to === a) { %> selected<% } %>><%= a %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Active</th>
+            <td>
+              <select name="active">
+                <option value="1"<% if (f.active) { %> selected<% } %>>Yes</option>
+                <option value="0"<% if (!f.active) { %> selected<% } %>>No</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <td><textarea name="description" rows="3" cols="30"><%= f.description %></textarea></td>
+          </tr>
+        </table>
+        <p>
+          <button type="submit" class="sis-button-go"><%= editing ? 'Save Changes' : 'Add Fee' %></button>
+          <% if (editing) { %>&nbsp;<a href="/fees/catalog">Cancel</a><% } %>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-body">
+      <ul class="links">
+        <li><a href="/fees">Fees dashboard</a> &mdash; totals and per-fee rollups</li>
+        <li><a href="/fees/assign">Assign Fees</a> &mdash; bulk assign to a school/term</li>
+        <li><a href="/fees/balances">Balances</a> &mdash; school-wide report and CSV export</li>
+      </ul>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

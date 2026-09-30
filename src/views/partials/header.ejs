@@ -15,16 +15,37 @@
   var termName = typeof termName !== 'undefined' ? termName : 'Year 2026–2027 · Term 2';
   var userName = typeof userName !== 'undefined' ? userName : 'Demo User';
 
+  // Nav tabs. `pub: true` tabs are visible to anyone; the rest need a signed-in user
+  // whose role is listed (Administrator sees everything). /admin, /fees and /discipline
+  // are additionally enforced server-side in src/app.js.
   var tabs = [
-    { id: 'start',   label: 'Start Page',     href: '/' },
-    { id: 'students',label: 'Student Records',href: '/students' },
-    { id: 'schedule',label: 'Scheduling',     href: '/scheduling' },
-    { id: 'attend',  label: 'Attendance',     href: '/attendance' },
-    { id: 'grades',  label: 'Grading',        href: '/grading' },
-    { id: 'transcripts', label: 'Grades & Transcripts', href: '/grades' },
-    { id: 'reports', label: 'Reports',        href: '/reports' },
-    { id: 'admin',   label: 'Administration', href: '/admin' }
+    { id: 'start',        label: 'Start Page',        href: '/',                pub: true },
+    { id: 'students',     label: 'Student Records',   href: '/students',        pub: true },
+    { id: 'schedule',     label: 'Scheduling',        href: '/scheduling',      pub: true },
+    { id: 'attend',       label: 'Attendance',        href: '/attendance',      pub: true },
+    { id: 'grades',       label: 'Grading',           href: '/grading',         pub: true },
+    { id: 'transcripts',  label: 'Grades & Transcripts', href: '/grades',       pub: true },
+    { id: 'reports',      label: 'Reports',           href: '/reports',         pub: true },
+    { id: 'teacher',      label: 'Teacher Workspace', href: '/teacher',         pub: true },
+    { id: 'portal',       label: 'Family Portal',     href: '/portal',          pub: true },
+    { id: 'communications', label: 'Communications',  href: '/communications',  pub: true },
+    { id: 'assessment',   label: 'Assessment',        href: '/assessment',      pub: true },
+    { id: 'fees',         label: 'Fees',              href: '/fees',            pub: false, roles: ['Administrator', 'Registrar'] },
+    { id: 'admin',        label: 'Administration',    href: '/admin',           pub: false, roles: ['Administrator'] },
   ];
+
+  // Resolve who is looking and what they may see. When nobody is signed in only the
+  // public tabs render and the control cluster offers a Login link instead of a chip.
+  var cu = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null;
+  var cuRoles = cu ? (cu.roles || []).map(function (r) { return String(r).toLowerCase(); }) : [];
+  var isAdmin = cuRoles.indexOf('administrator') !== -1;
+  var visibleTabs = tabs.filter(function (t) {
+    if (t.pub) return true;
+    if (!cu) return false;
+    if (isAdmin) return true;
+    return (t.roles || []).some(function (r) { return cuRoles.indexOf(String(r).toLowerCase()) !== -1; });
+  });
+  if (cu && !userName) { userName = cu.display_name || cu.username || userName; }
 %>
 
 <div id="shell">
@@ -51,7 +72,15 @@
       <a class="sis-iconbtn" href="/reports" title="Reports">R</a>
       <a class="sis-iconbtn" href="/admin" title="Administration">A</a>
       <a class="sis-iconbtn" href="/grades" title="Grades &amp; Transcripts">G</a>
-      <span class="sis-userchip" title="<%= userName %>"><%= initials %></span>
+      <% if (cu) { %>
+        <span class="sis-userchip" title="<%= userName %> (<%= (cu.roles || []).join(', ') %>)"><%= initials %></span>
+        <span class="ctx-label"><%= userName %></span>
+        <form method="post" action="/auth/logout" style="margin:0;display:inline;">
+          <button type="submit" class="sis-iconbtn" title="Sign out">&#8592;</button>
+        </form>
+      <% } else { %>
+        <a class="sis-iconbtn" href="/auth/login" title="Sign in to the district SIS">Login</a>
+      <% } %>
     </div>
 
     <span class="ctx-label">School:</span>
@@ -75,7 +104,7 @@
 
   <div id="tabbar" role="navigation">
     <ul class="tabs">
-      <% tabs.forEach(function (t) { %>
+      <% visibleTabs.forEach(function (t) { %>
       <li<% if (t.id === activeTab) { %> class="active"<% } %>><a href="<%= t.href %>"><%= t.label %></a></li>
       <% }); %>
     </ul>

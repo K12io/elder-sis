@@ -1,0 +1,117 @@
+<%- include('../partials/header', { pageTitle: pageTitle, activeTab: '' }) %>
+
+<div class="sis-page-title">Take Attendance</div>
+
+<% if (notFound) { %>
+  <div class="sis-metabar">
+    <span class="meta-label">Section:</span>
+    <span class="meta-strong">not found<%= requestedSectionId ? ' (id ' + requestedSectionId + ')' : '' %></span>
+  </div>
+  <div class="sis-box" style="margin-top:8px;">
+    <div class="sis-box-body">
+      <p>We could not find this section for the selected teacher. It may not exist, or it may belong to another teacher.</p>
+      <p>Pick a teacher and one of their sections from the <a href="/teacher">Teacher Workspace</a>.</p>
+      <p><a href="/teacher">&laquo; Back to Teacher Workspace</a></p>
+    </div>
+  </div>
+<% } else { %>
+
+<div class="sis-metabar">
+  <span class="meta-label">Course:</span> <span class="meta-strong"><%= section.course_name %> [<%= section.section_code %>]</span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Teacher:</span> <span class="meta-strong"><%= section.teacher_name %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">School:</span> <span class="meta-strong"><%= section.school_name %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Period:</span> <span class="meta-strong"><%= section.period != null ? section.period : '—' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Room:</span> <span class="meta-strong"><%= section.room || '—' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Date:</span> <span class="meta-strong"><%= date %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Roster:</span> <span class="meta-strong"><%= roster.length %></span> students
+</div>
+
+<% if (saved !== null) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-body">
+    <strong>Saved attendance for <%= saved %> student<%= saved === 1 ? '' : 's' %>.</strong>
+  </div>
+</div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Quick Entry &mdash; <%= date %></div>
+  <div class="sis-box-body">
+
+    <form action="/teacher/attendance" method="post">
+      <input type="hidden" name="section" value="<%= section.id %>">
+      <input type="hidden" name="teacher" value="<%= teacher.id %>">
+      <input type="hidden" name="date" value="<%= date %>">
+
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th style="width:24px;">#</th>
+            <th>Student</th>
+            <th>State ID</th>
+            <th class="num">Grade</th>
+            <th style="width:70px; text-align:center;">Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (roster.length === 0) { %>
+          <tr><td colspan="5">No students assigned to this section &mdash; assign them in Scheduling.</td></tr>
+          <% } %>
+          <% roster.forEach(function (st, idx) { %>
+          <tr>
+            <td class="num"><%= idx + 1 %></td>
+            <td><%= st.last_name %>, <%= st.first_name %><span class="fineprint"> <%= st.state_id %></span></td>
+            <td><%= st.state_id %></td>
+            <td class="num"><%= st.grade_level != null ? st.grade_level : '—' %></td>
+            <td style="text-align:center;">
+              <input type="text" name="code_<%= st.id %>" size="2" maxlength="2"
+                     value="<%= existing[st.id] || '' %>"
+                     style="width:28px; text-align:center; text-transform:uppercase;">
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+
+      <p style="margin-top:8px;">
+        <% if (roster.length > 0) { %>
+        <button type="submit" class="sis-button-go">Save Attendance</button>
+        <% } %>
+        &nbsp;
+        <a href="/attendance/grid?section=<%= section.id %>&amp;date=<%= date %>">Open the full week grid &raquo;</a>
+        &nbsp;&nbsp;
+        <a href="/teacher/section?teacher=<%= teacher.id %>&amp;section=<%= section.id %>">Standings &raquo;</a>
+        &nbsp;&nbsp;
+        <a href="/teacher?teacher=<%= teacher.id %>&amp;date=<%= date %>">&laquo; Back to Teacher Workspace</a>
+      </p>
+    </form>
+
+    <% if (roster.length === 0) { %>
+    <p class="fineprint">Nothing to take attendance for on this section yet.</p>
+    <% } %>
+
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Code Legend</div>
+  <div class="sis-box-body">
+    <% codes.forEach(function (c) { %>
+    <span style="margin-right:14px;"><strong><%= c.code %></strong> = <%= c.label %><% if (c.counts_absent) { %><span class="fineprint"> (absent)</span><% } %><% if (c.excused) { %><span class="fineprint"> (excused)</span><% } %></span>
+    <% }); %>
+    <p class="fineprint">Codes are 2 characters, case-insensitive. Leave a code blank to skip that student. Existing marks are pre-filled.</p>
+    <% if (roster.length > 0 && Object.keys(existing).length === 0) { %>
+    <p class="fineprint">No attendance recorded for this date yet.</p>
+    <% } %>
+  </div>
+</div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

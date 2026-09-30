@@ -1,0 +1,92 @@
+<%- include('../partials/header', { pageTitle: pageTitle, activeTab: '' }) %>
+
+<div class="sis-page-title">Section Standings</div>
+
+<% if (notFound) { %>
+  <div class="sis-metabar">
+    <span class="meta-label">Section:</span>
+    <span class="meta-strong">not found<%= requestedSectionId ? ' (id ' + requestedSectionId + ')' : '' %></span>
+  </div>
+  <div class="sis-box" style="margin-top:8px;">
+    <div class="sis-box-body">
+      <p>We could not find this section for the selected teacher. It may not exist, or it may belong to another teacher.</p>
+      <p>Pick a teacher and one of their sections from the <a href="/teacher">Teacher Workspace</a>.</p>
+      <p><a href="/teacher">&laquo; Back to Teacher Workspace</a></p>
+    </div>
+  </div>
+<% } else { %>
+
+<div class="sis-metabar">
+  <span class="meta-label">Course:</span> <span class="meta-strong"><%= section.course_name %> [<%= section.section_code %>]</span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Teacher:</span> <span class="meta-strong"><%= section.teacher_name %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">School:</span> <span class="meta-strong"><%= section.school_name %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Period:</span> <span class="meta-strong"><%= section.period != null ? section.period : '—' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Room:</span> <span class="meta-strong"><%= section.room || '—' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Term:</span> <span class="meta-strong"><%= section.term_name || '—' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Roster:</span> <span class="meta-strong"><%= roster.length %></span> students
+</div>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Standings &mdash; <%= section.course_name %></div>
+  <div class="sis-box-body">
+
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th style="width:24px;">#</th>
+          <th>Student</th>
+          <th>State ID</th>
+          <th class="num">Grade</th>
+          <th class="num">Scores Entered</th>
+          <th class="num">Percent</th>
+          <th class="num">Letter</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (roster.length === 0) { %>
+        <tr><td colspan="7">No students assigned to this section &mdash; assign them in Scheduling.</td></tr>
+        <% } %>
+        <% roster.forEach(function (st, idx) {
+             var standing = standings.get(st.id) || { pct: null, letter: null, scoresEntered: 0 };
+        %>
+        <tr>
+          <td class="num"><%= idx + 1 %></td>
+          <td><%= st.last_name %>, <%= st.first_name %><% if (st.middle_name) { %> <%= st.middle_name %><% } %></td>
+          <td><%= st.state_id %></td>
+          <td class="num"><%= st.grade_level != null ? st.grade_level : '—' %></td>
+          <td class="num"><%= standing.scoresEntered %></td>
+          <td class="num"><%= standing.pct != null ? standing.pct.toFixed(1) + '%' : '—' %></td>
+          <td class="num"><%= standing.letter || '—' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <p style="margin-top:8px;">
+      <a href="/grading/scores?section=<%= section.id %>">Open the full grading grid for this section &raquo;</a>
+      &nbsp;&nbsp;
+      <a href="/attendance/grid?section=<%= section.id %>&amp;date=<%= new Date().toISOString().slice(0,10) %>">Open the attendance week grid &raquo;</a>
+      &nbsp;&nbsp;
+      <a href="/teacher/section?teacher=<%= teacher.id %>&amp;section=<%= section.id %>">Refresh standings</a>
+      &nbsp;&nbsp;
+      <a href="/teacher?teacher=<%= teacher.id %>">&laquo; Back to Teacher Workspace</a>
+    </p>
+
+    <p class="fineprint">
+      Percent is the weighted average over the section's grade categories (weights renormalized over categories
+      that have scores); "X" exempt scores are excluded and missing scores count as zero. A dash means no scores
+      have been entered for that category yet.
+    </p>
+
+  </div>
+</div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

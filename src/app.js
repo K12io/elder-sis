@@ -3,6 +3,7 @@ import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import { pool, query, applyDb } from "./db.js";
+import { attachUser, requireAuth, requireRole } from "./middleware/auth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -12,6 +13,9 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "..", "public")));
 app.use(express.urlencoded({ extended: false }));
+
+// Session/user resolution for every request (sets req.user + res.locals.currentUser).
+app.use(attachUser);
 
 app.get("/", async (req, res) => {
   const [students, sections, teachers, term] = await Promise.all([
@@ -45,6 +49,14 @@ app.get("/healthz", async (req, res) => {
 // "/<basename>", so parallel slices never edit this file. Extra paths are aliases.
 const ROUTES_DIR = path.join(__dirname, "routes");
 const ROUTE_ALIASES = { admin: ["/administration"] };
+
+// Modules that require a signed-in user, and which roles may open them.
+// Everything not listed stays public so the demo remains walkable end to end.
+const GATED = {
+  admin: [requireAuth, requireRole("Administrator")],
+  fees: [requireAuth, requireRole("Administrator", "Registrar")],
+  discipline: [requireAuth, requireRole("Administrator", "Counselor", "Teacher", "Registrar")],
+};
 {
   const files = readdirSync(ROUTES_DIR).filter((f) => f.endsWith(".js")).sort();
   for (const file of files) {
@@ -52,8 +64,8 @@ const ROUTE_ALIASES = { admin: ["/administration"] };
     const mod = await import(path.join(ROUTES_DIR, file));
     const router = mod.default;
     if (!router) continue;
-    app.use(`/${name}`, router);
-    for (const alias of ROUTE_ALIASES[name] ?? []) app.use(alias, router);
+    app.use(`/${name}`, ...(GATED[name] ?? []), router);
+    for (const alias of ROUTE_ALIASES[name] ?? []) app.use(alias, ...(GATED[name] ?? []), router);
   }
 }
 

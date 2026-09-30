@@ -5,7 +5,7 @@
 <div class="sis-metabar">
   <span class="meta-label">Roles:</span>
   <span class="meta-strong"><%= roles.length %></span>
-  &nbsp;|&nbsp; <span class="meta-label">Module visibility is descriptive only.</span>
+  &nbsp;|&nbsp; <span class="meta-label">Module visibility is enforced in the header nav; see the note below for the server-side gates.</span>
   The header navigation is NOT driven by these checkboxes in this demo.
 </div>
 
@@ -44,7 +44,7 @@
         <% } %>
       </tbody>
     </table>
-    <p class="fineprint">This table is descriptive. The checkboxes below are stored on the role row and are not enforced anywhere yet.</p>
+    <p class="fineprint">The checkboxes below are stored on the role row and are enforced when rendering the header nav, and /admin, /fees and /discipline additionally require the roles listed in src/app.js.</p>
   </div>
 </div>
 

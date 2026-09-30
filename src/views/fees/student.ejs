@@ -1,0 +1,177 @@
+<%- include('../partials/header', { pageTitle: 'Student Fees', activeTab: 'admin' }) %>
+
+<% if (typeof noStudent !== 'undefined' && noStudent) { %>
+
+<div class="sis-page-title">Student Fees</div>
+<% if (typeof message !== 'undefined' && message) { %>
+<div class="sis-box"><div class="sis-box-body"><%= message %></div></div>
+<% } %>
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box" style="border:2px solid #a94442;"><div class="sis-box-body"><strong>Error:</strong> <%= error %></div></div>
+<% } %>
+
+<% } else { %>
+
+<div class="sis-page-title">Student Fees &mdash; <%= student.last_name %>, <%= student.first_name %></div>
+
+<% if (typeof savedMsg !== 'undefined' && savedMsg) { %>
+<div class="sis-metabar" style="margin-bottom: 8px;"><span class="meta-label">Status:</span> <span class="meta-strong"><%= savedMsg %></span></div>
+<% } %>
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box" style="border:2px solid #a94442; margin-bottom: 8px;">
+  <div class="sis-box-body"><strong>Error:</strong> <%= error %></div>
+</div>
+<% } %>
+
+<div class="sis-metabar" style="margin-bottom: 8px;">
+  <span class="meta-label">Student ID:</span> <span class="meta-strong"><%= student.id %></span>
+  &nbsp; <span class="meta-label">State ID:</span> <span class="meta-strong"><%= student.state_id %></span>
+  &nbsp; <span class="meta-label">Grade:</span> <span class="meta-strong"><%= student.grade_level === 0 ? 'K' : student.grade_level %></span>
+  &nbsp; <span class="meta-label">School:</span> <span class="meta-strong"><%= student.school_name %></span>
+  &nbsp; <span class="meta-label">Status:</span> <span class="meta-strong"><%= student.status %></span>
+</div>
+
+<div class="sis-metabar" style="margin-bottom: 8px;">
+  <span class="meta-label">Billed:</span> <span class="meta-strong"><%= money(totals.billed) %></span>
+  &nbsp; <span class="meta-label">Paid:</span> <span class="meta-strong"><%= money(totals.paid) %></span>
+  &nbsp; <span class="meta-label">Outstanding:</span> <span class="meta-strong"><%= money(totals.outstanding) %></span>
+</div>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Assigned Fees</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Fee</th>
+            <th>Term</th>
+            <th class="num">Amount</th>
+            <th>Waived</th>
+            <th class="num">Paid</th>
+            <th class="num">Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!feeRows.length) { %>
+          <tr><td colspan="6">No fees assigned to this student.</td></tr>
+          <% } %>
+          <% feeRows.forEach(function (r) { %>
+          <tr>
+            <td><%= r.fee_name %></td>
+            <td><%= r.term_name || '' %></td>
+            <td class="num"><%= money(r.amount) %></td>
+            <td><%= r.waived ? 'Yes' : 'No' %></td>
+            <td class="num"><%= money(r.paid) %></td>
+            <td class="num"><%= money(r.balance) %></td>
+          </tr>
+          <% }); %>
+          <tr>
+            <td colspan="5" style="text-align: right; font-weight: bold;">Outstanding total</td>
+            <td class="num" style="font-weight: bold;"><%= money(totals.outstanding) %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Record Payment / Waive</div>
+    <div class="sis-box-body">
+      <% var payable = feeRows.filter(function (r) { return !r.waived && Number(r.balance) > 0; }); %>
+      <% if (!payable.length) { %>
+      <p class="fineprint">No payable fees remain &mdash; everything is paid or waived.</p>
+      <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr><th>Fee</th><th class="num">Balance</th><th>Record payment</th><th>Waive</th></tr>
+        </thead>
+        <tbody>
+          <% payable.forEach(function (r) { %>
+          <tr>
+            <td><%= r.fee_name %></td>
+            <td class="num"><%= money(r.balance) %></td>
+            <td>
+              <form method="post" action="/fees/payment">
+                <input type="hidden" name="student_id" value="<%= student.id %>">
+                <input type="hidden" name="student_fee_id" value="<%= r.id %>">
+                <input type="text" name="amount" size="8" maxlength="12" placeholder="<%= Number(r.balance).toFixed(2) %>">
+                <select name="method">
+                  <% methods.forEach(function (m) { %>
+                  <option value="<%= m %>"><%= m %></option>
+                  <% }); %>
+                </select>
+                <input type="text" name="paid_on" size="10" maxlength="10" value="">
+                <input type="text" name="received_by" size="10" maxlength="60" placeholder="received by">
+                <input type="text" name="note" size="14" maxlength="120" placeholder="note">
+                <button type="submit" class="sis-button-go">Record</button>
+              </form>
+            </td>
+            <td>
+              <form method="post" action="/fees/waive">
+                <input type="hidden" name="student_id" value="<%= student.id %>">
+                <input type="hidden" name="student_fee_id" value="<%= r.id %>">
+                <button type="submit" class="sis-button-warn">Waive</button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <p class="fineprint">
+        Payments over the remaining balance are rejected. Leave the date blank for today (YYYY-MM-DD otherwise).
+      </p>
+      <% } %>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Contacts</div>
+    <div class="sis-box-body">
+      <% if (!contacts.length) { %>
+      <p class="fineprint">No contacts on file.</p>
+      <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr><th>Name</th><th>Relationship</th><th>Phone</th><th>Email</th><th>Primary</th></tr>
+        </thead>
+        <tbody>
+          <% contacts.forEach(function (c) { %>
+          <tr>
+            <td><%= c.name %></td>
+            <td><%= c.relationship || '' %></td>
+            <td><%= c.phone || '' %></td>
+            <td><%= c.email || '' %></td>
+            <td><%= c.is_primary ? 'Yes' : '' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-body">
+      <ul class="links">
+        <li><a href="/fees">Fees dashboard</a> &mdash; totals and per-fee rollups</li>
+        <li><a href="/fees/assign">Assign Fees</a> &mdash; bulk assign to a school/term</li>
+        <li><a href="/fees/balances">Balances</a> &mdash; school-wide report and CSV export</li>
+      </ul>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<% } %>
+
+<%- include('../partials/footer') %>

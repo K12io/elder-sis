@@ -1,0 +1,129 @@
+<%- include('../partials/header', { pageTitle: 'New Announcement', activeTab: 'communications' }) %>
+
+<div class="sis-page-title">New Announcement</div>
+
+<% if (error) { %>
+  <div class="sis-metabar" style="border-color:#d8a0a0;background:#fbeaea;">
+    <span class="meta-strong">Error:</span> <%= error %>
+  </div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Compose</div>
+  <div class="sis-box-body">
+    <form action="/communications" method="post">
+      <table class="sis-table kv">
+        <tr>
+          <th>Title</th>
+          <td><input type="text" name="title" value="<%= form.title %>" size="60" required></td>
+        </tr>
+        <tr>
+          <th>Body</th>
+          <td><textarea name="body" rows="8" cols="70" required><%= form.body %></textarea></td>
+        </tr>
+        <tr>
+          <th>Audience type</th>
+          <td>
+            <select name="audience_type" id="audience_type">
+              <% audienceTypes.forEach(function (a) { %>
+                <option value="<%= a %>"<%= form.audience_type === a ? ' selected' : '' %>><%= a %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr id="audience_value_row">
+          <th>Audience value</th>
+          <td id="audience_value_cell">
+            <% if (form.audience_type === 'school') { %>
+              <select name="audience_value">
+                <option value="">(select school)</option>
+                <% schools.forEach(function (s) { %>
+                  <option value="<%= s.id %>"<%= form.audience_value == s.id ? ' selected' : '' %>><%= s.name %> (<%= s.code %>)</option>
+                <% }); %>
+              </select>
+            <% } else if (form.audience_type === 'grade') { %>
+              <select name="audience_value">
+                <option value="">(select grade)</option>
+                <% grades.forEach(function (g) { %>
+                  <option value="<%= g.value %>"<%= form.audience_value === g.value ? ' selected' : '' %>><%= g.label %></option>
+                <% }); %>
+              </select>
+            <% } else if (form.audience_type === 'staff') { %>
+              <input type="text" name="audience_value" value="<%= form.audience_value %>" size="30" placeholder="e.g., All Teachers, Counseling Dept">
+              <span class="fineprint">Descriptive label for the staff group (not used for filtering recipients).</span>
+            <% } else { %>
+              <span class="fineprint">No value needed for "all" audience.</span>
+            <% } %>
+          </td>
+        </tr>
+        <tr>
+          <th>Channel</th>
+          <td>
+            <select name="channel">
+              <% channels.forEach(function (c) { %>
+                <option value="<%= c %>"<%= form.channel === c ? ' selected' : '' %>><%= c %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>
+            <select name="status">
+              <% statuses.forEach(function (s) { %>
+                <option value="<%= s %>"<%= form.status === s ? ' selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+              <% }); %>
+            </select>
+            <span class="fineprint">Choosing "Published" sets the published timestamp to now.</span>
+          </td>
+        </tr>
+        <tr>
+          <th>&nbsp;</th>
+          <td>
+            <button type="submit" class="sis-button-go">Create announcement</button>
+            &nbsp;<a href="/communications">Cancel</a>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('audience_type').addEventListener('change', function () {
+  var v = this.value;
+  var cell = document.getElementById('audience_value_cell');
+  if (v === 'school') {
+    var html = '<select name="audience_value"><option value="">(select school)</option>';
+    var schoolsData = [
+      <% schools.forEach(function(s) { %>
+      { id: '<%= s.id %>', name: '<%= s.name.replace(/'/g, "\\'") %>', code: '<%= s.code %>' },
+      <% }); %>
+    ];
+    schoolsData.forEach(function(s) {
+      html += '<option value="' + s.id + '">' + s.name + ' (' + s.code + ')</option>';
+    });
+    html += '</select>';
+    cell.innerHTML = html;
+  } else if (v === 'grade') {
+    var html = '<select name="audience_value"><option value="">(select grade)</option>';
+    var gradesData = [
+      <% grades.forEach(function(g) { %>
+      { value: '<%= g.value %>', label: '<%= g.label.replace(/'/g, "\\'") %>' },
+      <% }); %>
+    ];
+    gradesData.forEach(function(g) {
+      html += '<option value="' + g.value + '">' + g.label + '</option>';
+    });
+    html += '</select>';
+    cell.innerHTML = html;
+  } else if (v === 'staff') {
+    cell.innerHTML = '<input type="text" name="audience_value" size="30" placeholder="e.g., All Teachers, Counseling Dept">' +
+      '<span class="fineprint">Descriptive label for the staff group (not used for filtering recipients).</span>';
+  } else {
+    cell.innerHTML = '<span class="fineprint">No value needed for "all" audience.</span>';
+  }
+});
+</script>
+
+<%- include('../partials/footer') %>

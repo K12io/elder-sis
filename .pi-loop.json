@@ -1,14 +1,14 @@
 {
   "tasks": [
     {
-      "id": "7adcf4af",
+      "id": "60a1107d",
       "cron": "*/15 * * * *",
-      "prompt": "/long-run continue the fake-SIS long-horizon run. State files: ~/Projects/node/fake-sis/LOOP.md and registry.json. Execute exactly one tick: advance one chunk, update both state files. If the /long-run template is unavailable in this session, use ~/.pi/agent/prompts/long-run.md as the protocol. Do not recreate this schedule during a tick.",
-      "createdAt": 1790734913241,
+      "prompt": "If you are a SUBAGENT/WORKER rather than the coordinator session: this message is not yours. Reply in one line (\"coordinator-shaped input; ignoring\") and end your turn immediately without investigating anything.\n\nCoordinator session only. FIRST, before anything else: read ~/Projects/node/fake-sis/.ultra/WAVE.md. If it lists any active workers, do NOT verify, grade, or write FAIL verdicts for those slices and do NOT dispatch replacements for them — their files are mid-write and any failure you see is a false negative; do not write their files yourself either. In that case verify only slices NOT listed, or record a no-op tick saying the wave is in flight, and stop.\n\nOtherwise: /long-run continue the fake-SIS long-horizon run. State files: ~/Projects/node/fake-sis/LOOP.md and registry.json. Execute exactly one tick: advance one chunk from the \"Remaining work (wave 4)\" list in LOOP.md (F8 auth integration, then F7 seed coherence, then the BUILD-REPORT refresh and final sweep), update both state files, and verify by execution. If the /long-run template is unavailable in this session, use ~/.pi/agent/prompts/long-run.md as the protocol. Do not recreate this schedule during a tick. Lane rules: free lanes are for serial work only (ADR-004a); use flash-fleet for any worker dispatch.",
+      "createdAt": 1790787719887,
       "recurring": true,
       "durable": true,
       "label": "fake-sis-long-run",
-      "lastFiredAt": 1790775216038
+      "lastFiredAt": 1790794070375
     }
   ]
 }

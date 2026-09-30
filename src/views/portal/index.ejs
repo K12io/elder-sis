@@ -1,0 +1,105 @@
+<%- include('../partials/header', { pageTitle: 'Parent &amp; Student Portal', activeTab: 'portal' }) %>
+
+<div class="sis-page-title">Parent &amp; Student Portal</div>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Find Your Student</div>
+    <div class="sis-box-body">
+      <form action="/portal" method="get">
+        <table class="sis-table kv">
+          <tr>
+            <th>Search</th>
+            <td>
+              <input type="text" name="q" value="<%= q %>" size="34"
+                     placeholder="Last name, first name, or state ID">
+              <button type="submit" class="sis-button">Find</button>
+              <% if (searching) { %>
+                <a href="/portal">Clear</a>
+              <% } %>
+            </td>
+          </tr>
+        </table>
+      </form>
+      <p class="fineprint">Search by any part of a last name, first name, or
+         state ID. Results link to that student&rsquo;s portal page.</p>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">
+      <% if (searching) { %>
+        Search Results <%= rows.length ? '(' + rows.length + ')' : '' %>
+      <% } else { %>
+        Recently Added Students
+      <% } %>
+    </div>
+    <div class="sis-box-body">
+      <% if (!rows.length) { %>
+        <p>
+          <% if (searching) { %>
+            No students matched <strong>&ldquo;<%= q %>&rdquo;</strong>.
+            Check the spelling or try a state ID (for example, <code>VA100000</code>).
+          <% } else { %>
+            No student records are available yet.
+          <% } %>
+        </p>
+      <% } else { %>
+        <table class="sis-table">
+          <thead>
+            <tr>
+              <th>State ID</th>
+              <th>Name</th>
+              <th>Grade</th>
+              <th>School</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rows.forEach(function (r) { %>
+            <tr>
+              <td class="num"><%= r.state_id %></td>
+              <td><%= r.last_name %>, <%= r.first_name %></td>
+              <td class="num"><%= gradeLabel(r.grade_level) %></td>
+              <td><%= r.school_name || '—' %></td>
+              <td><a href="/portal/student?student=<%= r.id %>">Open portal &raquo;</a></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% if (searching && rows.length === 50) { %>
+          <p class="fineprint">Showing the first 50 matches. Narrow your search if needed.</p>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">What the Portal Shows</div>
+    <div class="sis-box-body">
+      <p>This portal gives families a read-only view of their student&rsquo;s
+         current school record:</p>
+      <ul>
+        <li><strong>Current schedule</strong> &mdash; classes and teachers for the current term.</li>
+        <li><strong>Grades</strong> &mdash; posted final grades, plus a current standing where no final grade is posted yet.</li>
+        <li><strong>Attendance</strong> &mdash; day counts by attendance code and an attendance rate.</li>
+        <li><strong>Contacts</strong> &mdash; the emergency/guardian contacts on file.</li>
+        <li><strong>Alerts</strong> &mdash; health, safety, or office notices.</li>
+      </ul>
+      <p class="fineprint">Information is shown exactly as recorded by the school.
+         Contact the school office to correct any record. This demo uses synthetic
+         data only.</p>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

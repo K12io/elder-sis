@@ -5,7 +5,7 @@
 <div class="sis-metabar">
   <span class="meta-label">Staff accounts:</span>
   <span class="meta-strong"><%= users.length %></span>
-  &nbsp;|&nbsp; <span class="meta-label">Note:</span> passwords are out of scope for this demo &mdash; accounts exist for role mapping only.
+  &nbsp;|&nbsp; <span class="meta-label">Note:</span> sign-in is live: use the demo password <code>demo1234</code> for any username at <a href="/auth/login">/auth/login</a>.
 </div>
 
 <% if (message) { %>
@@ -66,7 +66,7 @@
         <% } %>
       </tbody>
     </table>
-    <p class="fineprint">Roles replace the whole set on save. Passwords are explicitly out of scope &mdash; no password is stored or checked.</p>
+    <p class="fineprint">Roles replace the whole set on save. Passwords are stored as scrypt hashes and checked at sign-in; all demo accounts share the password <code>demo1234</code>.</p>
   </div>
 </div>
 

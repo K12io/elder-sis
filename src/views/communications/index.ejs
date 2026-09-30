@@ -1,0 +1,87 @@
+<%- include('../partials/header', { pageTitle: 'Communications', activeTab: 'communications' }) %>
+
+<div class="sis-page-title">Communications &mdash; Announcements</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Drafts:</span>
+  <span class="meta-strong"><%= metabar.drafts %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Published:</span>
+  <span class="meta-strong"><%= metabar.published %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Total recipients:</span>
+  <span class="meta-strong"><%= metabar.totalRecipients %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <form action="/communications" method="get">
+      <table class="sis-table kv">
+        <tr>
+          <th>Status</th>
+          <td>
+            <select name="status">
+              <option value="">(all)</option>
+              <% statuses.forEach(function (s) { %>
+                <option value="<%= s %>"<%= filters.status === s ? ' selected' : '' %>><%= s %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Audience type</th>
+          <td>
+            <select name="audience_type">
+              <option value="">(all)</option>
+              <% audienceTypes.forEach(function (a) { %>
+                <option value="<%= a %>"<%= filters.audience_type === a ? ' selected' : '' %>><%= a %></option>
+              <% }); %>
+            </select>
+          </td>
+          <td>
+            <button type="submit" class="btn">Apply</button>
+            &nbsp;<a href="/communications">Clear</a>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">
+    Announcements
+    <a href="/communications/new" class="sis-button-go" style="float:right;margin-top:-3px;">New announcement</a>
+  </div>
+  <div class="sis-box-body">
+    <% if (rows.length === 0) { %>
+      <p><em>No announcements found.</em></p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Created</th>
+            <th>Title</th>
+            <th>Audience</th>
+            <th>Channel</th>
+            <th>Status</th>
+            <th class="num">Recipients</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% rows.forEach(function (r) { %>
+          <tr>
+            <td class="num"><%= formatDate(r.created_at) %></td>
+            <td><a href="/communications/show?id=<%= r.id %>"><%= r.title %></a></td>
+            <td><%= audienceLabel(r.audience_type, r.audience_value) %></td>
+            <td><%= r.channel %></td>
+            <td><%= r.status %></td>
+            <td class="num"><%= r.recipient_count %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

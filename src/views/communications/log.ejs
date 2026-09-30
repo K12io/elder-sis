@@ -1,0 +1,165 @@
+<%- include('../partials/header', { pageTitle: 'Delivery Log', activeTab: 'communications' }) %>
+
+<div class="sis-page-title">Communications &mdash; Delivery Log</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Total deliveries:</span>
+  <span class="meta-strong"><%= total %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Per-announcement counts</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Announcement</th>
+          <th class="num">Total</th>
+          <th class="num">Delivered</th>
+          <th class="num">Read</th>
+          <th class="num">Pending</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% perAnn.forEach(function (a) { %>
+        <tr>
+          <td><a href="/communications/show?id=<%= a.id %>"><%= a.title %></a></td>
+          <td class="num"><%= a.total %></td>
+          <td class="num"><%= a.delivered %></td>
+          <td class="num"><%= a.read %></td>
+          <td class="num"><%= a.total - a.delivered %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <form action="/communications/log" method="get">
+      <table class="sis-table kv">
+        <tr>
+          <th>Announcement</th>
+          <td>
+            <select name="announcement_id">
+              <option value="">(all)</option>
+              <% announcements.forEach(function (a) { %>
+                <option value="<%= a.id %>"<%= filters.announcement_id == a.id ? ' selected' : '' %>><%= a.title %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Student ID</th>
+          <td><input type="text" name="student_id" value="<%= filters.student_id %>" size="12" placeholder="Student PK"></td>
+          <th>Delivered</th>
+          <td>
+            <select name="delivered">
+              <option value="">(any)</option>
+              <option value="yes"<%= filters.delivered === 'yes' ? ' selected' : '' %>>Yes</option>
+              <option value="no"<%= filters.delivered === 'no' ? ' selected' : '' %>>No</option>
+            </select>
+          </td>
+          <th>Read</th>
+          <td>
+            <select name="read">
+              <option value="">(any)</option>
+              <option value="yes"<%= filters.read === 'yes' ? ' selected' : '' %>>Yes</option>
+              <option value="no"<%= filters.read === 'no' ? ' selected' : '' %>>No</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>&nbsp;</th>
+          <td colspan="7">
+            <button type="submit" class="btn">Apply</button>
+            &nbsp;<a href="/communications/log">Clear</a>
+            &nbsp;<a href="/communications/log?format=csv" class="sis-button-go">Export CSV</a>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">
+    Delivery Records
+    <% if (totalPages > 1) { %>
+      <span class="fineprint" style="float:right;">
+        Page <%= page %> of <%= totalPages %>
+        <% if (page > 1) { %>
+          <a href="/communications/log?<%= [
+            'announcement_id=' + encodeURIComponent(filters.announcement_id),
+            'student_id=' + encodeURIComponent(filters.student_id),
+            'delivered=' + encodeURIComponent(filters.delivered),
+            'read=' + encodeURIComponent(filters.read),
+            'page=' + (page - 1)
+          ].join('&') %>">&laquo; Prev</a>
+        <% } %>
+        <% if (page < totalPages) { %>
+          &nbsp;<a href="/communications/log?<%= [
+            'announcement_id=' + encodeURIComponent(filters.announcement_id),
+            'student_id=' + encodeURIComponent(filters.student_id),
+            'delivered=' + encodeURIComponent(filters.delivered),
+            'read=' + encodeURIComponent(filters.read),
+            'page=' + (page + 1)
+          ].join('&') %>">Next &raquo;</a>
+        <% } %>
+      </span>
+    <% } %>
+  </div>
+  <div class="sis-box-body">
+    <% if (rows.length === 0) { %>
+      <p><em>No delivery records match the current filters.</em></p>
+    <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Announcement</th>
+            <th>Audience</th>
+            <th>Channel</th>
+            <th>Status</th>
+            <th>Recipient</th>
+            <th>ID / Grade / School</th>
+            <th class="num">Delivered</th>
+            <th class="num">Read</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% rows.forEach(function (r) { %>
+          <tr>
+            <td><a href="/communications/show?id=<%= r.announcement_id %>"><%= r.announcement_title %></a></td>
+            <td><%= audienceLabel(r.audience_type, r.audience_value) %></td>
+            <td><%= r.channel %></td>
+            <td><%= r.status %></td>
+            <td>
+              <% if (r.student_id) { %>
+                <a href="/students/<%= r.student_id %>"><%= r.last_name %>, <%= r.first_name %></a>
+              <% } else { %>
+                <%= r.display_name || r.username %>
+              <% } %>
+            </td>
+            <td>
+              <% if (r.student_id) { %>
+                <%= r.state_id %> | Gr. <%= r.grade_level === 0 ? 'K' : r.grade_level %> | <%= r.school_name || '' %>
+              <% } else { %>
+                Staff
+              <% } %>
+            </td>
+            <td class="num"><%= r.delivered_at ? formatDate(r.delivered_at) : '—' %></td>
+            <td class="num"><%= r.read_at ? formatDate(r.read_at) : '—' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% if (total > rows.length) { %>
+        <p class="fineprint">Showing <%= rows.length %> of <%= total %> records.</p>
+      <% } %>
+    <% } %>
+  </div>
+</div>
+
+<p><a href="/communications">&laquo; Back to announcements</a></p>
+
+<%- include('../partials/footer') %>

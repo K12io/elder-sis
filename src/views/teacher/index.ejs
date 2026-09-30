@@ -1,0 +1,105 @@
+<%- include('../partials/header', { pageTitle: 'Teacher Workspace', activeTab: '' }) %>
+
+<div class="sis-page-title">Teacher Workspace</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Teacher:</span>
+  <span class="meta-strong"><%= teacher ? teacher.name : '— none —' %></span>
+  <% if (teacher) { %>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Dept:</span> <span class="meta-strong"><%= teacher.dept || '—' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">School:</span> <span class="meta-strong"><%= teacher.school_name || '—' %></span>
+  <% } %>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Term:</span> <span class="meta-strong"><%= term ? term.name : 'no current term' %></span>
+</div>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Select Teacher</div>
+  <div class="sis-box-body">
+    <form method="get" action="/teacher">
+      <label for="teacher">Teacher:</label>
+      <select id="teacher" name="teacher">
+        <% teachers.forEach(function (t) { %>
+        <option value="<%= t.id %>"<% if (teacher && t.id === teacher.id) { %> selected<% } %>><%= t.name %> (<%= t.code %>)<% if (t.dept) { %> &mdash; <%= t.dept %><% } %></option>
+        <% }); %>
+      </select>
+      &nbsp;
+      <label for="date">Date:</label>
+      <input type="text" id="date" name="date" size="10" value="<%= date %>" maxlength="10">
+      &nbsp;
+      <button type="submit" class="sis-button-go">View Workspace</button>
+      <span class="fineprint">&nbsp;Date drives the "today at a glance" count (YYYY-MM-DD).</span>
+    </form>
+  </div>
+</div>
+
+<div class="sis-metabar" style="margin-top:8px;">
+  <span class="meta-label">Today at a glance (<%= date %>):</span>
+  <span class="meta-strong"><%= sections.length %></span> section<%= sections.length === 1 ? '' : 's' %>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Rostered students:</span> <span class="meta-strong"><%= totalStudents %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Attendance rows today:</span> <span class="meta-strong"><%= todayMarks %></span>
+</div>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">My Sections &mdash; Current Term</div>
+  <div class="sis-box-body">
+
+    <% if (!teacher) { %>
+    <p>No teachers found in the system.</p>
+    <% } else { %>
+
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Section Code</th>
+          <th class="num">Period</th>
+          <th>Room</th>
+          <th>School</th>
+          <th class="num">Roster</th>
+          <th>Standings</th>
+          <th>Attendance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (sections.length === 0) { %>
+        <tr><td colspan="8">No sections assigned to this teacher for the current term &mdash; assign sections in Scheduling.</td></tr>
+        <% } %>
+        <% sections.forEach(function (s) { %>
+        <tr>
+          <td><%= s.course_name %></td>
+          <td><%= s.section_code %></td>
+          <td class="num"><%= s.period != null ? s.period : '—' %></td>
+          <td><%= s.room || '—' %></td>
+          <td><%= s.school_code %></td>
+          <td class="num"><%= s.roster_count %></td>
+          <td><a href="/teacher/section?teacher=<%= teacher.id %>&amp;section=<%= s.id %>">Standings</a></td>
+          <td><a href="/teacher/attendance?teacher=<%= teacher.id %>&amp;section=<%= s.id %>&amp;date=<%= date %>">Take Attendance</a></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <p class="fineprint" style="margin-top:6px;">
+      Roster counts come from Scheduling's roster; open a section to compute live standing from the gradebook.
+    </p>
+
+    <% } %>
+
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Code Legend</div>
+  <div class="sis-box-body">
+    <% codes.forEach(function (c) { %>
+    <span style="margin-right:14px;"><strong><%= c.code %></strong> = <%= c.label %><% if (c.counts_absent) { %><span class="fineprint"> (absent)</span><% } %><% if (c.excused) { %><span class="fineprint"> (excused)</span><% } %></span>
+    <% }); %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
