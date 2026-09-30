@@ -1,12 +1,14 @@
 # WAVE IN FLIGHT — do not act on these slices
 
-## Active workers
+## Active workers (wave 5 — data population)
 
-(none — wave 3 complete 2026-09-30; every worker reported and the tree is frozen.)
+- `D1` rosters — flash-fleet. db/migrations/30-rosters.sql
+- `D4` people — flash-fleet. db/migrations/33-people.sql
+- `D5` conduct+health — flash-fleet. db/migrations/34-conduct-health.sql
+- `D6` finance/assessment/comms — flash-fleet. db/migrations/35-finance-assess-comms.sql
+- `D7` demo users — flash-fleet. db/migrations/36-users.sql
 
 ## Rules while this list is non-empty
-- Do NOT verify, grade, or write verdicts for the slices listed.
-- Do NOT dispatch replacements.
-- You MAY verify slices NOT listed, or record a no-op tick.
-
-## Clear this file when the wave has finished
+- Do NOT verify, grade, or write verdicts for the slices listed — their migrations are mid-write.
+- Do NOT dispatch replacements. Do NOT write their files yourself.
+- You MAY verify slices NOT listed, or record a no-op tick. That is a complete tick.

@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 24,
+  "tick": 25,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -603,26 +603,6 @@
       "notes": "State-assessment style scores with summaries; seeded synthetic data. Lane: flash-fleet."
     },
     {
-      "id": "F7",
-      "title": "Seed coherence: make roster, grades and attendance overlap on the same sections",
-      "surface": "data",
-      "dependsOn": [],
-      "files": [
-        "db/migrations/23-seed-coherence.sql"
-      ],
-      "screens": [
-        "teacher standings",
-        "portal grades",
-        "grading->transcripts path"
-      ],
-      "refweight": 0,
-      "status": "queued",
-      "vet": null,
-      "evidence": [],
-      "failedTicks": 0,
-      "notes": "Surfaced by F2's report: section_roster rows exist only for elementary sections (36-42) which have no grade assignments, while sections with scores (e.g. 1) have no roster rows. Consequence: no screen can show a student who is BOTH enrolled in a section AND graded in it, so teacher standings, portal grades and the grading->transcript path all render empty/em-dash states in the demo. Fix: an idempotent migration that assigns rosters to the sections that already have categories/assignments/scores (and a few attendance rows), so at least 3-4 sections are fully coherent end to end. Dispatch after wave 3 so migrations do not collide."
-    },
-    {
       "id": "F8",
       "title": "Auth integration: wire attachUser, nav tabs for wave-3 modules, role-gated nav, fix falsified admin copy",
       "surface": "integration",
@@ -660,10 +640,154 @@
       ],
       "failedTicks": 0,
       "notes": "Coordinator-owned integration after wave 3: (1) insert app.use(attachUser) before the route auto-mount in src/app.js; (2) add nav tabs for Teacher, Portal, Communications, Fees, Assessment; (3) gate nav items by the signed-in user's roles/modules (app_roles.visible_modules) and wrap the sensitive module mounts in requireRole where appropriate; (4) update src/views/admin/users.ejs, which still claims passwords are out of scope \u2014 false since F1 landed. Closes knownGaps 1 and 2 (auth, role-gated nav)."
+    },
+    {
+      "id": "D1",
+      "title": "Roster every section (root dependency for grading + attendance data)",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/30-rosters.sql"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: flash-fleet. Fill section_roster to ~85% of capacity per section by school+grade, every student in >=2 sections, and guarantee the graded sections get rosters."
+    },
+    {
+      "id": "D2",
+      "title": "Grading data for all 42 sections (categories, assignments, ~10k scores)",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/31-grading-data.sql"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: flash-fleet. Depends on D1. 3 categories/section summing to 100, 8-10 assignments/section, scores for rostered students with realistic M/X/blank distribution."
+    },
+    {
+      "id": "D3",
+      "title": "Attendance history: 6 weeks x all sections (~25-30k rows)",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/32-attendance-data.sql"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: flash-fleet. Depends on D1. Realistic code mix (P/T/A/E), a few absence-heavy students for the letters report, and today's rows so office screens are non-empty."
+    },
+    {
+      "id": "D4",
+      "title": "People depth: contacts for all 300 students, alerts, enrollment history with transfers/withdrawals",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/33-people.sql"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: flash-fleet. 1-2 contacts per student; alerts for ~40; prior-year enrollment rows; ~15 withdrawn students with exit dates; ~10 mid-year entrants."
+    },
+    {
+      "id": "D5",
+      "title": "Conduct + health volume: ~140 incidents, ~90 encounters, ~50 more flags",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/34-conduct-health.sql"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: flash-fleet. Spread across schools, grades and codes over the current term."
+    },
+    {
+      "id": "D6",
+      "title": "Finance + assessment + communications volume",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/35-finance-assess-comms.sql"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: flash-fleet. Fees assigned district-wide (~600), ~180 payments incl. partials; 2 more assessments with scores; announcements to ~15 with recipients."
+    },
+    {
+      "id": "D7",
+      "title": "Demo users: ~12 accounts across all roles",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/36-users.sql"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: flash-fleet. Registrars/counselors/teachers/admin linked to app_roles; reuse the seeded scrypt hash for demo1234 so every account is sign-in-able."
+    },
+    {
+      "id": "V1",
+      "title": "Visual fidelity pass vs the capture corpus (screens, not just chrome)",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "public/css/app.css + module views as agreed"
+      ],
+      "screens": [
+        "all module screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Lane: coordinator + flash-fleet. Harvest ~14 captures covering each screen type, review them, write a delta spec, then apply: criteria panels, tab strips, grid density, print views."
     }
   ],
   "metrics": {
-    "ticks": 24,
+    "ticks": 25,
     "firstPassVetPass": 14,
     "firstPassVetTotal": 21,
     "retries": 3,
@@ -778,6 +902,10 @@
     {
       "tick": 24,
       "note": "F8 done: auth wired, nav gated by role, admin copy corrected (verification green)"
+    },
+    {
+      "tick": 25,
+      "note": "ADR-005 (migration-demo purpose: dense data + capture fidelity); F7 replaced by data wave D1-D7 + V1; dispatched D1/D4/D5/D6/D7"
     }
   ],
   "guidance": [
@@ -829,6 +957,15 @@
         "two 429 'upstream_provider_shared_pool' errors at 15s / 0 tokens",
         "serial sweep of the same models passed"
       ]
+    },
+    {
+      "id": "ADR-005",
+      "date": "2026-09-30",
+      "title": "Purpose: migration-demo legacy system -> dense data + capture fidelity",
+      "decision": "Operator clarified the goal: this app is the LEGACY side of a data-migration demonstration. Two requirements follow. (1) DATA DEPTH: every section rostered, every section graded, weeks of attendance, contacts for every student, enrollment history with transfers/withdrawals, incidents, encounters, fees, assessments and communications at realistic volume - plus realistic messiness (missing data, mid-year entries/exits, withdrawn students, duplicate names) because migration work needs edge cases. All seeds deterministic, idempotent and guarded, since migrations re-run on every boot. (2) VISUAL FIDELITY: screens must match the reference captures from the Vera SIS UI library (PowerSchool/Aeries/Skyward/Synergy/Focus) - tables, tab strips, criteria panels, grids, print views. Current state measured before the wave: 0 sections with both roster and assignments, 41/42 sections with no assignments, 35/42 with no roster rows, 0 attendance rows, 288/300 students with no contacts, 270/300 with no final grades, 0 incidents, 0 encounters - a working shell, not a populated legacy system.",
+      "evidence": [
+        "inventory query (tick 25)"
+      ]
     }
   ],
   "knownGaps": [
@@ -858,8 +995,15 @@
     }
   ],
   "wave": {
-    "active": [],
-    "note": "wave 3 closed: all six build-out slices delivered and verified",
-    "closedAt": "tick 23"
-  }
+    "active": [
+      "D1 rosters",
+      "D4 people",
+      "D5 conduct-health",
+      "D6 finance-assess-comms",
+      "D7 users"
+    ],
+    "note": "wave 5: data population (D2/D3 next, after D1 rosters land)",
+    "dispatchedAt": "tick 25"
+  },
+  "purpose": "Legacy reference SIS: a 'fake PowerSchool' populated with dense, realistic demo data, run alongside a newer SIS to demonstrate DATA MIGRATION and ad-hoc adaptability. Data depth and visual fidelity to the reference capture corpus are therefore first-class requirements, not polish."
 }
