@@ -360,3 +360,19 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   (s4-scheduling, s7-post-fix) so fired ticks leave them alone.
   · vet: S7 fail (fix in flight) · status: 10 done, 2 in-progress (S4, S7-fix)
   · metrics 7/13 first-pass · next up: fix report, then S4, then the post-wave pass + QA.
+- 2026-09-30 · tick 15 (coordinator) · **S7 fix verified → S7 CLOSED.** The scoped fix
+  (flash-fleet, 104k tokens, 4.5 min — a quarter of the cost of the glm-swarm original)
+  landed and my execution pass confirms every acceptance item: **posting now covers 30 of
+  30 students** for section 1 (was 2 of 30), re-posting is idempotent (still 30 rows), a
+  `gpa_snapshots` row is written and a numeric GPA renders for a posted student, the
+  transcript lists course rows, and the standings page shows the whole roster with
+  "not scored" surfaced explicitly instead of silently dropping students. The stray
+  `q.mjs` helper was removed. Only the slice's own files were touched. The fix's shape
+  matches the diagnosis: `computeStandings` now takes the roster, seeds every enrolled
+  student, and routes scores whose category does not match the section into an explicit
+  uncategorized bucket with a raw-ratio fallback rather than discarding the student.
+  Lane lesson reinforced: the same slice cost 342k tokens on glm-swarm and 104k on
+  flash-fleet, and flash-fleet needed a *more specific* brief, not a smarter model.
+  · vet: S7 pass (second pass after fix) · status: 11 done, 1 in-progress (S4)
+  · metrics 7/13 first-pass, 3 retries · next up: S4 (still running) then the post-wave
+  pass + QA (known gaps + orphan view cleanup).

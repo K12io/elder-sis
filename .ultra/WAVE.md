@@ -16,8 +16,6 @@ Workers currently running for this run. **While this list is non-empty:**
 - `s4-scheduling` (glm-swarm) — STILL RUNNING; do not touch /scheduling — S4 scheduling: course catalog, master schedule, student
   schedule, section roster, conflict detection. Views: src/views/scheduling/*,
   route: src/routes/scheduling.js, migration: db/migrations/14-scheduling.sql
-- `s7-post-fix` (flash-fleet) — S7 fixes: posting coverage in src/routes/grades.js +
-  src/views/grades/*, plus deleting a stray q.mjs helper.
 
 ## Clear this file when the wave has finished
 
