@@ -471,7 +471,7 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Teacher-facing entry points reusing grading/attendance tables. Lane: free-worker (space-bunny-free)."
+      "notes": "Teacher-facing entry points reusing grading/attendance tables. Lane: free-worker (space-bunny-free). | REPORT (free space-bunny lane, 58.9k tokens / 42 tool uses / 3min, run-state respected): 4 files, all three renders resolve, 12-teacher dropdown, section standings row count matched section_roster exactly (32), attendance POST upsert verified (302 + row, re-test P->A stayed one row), probe cleaned up, all bad-id/empty states 200. CAVEATS it flagged honestly: (a) no section in the seed has BOTH roster rows and grade scores, so populated standings were only provable via direct SQL; (b) default teacher = first by name, not lowest id; (c) 'today' count uses the date param. Boot-verify deferred until the wave's writers stop."
     },
     {
       "id": "F3",
@@ -551,6 +551,26 @@
       "evidence": [],
       "failedTicks": 0,
       "notes": "State-assessment style scores with summaries; seeded synthetic data. Lane: flash-fleet."
+    },
+    {
+      "id": "F7",
+      "title": "Seed coherence: make roster, grades and attendance overlap on the same sections",
+      "surface": "data",
+      "dependsOn": [],
+      "files": [
+        "db/migrations/23-seed-coherence.sql"
+      ],
+      "screens": [
+        "teacher standings",
+        "portal grades",
+        "grading->transcripts path"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Surfaced by F2's report: section_roster rows exist only for elementary sections (36-42) which have no grade assignments, while sections with scores (e.g. 1) have no roster rows. Consequence: no screen can show a student who is BOTH enrolled in a section AND graded in it, so teacher standings, portal grades and the grading->transcript path all render empty/em-dash states in the demo. Fix: an idempotent migration that assigns rosters to the sections that already have categories/assignments/scores (and a few attendance rows), so at least 3-4 sections are fully coherent end to end. Dispatch after wave 3 so migrations do not collide."
     }
   ],
   "metrics": {
@@ -653,6 +673,10 @@
     {
       "tick": 22,
       "note": "F3/F5 free lanes died on upstream 429 (shared pool); re-dispatched on flash-fleet; ADR-004a records the free-lane concurrency limit"
+    },
+    {
+      "tick": 22,
+      "note": "F2 reported (free lane success); new item F7 raised: seed coherence across roster/grades/attendance"
     }
   ],
   "guidance": [

@@ -481,3 +481,19 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   free is genuinely usable (space-bunny + six OpenRouter models passed real tool-calling
   tests), but it is *rate-limited*, not *unlimited* — the plan leans free where it fits
   and pays for reliability where it matters.
+- 2026-09-30 · tick 22b (coordinator) · **F2 landed on a free lane, and its report found a real
+  data problem.** Space-bunny (free) delivered the teacher workspace in 59k tokens / 3 min with
+  the run-state prohibition respected, and its own verification was honest and specific: three
+  renders resolve, the section standings row count matched `section_roster` exactly (32),
+  attendance POST upserts correctly (302 + row; re-post P->A stayed one row), probe rows were
+  cleaned up, and every bad-id/empty state returned 200 rather than 500. Static pre-flight here
+  agrees (files present, render targets exist, form field names match the handler).
+  **The finding that matters: the seed is incoherent across modules.** `section_roster` rows
+  exist only for elementary sections (36-42) which have NO grade assignments, while the
+  sections that DO have scores (section 1) have no roster rows — so no screen can show a
+  student who is both enrolled in a section and graded in it. Teacher standings, the portal's
+  grade box and the grading->transcript path therefore all render empty states in the demo,
+  even though each module is individually correct. Raised as **F7 (seed coherence)**, to be
+  fixed by an idempotent migration after wave 3 so migrations do not collide. This is exactly
+  the class of problem per-slice verification cannot see: every slice passed, the system does
+  not cohere. Boot-verify for F2 stays deferred until the wave's writers stop.
