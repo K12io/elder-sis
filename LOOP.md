@@ -340,3 +340,23 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   `in-progress` and the sentinel stays up until they land.
   · vet: S8 pass, S10 pass (7/12 first-pass overall) · status: 10 done, 2 in-progress (S4, S7)
   · next up: clear the sentinel once S4/S7 report, then the authoritative post-wave pass.
+- 2026-09-30 · tick 14 (coordinator) · **S7 verified by execution → FIX-THEN-SHIP, and the
+  failure was real.** The slice's five GET routes render 200 and its migration is correct
+  (`grade_scale` seeded 12 rows, four tables present), but the critical write path is
+  broken: `POST /grades/post` (form field `section`, not `section_id` — my first probe used
+  the wrong name and the handler correctly ignored it) returned 200 while writing only
+  **2 of 30 students** into `final_grades`, and `GET /grades/gpa` wrote **no**
+  `gpa_snapshots` row. Root cause located by reading the code: `loadSectionContext()` passes
+  an EMPTY roster array to `computeStandings(cats, [], scores)`, which only creates records
+  for students present in the score rows and silently drops any whose `category_id` is not
+  in the section's category list — and students with no scores are never listed at all.
+  Notably the worker's own report had declared these round-trips **"not verified
+  (intercepted before completion)"** — the wrap-up steer cut its verification short, so the
+  slice shipped an unverified write path and my independent check caught it. Credit where
+  due: it disclosed the gap instead of claiming success, which is why this was cheap to find.
+  Dispatched `s7-post-fix` (flash-fleet, deliberately NOT glm-swarm) with the exact
+  root-cause pointer and four numbered acceptance requirements, plus removal of a stray
+  `q.mjs` helper it left in the repo root. Sentinel updated to list both in-flight workers
+  (s4-scheduling, s7-post-fix) so fired ticks leave them alone.
+  · vet: S7 fail (fix in flight) · status: 10 done, 2 in-progress (S4, S7-fix)
+  · metrics 7/13 first-pass · next up: fix report, then S4, then the post-wave pass + QA.

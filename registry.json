@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 13,
+  "tick": 14,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -298,16 +298,20 @@
       "status": "in-progress",
       "vet": {
         "verified": "2026-09-30",
-        "gate": "preliminary",
-        "firstPass": null,
-        "verdict": "PRELIMINARY / SUPERSEDED \u2014 verdict was taken while the slice's worker was still running (route+views pending (worker in flight)). Do not act on it.",
-        "notes": "Tick 11 graded this slice mid-write. Its route and migration files had landed; the remaining files arrived after the sweep. Re-verification happens in the post-wave pass. Kept for the audit trail, not as a fail signal."
+        "firstPass": false,
+        "gate": "fail",
+        "verdict": "FIX-THEN-SHIP \u2014 critical write path is broken, found by independent execution verification.",
+        "notes": "Coordinator verification: the 5 GET routes render 200 and the migration's four tables exist (grade_scale seeded 12 rows), but POST /grades/post wrote only 2 of 30 students into final_grades, and GET /grades/gpa wrote no snapshot. Root cause: loadSectionContext passes an empty roster to computeStandings, which only creates records for students present in the score rows and silently drops any whose category_id is not in the section's category list; students with no scores are never listed. Note: the worker's own report declared the POST/GPA/transcript round-trips NOT VERIFIED ('intercepted before completion' by the wrap-up steer).",
+        "evidence": [
+          "evidence: coordinator tick-14 probe (final_grades 2 rows, gpa_snapshots 0)",
+          "worker report: 'Not verified (intercepted before completion)'"
+        ]
       },
       "evidence": [
         "evidence/tick11-wave2-verify.md"
       ],
-      "failedTicks": 0,
-      "notes": "Wave 2: dispatched as s7-transcripts (glm-swarm). | TICK 11: NOT DELIVERED \u2014 grades.js unchanged (9-line stub), no views, no tables. Re-dispatch; consider flash-fleet for the mechanical screen work or glm-swarm again with the S6 scores schema contract. | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure. | COST WATCH: worker burned >268k tokens with few tool calls and no recent file writes \u2014 suspected reasoning spin; steered to wrap up."
+      "failedTicks": 1,
+      "notes": "Wave 2: dispatched as s7-transcripts (glm-swarm). | TICK 11: NOT DELIVERED \u2014 grades.js unchanged (9-line stub), no views, no tables. Re-dispatch; consider flash-fleet for the mechanical screen work or glm-swarm again with the S6 scores schema contract. | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure. | COST WATCH: worker burned >268k tokens with few tool calls and no recent file writes \u2014 suspected reasoning spin; steered to wrap up. | Tick 14: dispatched s7-post-fix (flash-fleet) with the exact root-cause pointer. Also to delete stray q.mjs. Sentinel lists both in-flight workers."
     },
     {
       "id": "S8",
@@ -420,9 +424,9 @@
     }
   ],
   "metrics": {
-    "ticks": 13,
+    "ticks": 14,
     "firstPassVetPass": 7,
-    "firstPassVetTotal": 12,
+    "firstPassVetTotal": 13,
     "retries": 2,
     "blockedCount": 0
   },
@@ -487,6 +491,10 @@
     {
       "tick": 13,
       "note": "guard-compliant tick: S8 + S10 verified (CSV fixed, upsert XSS ok) and closed; S4/S7 left untouched per sentinel; glm workers steered to wrap up after 580k combined tokens"
+    },
+    {
+      "tick": 14,
+      "note": "S7 verified -> FIX-THEN-SHIP (posting 2/30, GPA snapshot never written); fix dispatched; q.mjs cleanup; sentinel updated"
     }
   ],
   "guidance": [
