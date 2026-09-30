@@ -269,3 +269,17 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · status: 8 done, 0 in-progress, 5 queued (S4, S7, S8, S10, QA) ·
   next up: second fan-out — S4 scheduling, S7 transcripts, S8 reports, S10 discipline/health
   (all dependencies now satisfied; S7 needs S6 scores, S8 needs S2+S5 data, S10 needs S2).
+- 2026-09-30 · tick 10 (coordinator) · **Wave 2 dispatched (4 slices).** S4 scheduling and
+  S7 transcripts on **glm-swarm**; S8 reports and S10 discipline/health on **flash-fleet**.
+  Jev (1,591 tokens, 8 atomic questions) flagged this wave differently from wave 1:
+  `parallel_safe` dropped to 0.51–0.69 and `needs_heavy_lane` rose for S4 (0.75, conflict
+  detection) and S7 (0.73, weighting/GPA math) — correct, because these slices are
+  DATA-coupled (S7 posts from the grading tables, S8 reports over student/attendance data,
+  S4 builds the real section rosters that S5 currently approximates) even though they stay
+  file-disjoint. Response recorded as **ADR-003**: keep the parallelism (reads only, no
+  cross-slice writes), route the two hard slices to the stronger lane, and hand each worker
+  the verified schema of every table it may read so nobody invents columns. Lesson: when
+  `parallel_safe` drops, look for data coupling and answer it with schema contracts rather
+  than serialising the work.
+  · vet: pending x4 · status: 8 done, 4 in-progress, 1 queued (QA) ·
+  next up: verify wave 2 (same one-pass boot+curl+psql+restart method), batch-triage, then QA.

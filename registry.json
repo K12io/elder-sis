@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 9,
+  "tick": 10,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -210,11 +210,11 @@
         "Build and repair schedules"
       ],
       "refweight": 1521,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Known dead link until this slice: home.ejs -> /scheduling/catalog (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration."
+      "notes": "Known dead link until this slice: home.ejs -> /scheduling/catalog (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. | Wave 2: dispatched as s4-scheduling (glm-swarm)."
     },
     {
       "id": "S5",
@@ -287,11 +287,11 @@
         "Produce the academic record of record"
       ],
       "refweight": 544,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "Wave 2: dispatched as s7-transcripts (glm-swarm)."
     },
     {
       "id": "S8",
@@ -309,11 +309,11 @@
         "Build and distribute operational reports"
       ],
       "refweight": 316,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "Wave 2: dispatched as s8-reports (flash-fleet)."
     },
     {
       "id": "S9",
@@ -358,11 +358,11 @@
         "Record health, discipline, and support work"
       ],
       "refweight": 317,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "Wave 2: dispatched as s10-discipline-health (flash-fleet)."
     },
     {
       "id": "QA",
@@ -386,7 +386,7 @@
     }
   ],
   "metrics": {
-    "ticks": 9,
+    "ticks": 10,
     "firstPassVetPass": 6,
     "firstPassVetTotal": 10,
     "retries": 2,
@@ -437,6 +437,10 @@
     {
       "tick": 9,
       "note": "5-way fan-out verified (24 routes 200, 12 tables seeded, writes+idempotency proven); all five accepted; 6 known gaps tracked"
+    },
+    {
+      "tick": 10,
+      "note": "Wave 2 dispatched (S4/S7 glm-swarm, S8/S10 flash-fleet) with schema contracts per ADR-003"
     }
   ],
   "guidance": [
@@ -457,6 +461,16 @@
         "src/db.js MIGRATIONS_DIR runner",
         "db/migrations/README.md",
         "all 11 routes verified 200 after the refactor"
+      ]
+    },
+    {
+      "id": "ADR-003",
+      "date": "2026-09-30",
+      "title": "Jev lane decisions + schema-supplied dispatch for data-coupled slices",
+      "decision": "Wave 2 slices are DATA-coupled (S7 posts from grading tables, S8 reports over student/attendance data, S4 builds the rosters S5 approximates) though still file-disjoint. Jev scored parallel_safe only 0.51-0.69 and flagged needs_heavy_lane for S4 (0.75) and S7 (0.73). Response: keep parallelism (reads only, no cross-slice writes), route the two hard slices to glm-swarm, and supply each worker the verified schema of every table it may read so it cannot invent columns. Lesson recorded: when parallel_safe drops, look for data coupling and answer it with schema contracts, not serialisation.",
+      "evidence": [
+        "Jev call (1,591 tokens): safe 0.51-0.69, heavy 0.17-0.75",
+        "four dispatches with read-only schema blocks"
       ]
     }
   ],
