@@ -190,3 +190,27 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   status: 1 done, 1 in-progress, 11 queued · next up: adjudicator verdict -> close S1,
   then S2 (Student Records) as first module slice · next up: S1 on a
   DeepInfra lane, per operator guidance.
+- 2026-09-30 · tick 6 (coordinator) · S1 closed + gate vindicated · **Two real defects the
+  gate was sensing, found by plain-task re-verification** (`s1-verify`, flash-fleet):
+  (1) the `/administration` alias was absent from the tree although commit dbc5082 claimed
+  it, and (2) the `header.ejs:24` double-escape fix was likewise claimed-but-absent
+  (`git show --name-only` did not even list header.ejs). Both are now applied and verified
+  BY READING THE COMMITTED BLOB (`git show HEAD:...`), plus a third fix: the topbar
+  `/admin/school-select` dead link -> `/admin` (it appeared on every page). XSS probe on
+  `/students/search?q=` came back SAFE (escaped once). Remaining dead links recorded
+  against their future slices (`/enrollment/register` -> S3, `/scheduling/catalog` -> S4).
+  Verdict: FIX-THEN-SHIP, applied. **S1 = done.**
+  Escalation post-mortem: `mimo-heavy` adjudicator REFUSED (118k tokens, no verdict) —
+  my prompt carried tick/loop vocabulary, which worker rules treat as leakage. Fix:
+  ultra dispatch-framing rule (plain tasks only; verifiers read/run/report; bounded
+  verification belongs on flash-fleet) + ultra rule 7 "verify the artifact, not your
+  belief". **Jev was right**: its 0.78 `matches_evidence` pointed at real claim-vs-reality
+  gaps, not at framing noise — the gate works; my commit hygiene was the weak link.
+  Tick bookkeeping: repeated `/long-run` firings queued while long turns ran; the loop
+  lock is held by the (single) session process — pid analysis confirmed no third-party
+  writer. Ticks do not stack; the backlog was collapsed into this one.
+  S1b status: `reference/chrome-delta.md` written from 6 visually-reviewed captures
+  (D1–D7 concrete header/CSS deltas) — ready for a tick to dispatch the application.
+  · vet: 0/4 first-pass across the run (all four slices needed rework found by
+  verification) · status: 2 done, 11 queued · next up: S1b apply (chrome deltas) or
+  S2 (Student Records) — both unblocked.

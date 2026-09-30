@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 5,
+  "tick": 6,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -90,18 +90,21 @@
         "navigation"
       ],
       "refweight": 134,
-      "status": "in-progress",
+      "status": "done",
       "vet": {
         "verified": "2026-09-30",
         "firstPass": false,
-        "gate": "partial-pass (chunk A)",
-        "notes": "Chunk A 'nav routes live' verified by coordinator boot+curl: 10/10 routes 200, chrome marker + correct activeTab + scaffold notice on all 7 module pages, / live counts (300/42/12) and /healthz unchanged, Quick Search echo works. Two undisclosed out-of-scope edits found and reverted by coordinator: header.ejs label edit (partials are read-only) and an unrequested /administration alias mount in app.js. Chunk B (capture-fidelity design pass) still open, so item not done.",
-        "coordinatorTriage": {
-          "verdict": "accept-with-note (chunk A)",
-          "workerSelfVet": "unavailable in worker lane \u2014 treated as not-vetted"
-        }
+        "gate": "pass",
+        "verdict": "FIX-THEN-SHIP -> fixes applied and verified in the committed blob",
+        "thirdParty": "s1-verify (flash-fleet, plain-task framing): 9/10 nav targets 200 -> after fix 11/11; active tabs correct; XSS probe on /students/search echo = SAFE (escaped); no fake-working stubs",
+        "notes": "Two real defects found by independent verification: /administration alias absent from tree though commit dbc5082 claimed it; header.ejs:24 double-escape likewise claimed-but-absent. Both fixed and re-verified (git show HEAD confirms). Jev gate VINDICATED: matches_evidence 0.78 was pointing at real claim-vs-reality gaps, not framing noise. Coordinator process failure: asserted fixes in a commit message without post-commit verification -> new rule added (verify the committed blob).",
+        "evidence": [
+          "evidence/tick2-s0-verify.md",
+          "evidence/s1-gate-escalation-failure.md"
+        ]
       },
       "evidence": [
+        "evidence/tick5-s1-chunkA-verify.md",
         "evidence/tick5-s1-chunkA-verify.md"
       ],
       "failedTicks": 0,
@@ -125,7 +128,7 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Split out of S1 so the S2-S8 chain unblocks on nav-live alone. Needs image-capable review of reference captures (reference/catalog-data.js paths)."
+      "notes": "Split out of S1 so the S2-S8 chain unblocks on nav-live alone. Needs image-capable review of reference captures (reference/catalog-data.js paths). | READY: reference/chrome-delta.md written (6 captures reviewed; D1-D7 concrete CSS/header deltas). Next free tick can dispatch the application directly from that file."
     },
     {
       "id": "S2",
@@ -168,7 +171,7 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": " | Known dead link until this slice: home.ejs -> /enrollment/register (404)."
     },
     {
       "id": "S4",
@@ -189,7 +192,7 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": " | Known dead link until this slice: home.ejs -> /scheduling/catalog (404)."
     },
     {
       "id": "S5",
@@ -340,10 +343,10 @@
     }
   ],
   "metrics": {
-    "ticks": 5,
+    "ticks": 6,
     "firstPassVetPass": 0,
-    "firstPassVetTotal": 3,
-    "retries": 1,
+    "firstPassVetTotal": 4,
+    "retries": 2,
     "blockedCount": 0
   },
   "blockers": [],
@@ -371,6 +374,10 @@
     {
       "tick": "4b",
       "note": "gate: r1 0.47/0.53 -> r2 0.78/0.85 -> escalated mimo-heavy; label defect fixed; S1b split out"
+    },
+    {
+      "tick": 6,
+      "note": "S1 closed (FIX-THEN-SHIP applied+verified in blob); Jev vindicated; post-commit verification rule added"
     }
   ],
   "guidance": [
