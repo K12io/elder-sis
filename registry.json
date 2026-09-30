@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 6,
+  "tick": 7,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -124,9 +124,19 @@
         "nav/chrome fidelity vs captures"
       ],
       "refweight": 0,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT-WITH-NOTE (0.87/0.84); matches_evidence >= 0.85 with only ready_to_ship low due to a spec-permitted deferred demo",
+        "notes": "D1-D7 all implemented; independent verification confirmed: two-tier header markup (#topbar/#topbar-context + control cluster) served on all pages; correct active tabs; preservation checks all three held (href=/admin only, grades label single-escaped, app.js untouched so /administration stays 200); all six new CSS device classes present in the served stylesheet; git status showed exactly the two permitted files. FIRST CLEAN FIRST-PASS of the run.",
+        "caveat": "CSS-only: .sis-metabar / .col-current are documented but unrendered; consumer demo deferred to the grading slice per spec wording \u2014 recorded against S6."
+      },
+      "evidence": [
+        "reference/chrome-delta.md",
+        "reference/captures/ (6 reviewed captures)"
+      ],
       "failedTicks": 0,
       "notes": "Split out of S1 so the S2-S8 chain unblocks on nav-live alone. Needs image-capable review of reference captures (reference/catalog-data.js paths). | READY: reference/chrome-delta.md written (6 captures reviewed; D1-D7 concrete CSS/header deltas). Next free tick can dispatch the application directly from that file. | Tick 6 dispatched the application to flash-fleet (s1b-apply-chrome) from reference/chrome-delta.md D1-D7, with three preservation requirements (topbar -> /admin, grades label single-escape, no app.js edits). Verification lands next tick."
     },
@@ -234,7 +244,7 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": " | MUST render the S1b devices: use .sis-metabar for the assignment meta strip and .col-current for the active score-entry column, plus .col-accent-blue/orange column bars (acceptance for S1b was satisfied at the CSS level only)."
     },
     {
       "id": "S7",
@@ -343,9 +353,9 @@
     }
   ],
   "metrics": {
-    "ticks": 6,
-    "firstPassVetPass": 0,
-    "firstPassVetTotal": 4,
+    "ticks": 7,
+    "firstPassVetPass": 1,
+    "firstPassVetTotal": 5,
     "retries": 2,
     "blockedCount": 0
   },
@@ -382,6 +392,10 @@
     {
       "tick": 6,
       "note": "S1b chrome-delta application dispatched to flash-fleet"
+    },
+    {
+      "tick": 7,
+      "note": "S1b chrome fidelity accepted with note (0.87/0.84); first clean first-pass; device demo recorded against S6"
     }
   ],
   "guidance": [

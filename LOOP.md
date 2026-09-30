@@ -214,3 +214,18 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · vet: 0/4 first-pass across the run (all four slices needed rework found by
   verification) · status: 2 done, 11 queued · next up: S1b apply (chrome deltas) or
   S2 (Student Records) — both unblocked.
+- 2026-09-30 · tick 7 (coordinator) · S1b · **Chrome fidelity accepted (first clean
+  first-pass of the run).** `s1b-apply-chrome` (flash-fleet, 102s) implemented D1–D7 from
+  reference/chrome-delta.md touching exactly public/css/app.css + partials/header.ejs.
+  Independent verification: two-tier header (#topbar / #topbar-context + control cluster)
+  served on every page; correct active tabs; all six new device classes present in the
+  SERVED stylesheet; three preservation checks held (topbar -> /admin only; grades label
+  single-escaped, amp;amp count 0; app.js untouched, /administration 200). Jev triage
+  0.87 / 0.84 -> accept-with-note; the note is real and tracked: `.sis-metabar` and
+  `.col-current` exist as documented CSS but no page renders them yet (module views were
+  out of scope) — the demo requirement is now recorded against **S6 (grading)**.
+  Claim-vs-reality: zero gaps this time (every worker claim held under independent
+  checks) — the first slice where the verification story is boring, which is the goal.
+  · vet: 1/5 first-pass (metric moves for the first time) ·
+  status: 3 done, 11 queued · next up: S2 (Student Records) as the first real module
+  slice — search roster + student 360 reading from the seeded database.

@@ -29,14 +29,48 @@
 
 <div id="shell">
 
+  <%
+    // Initials for the circular user chip (D1 control cluster).
+    var initials = String(userName).split(/\s+/).filter(Boolean)
+      .map(function (w) { return w.charAt(0).toUpperCase(); }).slice(0, 2).join('') || '?';
+  %>
+
+  <!-- D1 tier 1: solid navy branding bar -->
   <div id="topbar">
     <div id="topbar-title">Valley View Unified School District &mdash; Student Information System</div>
-    <div id="topbar-context">
-      School: <strong><%= schoolName %></strong>
-      &nbsp;|&nbsp; <%= termName %>
-      &nbsp;|&nbsp; User: <strong><%= userName %></strong>
-      &nbsp;|&nbsp; <a href="/admin" class="topbar-link">Switch School</a>
+  </div>
+
+  <!-- D1 tier 2: darker context/action strip + control cluster -->
+  <div id="topbar-context">
+    <div class="sis-control-cluster">
+      <form class="quicksearch" action="/students/search" method="get">
+        <label for="quicksearch">Search:</label>
+        <input type="text" id="quicksearch" name="q" size="14" placeholder="Student name or ID">
+        <button type="submit" class="sis-iconbtn" title="Search">&#8981;</button>
+      </form>
+      <a class="sis-iconbtn" href="/reports" title="Reports">R</a>
+      <a class="sis-iconbtn" href="/admin" title="Administration">A</a>
+      <a class="sis-iconbtn" href="/grades" title="Grades &amp; Transcripts">G</a>
+      <span class="sis-userchip" title="<%= userName %>"><%= initials %></span>
     </div>
+
+    <span class="ctx-label">School:</span>
+    <select class="sis-context-select" name="school">
+      <option value="/admin" selected><%= schoolName %></option>
+    </select>
+    &nbsp;
+    <span class="ctx-label">Year/Term:</span>
+    <select class="sis-context-select">
+      <option selected><%= termName %></option>
+    </select>
+    &nbsp;
+    <span class="ctx-label">User:</span>
+    <select class="sis-context-select">
+      <option selected><%= userName %></option>
+    </select>
+    &nbsp;
+    <a href="/admin" class="topbar-link">Switch School</a>
+    <div class="clear"></div>
   </div>
 
   <div id="tabbar" role="navigation">
@@ -45,11 +79,6 @@
       <li<% if (t.id === activeTab) { %> class="active"<% } %>><a href="<%= t.href %>"><%= t.label %></a></li>
       <% }); %>
     </ul>
-    <form class="quicksearch" action="/students/search" method="get">
-      <label for="quicksearch">Quick Search:</label>
-      <input type="text" id="quicksearch" name="q" size="18" placeholder="Student name or ID">
-      <button type="submit" class="btn">Go</button>
-    </form>
     <div class="clear"></div>
   </div>
 
