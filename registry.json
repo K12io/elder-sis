@@ -1,8 +1,8 @@
 {
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
-  "status": "complete",
-  "tick": 20,
+  "status": "open",
+  "tick": 21,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -432,10 +432,129 @@
       ],
       "failedTicks": 0,
       "notes": "Final QA pass dispatched to flash-fleet (qa-final): attendance roster fix using the new section_roster table (closes gap 5), run-wide route sweep, six-gap walk, orphan students/search.ejs deletion, BUILD-REPORT.md. Owns src/routes/attendance.js + src/views/attendance/* + BUILD-REPORT.md only."
+    },
+    {
+      "id": "F1",
+      "title": "Authentication: login/logout, sessions, role-gated access",
+      "surface": "extension",
+      "dependsOn": [],
+      "files": [
+        "src/middleware/auth.js",
+        "src/routes/auth.js",
+        "src/views/auth/",
+        "db/migrations/18-auth.sql"
+      ],
+      "screens": [
+        "Authentication: login/logout, sessions, role-gated access"
+      ],
+      "refweight": 0,
+      "status": "in-progress",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Adds scrypt password hashes to app_users, a session table, login/logout and requireAuth/requireRole middleware. Coordinator wires app.js + header nav afterwards (shared files). Lane: flash-fleet."
+    },
+    {
+      "id": "F2",
+      "title": "Teacher workspace: my classes today, roster, quick grade + attendance entry",
+      "surface": "extension",
+      "dependsOn": [],
+      "files": [
+        "src/routes/teacher.js",
+        "src/views/teacher/"
+      ],
+      "screens": [
+        "Teacher workspace: my classes today, roster, quick grade + attendance entry"
+      ],
+      "refweight": 0,
+      "status": "in-progress",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Teacher-facing entry points reusing grading/attendance tables. Lane: free-worker (space-bunny-free)."
+    },
+    {
+      "id": "F3",
+      "title": "Parent/Student portal: read-only schedule, grades, attendance, school info",
+      "surface": "extension",
+      "dependsOn": [],
+      "files": [
+        "src/routes/portal.js",
+        "src/views/portal/"
+      ],
+      "screens": [
+        "Parent/Student portal: read-only schedule, grades, attendance, school info"
+      ],
+      "refweight": 0,
+      "status": "in-progress",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Read-only portal views without login (auth lands separately); linked from home. Lane: free-qwen (qwen3.8-27b:free)."
+    },
+    {
+      "id": "F4",
+      "title": "Communications: announcements with audiences + delivery log",
+      "surface": "extension",
+      "dependsOn": [],
+      "files": [
+        "src/routes/communications.js",
+        "src/views/communications/",
+        "db/migrations/20-communications.sql"
+      ],
+      "screens": [
+        "Communications: announcements with audiences + delivery log"
+      ],
+      "refweight": 0,
+      "status": "in-progress",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Announcement table + audience targeting + read log; 1M-context lane for the sweep. Lane: free-nemotron (nemotron-3-ultra:free)."
+    },
+    {
+      "id": "F5",
+      "title": "Fees: catalog, student fee assignment, payments, balances",
+      "surface": "extension",
+      "dependsOn": [],
+      "files": [
+        "src/routes/fees.js",
+        "src/views/fees/",
+        "db/migrations/21-fees.sql"
+      ],
+      "screens": [
+        "Fees: catalog, student fee assignment, payments, balances"
+      ],
+      "refweight": 0,
+      "status": "in-progress",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Fee catalog, assignment, payment recording, balance per student. Lane: free-gemma (gemma-4-31b:free)."
+    },
+    {
+      "id": "F6",
+      "title": "Assessment: test score entry + grade-level summaries",
+      "surface": "extension",
+      "dependsOn": [],
+      "files": [
+        "src/routes/assessment.js",
+        "src/views/assessment/",
+        "db/migrations/22-assessment.sql"
+      ],
+      "screens": [
+        "Assessment: test score entry + grade-level summaries"
+      ],
+      "refweight": 0,
+      "status": "in-progress",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "State-assessment style scores with summaries; seeded synthetic data. Lane: flash-fleet."
     }
   ],
   "metrics": {
-    "ticks": 20,
+    "ticks": 21,
     "firstPassVetPass": 8,
     "firstPassVetTotal": 15,
     "retries": 3,
@@ -526,6 +645,10 @@
     {
       "tick": 20,
       "note": "QA verified and closed (attendance roster fix, sweep, gap walk, BUILD-REPORT.md). RUN COMPLETE: 14 items done, 0 blocked."
+    },
+    {
+      "tick": 21,
+      "note": "wave 3 dispatched: F1 auth, F2 teacher, F3 portal, F4 communications, F5 fees, F6 assessment \u2014 4 free lanes + 2 flash-fleet"
     }
   ],
   "guidance": [
@@ -557,6 +680,16 @@
         "Jev call (1,591 tokens): safe 0.51-0.69, heavy 0.17-0.75",
         "four dispatches with read-only schema blocks"
       ]
+    },
+    {
+      "id": "ADR-004",
+      "date": "2026-09-30",
+      "title": "Free subagent lanes for the build-out wave",
+      "decision": "Swept every free option with a real tool-calling request: all OpenCode Zen free chat models are 403-walled outside OpenCode EXCEPT space-bunny-free; OpenRouter exposes 20 zero-cost models of which six pass tool-calling (nemotron-3-ultra-550b, nemotron-3.5-lightning, qwen3.8-27b, gemma-4-31b, ling-3.0-flash-sante, dots-3-note); jev-1.13-free works as a classifier. Wired four free lanes (space-bunny, qwen3.8-27b, nemotron-3-ultra, gemma-4-31b), keeping flash-fleet as the paid fallback and roscoe as the sensitive-data path. Wave 3 dispatches six slices across four different free models to avoid per-model rate limits. Paid muse declined by operator; muse lane retired.",
+      "evidence": [
+        "tool-calling sweep results (6 free OpenRouter models + space-bunny)",
+        "pi -p resolution tests for two free OpenRouter models"
+      ]
     }
   ],
   "knownGaps": [
@@ -586,8 +719,15 @@
     }
   ],
   "wave": {
-    "active": [],
-    "note": "run complete \u2014 no workers in flight",
-    "closedAt": "tick 20"
+    "active": [
+      "F1 auth (flash-fleet)",
+      "F2 teacher (free-worker)",
+      "F3 portal (free-qwen)",
+      "F4 communications (free-nemotron)",
+      "F5 fees (free-gemma)",
+      "F6 assessment (flash-fleet)"
+    ],
+    "note": "wave 3: build-out",
+    "dispatchedAt": "tick 21"
   }
 }
