@@ -283,3 +283,26 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   than serialising the work.
   · vet: pending x4 · status: 8 done, 4 in-progress, 1 queued (QA) ·
   next up: verify wave 2 (same one-pass boot+curl+psql+restart method), batch-triage, then QA.
+- 2026-09-30 · tick 11 (fired tick) + coordinator reconciliation · **Wave 2 verified
+  mid-flight — one real race found and fixed.** The fired tick ran a full boot+curl+psql
+  sweep while three workers were still writing, and produced: **S8 reporting PASS** after
+  finding a real bug (CSV export 500 on all four reports — `c.value` vs `c.get` accessor;
+  the tick patched it and the slice's own worker then replaced `toCsv` with a `cellOf()`
+  helper, provenance recorded honestly), **S10 PASS** (writes, upsert idempotency, XSS
+  probe, friendly 4xx, probe cleanup), migrations idempotent across a restart
+  (courses=20, discipline_codes=7, health_flags=26, saved_reports=1), plus a transparent
+  disclosure that its probe cleanup had also deleted 27 `report_runs` activity rows.
+  **But its S4 and S7 verdicts were PREMATURE**: both slices were graded while their
+  workers were still in flight (S4's `scheduling.js` is 520 lines rendering four views its
+  worker had not yet saved; S7's migration had landed with its route/views still pending),
+  so "4 routes 500 / NOT DELIVERED" were false negatives. Left unhandled, those FAILs
+  would have triggered pointless re-dispatches that could clobber live workers' files.
+  Fixes: registry now carries a **`wave.active`** marker, `registry.json` S4/S7 verdicts
+  were reset to `preliminary` with `failedTicks: 0`, and BOTH `/long-run` and `/ultra`
+  gained an **IN-FLIGHT GUARD** — never verify, grade, or re-dispatch a slice whose worker
+  is still running; while a wave is active a tick may only verify finished slices or record
+  a no-op. Also noted: fired ticks run WITHOUT codemode/Jev (their evidence file says so),
+  so their gates are execution-only unless the coordinator adds a classifier pass.
+  · vet: S8 pass, S10 pass, S4/S7 pending re-verification · status: 8 done, 4 in-progress
+  · next up: wait for the three remaining workers, then ONE authoritative post-wave pass
+  (all slices quiet), batched Jev triage, then QA.

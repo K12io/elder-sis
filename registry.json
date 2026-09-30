@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 10,
+  "tick": 11,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -211,10 +211,18 @@
       ],
       "refweight": 1521,
       "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "vet": {
+        "verified": "2026-09-30",
+        "gate": "preliminary",
+        "firstPass": null,
+        "verdict": "PRELIMINARY / SUPERSEDED \u2014 verdict was taken while the slice's worker was still running (views pending (worker in flight)). Do not act on it.",
+        "notes": "Tick 11 graded this slice mid-write. Its route and migration files had landed; the remaining files arrived after the sweep. Re-verification happens in the post-wave pass. Kept for the audit trail, not as a fail signal."
+      },
+      "evidence": [
+        "evidence/tick11-wave2-verify.md"
+      ],
       "failedTicks": 0,
-      "notes": "Known dead link until this slice: home.ejs -> /scheduling/catalog (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. | Wave 2: dispatched as s4-scheduling (glm-swarm)."
+      "notes": "Known dead link until this slice: home.ejs -> /scheduling/catalog (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. | Wave 2: dispatched as s4-scheduling (glm-swarm). | TICK 11: route+migration landed, VIEWS MISSING -> 4 routes 500. Re-dispatch must supply the 4 view files (catalog, master, student, section). | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure."
     },
     {
       "id": "S5",
@@ -288,10 +296,18 @@
       ],
       "refweight": 544,
       "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "vet": {
+        "verified": "2026-09-30",
+        "gate": "preliminary",
+        "firstPass": null,
+        "verdict": "PRELIMINARY / SUPERSEDED \u2014 verdict was taken while the slice's worker was still running (route+views pending (worker in flight)). Do not act on it.",
+        "notes": "Tick 11 graded this slice mid-write. Its route and migration files had landed; the remaining files arrived after the sweep. Re-verification happens in the post-wave pass. Kept for the audit trail, not as a fail signal."
+      },
+      "evidence": [
+        "evidence/tick11-wave2-verify.md"
+      ],
       "failedTicks": 0,
-      "notes": "Wave 2: dispatched as s7-transcripts (glm-swarm)."
+      "notes": "Wave 2: dispatched as s7-transcripts (glm-swarm). | TICK 11: NOT DELIVERED \u2014 grades.js unchanged (9-line stub), no views, no tables. Re-dispatch; consider flash-fleet for the mechanical screen work or glm-swarm again with the S6 scores schema contract. | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure."
     },
     {
       "id": "S8",
@@ -441,6 +457,10 @@
     {
       "tick": 10,
       "note": "Wave 2 dispatched (S4/S7 glm-swarm, S8/S10 flash-fleet) with schema contracts per ADR-003"
+    },
+    {
+      "tick": 11,
+      "note": "tick 11 verified wave 2 mid-flight: S8 PASS (CSV bug found+fixed), S10 PASS, S4/S7 verdicts PRELIMINARY (workers still running) -> race recorded, wave marker added"
     }
   ],
   "guidance": [
@@ -499,5 +519,14 @@
       "gap": "enrollment_events has no UI listing yet.",
       "owner": "S3 follow-up / QA"
     }
-  ]
+  ],
+  "wave": {
+    "active": [
+      "s4-scheduling (glm-swarm)",
+      "s7-transcripts (glm-swarm)",
+      "s8-reports (flash-fleet)"
+    ],
+    "dispatchedAt": "2026-09-30 tick 10",
+    "rule": "While wave.active is non-empty, a tick must NOT verify slices whose workers are still running, and must NOT dispatch replacements."
+  }
 }
