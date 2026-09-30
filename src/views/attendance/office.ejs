@@ -1,0 +1,152 @@
+<%- include('../partials/header', { pageTitle: 'Attendance Office', activeTab: 'attend' }) %>
+
+<div class="sis-page-title">Attendance Office</div>
+
+<% if (corrected !== null) { %>
+<div class="sis-box"><div class="sis-box-body"><strong>Correction saved (<%= corrected %> row updated).</strong></div></div>
+<% } %>
+<% if (massCount !== null) { %>
+<div class="sis-box"><div class="sis-box-body"><strong>Mass entry applied to <%= massCount %> rows.</strong></div></div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <form action="/attendance/office" method="get">
+      <table class="kv">
+        <tr>
+          <th>Single date</th>
+          <td><input type="text" name="date" value="<%= filters.date %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>Range from</th>
+          <td><input type="text" name="from" value="<%= filters.from %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>to</th>
+          <td><input type="text" name="to" value="<%= filters.to %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+        </tr>
+        <tr>
+          <th>School</th>
+          <td>
+            <select name="school">
+              <option value="">All schools</option>
+              <% schools.forEach(function (sc) { %>
+              <option value="<%= sc.id %>"<% if (filters.school === sc.id) { %> selected<% } %>><%= sc.name %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Code</th>
+          <td>
+            <select name="code">
+              <option value="">Any code</option>
+              <% codes.forEach(function (c) { %>
+              <option value="<%= c.code %>"<% if (filters.code === c.code) { %> selected<% } %>><%= c.code %> &mdash; <%= c.label %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Student last name</th>
+          <td><input type="text" name="last" value="<%= filters.last %>" size="14" placeholder="starts with..."></td>
+        </tr>
+      </table>
+      <p><button type="submit" class="btn">Apply Filters</button> <a href="/attendance/office">Clear</a></p>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Attendance Records</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      Showing <%= rows.length %> row(s) (limit 500).
+      <% if (totals.length) { %>
+      Totals:
+      <% totals.forEach(function (t) { %><strong><%= t.code %></strong>=<%= t.n %>&nbsp; <% }); %>
+      <% } %>
+    </p>
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Student</th><th>ID</th><th>School</th><th>Grade</th>
+          <th>Date</th><th>Section</th><th>Period</th><th>Code</th>
+          <th>Updated</th><th>Correct</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (rows.length === 0) { %>
+        <tr><td colspan="10">No attendance records match these filters.</td></tr>
+        <% } %>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><%= r.last_name %>, <%= r.first_name %></td>
+          <td><%= r.state_id %></td>
+          <td><%= r.school_code %></td>
+          <td class="num"><%= r.grade_level %></td>
+          <td class="num"><%= String(r.on_date).slice(0, 10) %></td>
+          <td><%= r.section_code %> <span class="fineprint"><%= r.course_name %></span></td>
+          <td class="num"><%= r.period %></td>
+          <td><strong><%= r.code %></strong></td>
+          <td class="num"><%= String(r.updated_at).slice(0, 19).replace('T', ' ') %></td>
+          <td>
+            <form action="/attendance/office/correct" method="post" style="margin:0;">
+              <input type="hidden" name="id" value="<%= r.id %>">
+              <select name="code" style="width:44px;">
+                <% codes.forEach(function (c) { %>
+                <option value="<%= c.code %>"<% if (c.code === r.code) { %> selected<% } %>><%= c.code %></option>
+                <% }); %>
+              </select>
+              <button type="submit" class="btn">Save</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Mass Entry</div>
+  <div class="sis-box-body">
+    <form action="/attendance/office/mass" method="post">
+      <table class="kv">
+        <tr>
+          <th>Date</th>
+          <td><input type="text" name="date" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>Section</th>
+          <td>
+            <select name="section">
+              <option value="">-- section --</option>
+              <% sections.forEach(function (s) { %>
+              <option value="<%= s.id %>"><%= s.school_code %> &middot; P<%= s.period %> &middot; <%= s.course_name %> [<%= s.section_code %>]</option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Reason code</th>
+          <td>
+            <select name="code">
+              <% codes.forEach(function (c) { %>
+              <option value="<%= c.code %>"><%= c.code %> &mdash; <%= c.label %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <p class="fineprint">Enter student ids (one per line or comma-separated) or tick students below.</p>
+      <textarea name="students_text" rows="3" cols="40" placeholder="student ids, one per line"></textarea>
+      <div style="max-height:160px; overflow:auto; border:1px solid #c5c0b8; margin-top:6px;">
+        <table class="sis-table">
+          <thead><tr><th style="width:22px;">&nbsp;</th><th>Student</th><th>Grade</th></tr></thead>
+          <tbody>
+            <% students.forEach(function (st) { %>
+            <tr>
+              <td><input type="checkbox" name="student_ids" value="<%= st.id %>"></td>
+              <td><%= st.last_name %>, <%= st.first_name %> <span class="fineprint">[<%= st.id %>]</span></td>
+              <td class="num"><%= st.grade_level %></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <p><button type="submit" class="sis-button-warn">Apply Mass Entry</button></p>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

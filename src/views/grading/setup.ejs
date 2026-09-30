@@ -1,0 +1,162 @@
+<%- include('../partials/header', { pageTitle: pageTitle, activeTab: 'grades' }) %>
+
+<div class="sis-page-title">Grading Setup<% if (section) { %> &mdash; <%= section.course_name %> (<%= section.section_code %>)<% } %></div>
+
+<% if (notice) { %>
+  <div class="sis-metabar" style="margin-bottom:8px;"><span class="meta-strong">Notice:</span> <%= notice %></div>
+<% } %>
+<% if (error) { %>
+  <div class="sis-metabar" style="margin-bottom:8px; background:#f8d7d5; border-color:#c58b86;"><span class="meta-strong">Error:</span> <%= error %></div>
+<% } %>
+
+<% if (!section) { %>
+  <div class="sis-box"><div class="sis-box-body">
+    <p>No section selected. Choose one from the <a href="/grading">section list</a>.</p>
+  </div></div>
+<% } else { %>
+
+<div class="sis-metabar" style="margin-bottom:8px;">
+  <span class="meta-label">Section:</span> <span class="meta-strong"><%= section.section_code %></span>
+  &nbsp;|&nbsp; <span class="meta-label">Teacher:</span> <span class="meta-strong"><%= section.teacher_name %></span>
+  &nbsp;|&nbsp; <span class="meta-label">Period:</span> <span class="meta-strong"><%= section.period %></span>
+  &nbsp;|&nbsp; <span class="meta-label">Room:</span> <span class="meta-strong"><%= section.room %></span>
+  &nbsp;|&nbsp; <span class="meta-label">School:</span> <span class="meta-strong"><%= section.school_name %></span>
+  &nbsp;|&nbsp; <a href="/grading/scores?section=<%= section.id %>">Open score grid</a>
+</div>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Assignments</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th class="num">Points</th>
+            <th>Due</th>
+            <th>Published</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!assignments.length) { %>
+            <tr><td colspan="7">No assignments yet.</td></tr>
+          <% } %>
+          <% assignments.forEach(function (a, i) { %>
+            <tr>
+              <td class="num"><%= i + 1 %></td>
+              <td><%= a.name %></td>
+              <td><%= a.category_name || '\u2014' %></td>
+              <td class="num"><%= Number(a.points) %></td>
+              <td><%= a.due_on ? String(a.due_on).slice(0, 10) : '\u2014' %></td>
+              <td><%= a.published ? 'PUB' : '' %></td>
+              <td>
+                <a href="/grading/scores?section=<%= section.id %>&amp;assignment=<%= a.id %>">Scores</a>
+                <form method="post" action="/grading/publish" style="display:inline;">
+                  <input type="hidden" name="section" value="<%= section.id %>">
+                  <input type="hidden" name="assignment" value="<%= a.id %>">
+                  <input type="hidden" name="back" value="setup">
+                  <button type="submit" class="sis-button" title="Toggle published"><%= a.published ? 'Unpub' : 'Publish' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">New Assignment</div>
+    <div class="sis-box-body">
+      <form method="post" action="/grading/setup">
+        <input type="hidden" name="section" value="<%= section.id %>">
+        <table class="kv">
+          <tr><th>Name</th><td><input type="text" name="name" size="30" required></td></tr>
+          <tr>
+            <th>Category</th>
+            <td>
+              <select name="category_id">
+                <option value="">(none)</option>
+                <% categories.forEach(function (c) { %>
+                  <option value="<%= c.id %>"><%= c.name %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <tr><th>Points possible</th><td><input type="text" name="points" size="6" value="100"></td></tr>
+          <tr><th>Due date</th><td><input type="text" name="due_on" size="12" placeholder="YYYY-MM-DD"></td></tr>
+          <tr><th>Publish</th><td><input type="checkbox" name="published" value="1"> Release to students</td></tr>
+          <tr><th>&nbsp;</th><td><button type="submit" class="sis-button-go">Add Assignment</button></td></tr>
+        </table>
+      </form>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Categories &amp; Weights</div>
+    <div class="sis-box-body">
+      <form method="post" action="/grading/categories">
+        <input type="hidden" name="section" value="<%= section.id %>">
+        <input type="hidden" name="action" value="save">
+        <table class="sis-table">
+          <thead>
+            <tr><th>Category</th><th class="num">Weight</th></tr>
+          </thead>
+          <tbody>
+            <% if (!categories.length) { %>
+              <tr><td colspan="2">No categories yet.</td></tr>
+            <% } %>
+            <% categories.forEach(function (c) { %>
+              <tr>
+                <td><%= c.name %></td>
+                <td class="num"><input type="text" size="4" name="weight_<%= c.id %>" value="<%= Number(c.weight) %>"></td>
+              </tr>
+            <% }); %>
+            <tr>
+              <td><strong>Total</strong></td>
+              <td class="num"><strong><%= weightTotal %></strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <% if (categories.length) { %>
+          <p style="margin:6px 0;"><button type="submit" class="sis-button-go">Save Weights</button></p>
+        <% } %>
+      </form>
+
+      <% if (Math.abs(weightTotal - 100) > 0.001) { %>
+        <p style="margin:6px 0; padding:4px 6px; border:1px solid #e0a800; background:#fffbe8; color:#7a5c00;">
+          <strong>Warning:</strong> weights total <%= weightTotal %>, not 100.
+        </p>
+      <% } else { %>
+        <p class="fineprint" style="margin:6px 0;">Weights total 100.</p>
+      <% } %>
+
+      <hr class="sis-sep">
+      <form method="post" action="/grading/categories">
+        <input type="hidden" name="section" value="<%= section.id %>">
+        <input type="hidden" name="action" value="add">
+        <label>New category:</label>
+        <input type="text" name="name" size="14" required>
+        <label>Weight:</label>
+        <input type="text" name="weight" size="4" value="0">
+        <button type="submit" class="sis-button">Add</button>
+      </form>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<% } %>
+
+<%- include('../partials/footer') %>

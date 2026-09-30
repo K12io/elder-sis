@@ -1,0 +1,134 @@
+<%- include('../partials/header', { pageTitle: pageTitle, activeTab: 'grades' }) %>
+
+<div class="sis-page-title">Score Grid<% if (section) { %> &mdash; <%= section.course_name %> (<%= section.section_code %>)<% } %></div>
+
+<% if (notice) { %>
+  <div class="sis-metabar" style="margin-bottom:8px;"><span class="meta-strong">Notice:</span> <%= notice %></div>
+<% } %>
+<% if (error) { %>
+  <div class="sis-metabar" style="margin-bottom:8px; background:#f8d7d5; border-color:#c58b86;"><span class="meta-strong">Error:</span> <%= error %></div>
+<% } %>
+
+<% if (!section) { %>
+  <div class="sis-box"><div class="sis-box-body">
+    <p>No section selected. Choose one from the <a href="/grading">section list</a>.</p>
+  </div></div>
+<% } else { %>
+
+<%
+  function scoreCell(a, st) {
+    return scores[a.id + ':' + st.id] || null;
+  }
+  function cellValue(a, st) {
+    var s = scoreCell(a, st);
+    if (!s) return '';
+    if (s.code) return s.code;
+    if (s.points != null) return String(Number(s.points));
+    return '';
+  }
+%>
+
+<!-- meta strip directly above the grid -->
+<div class="sis-metabar" style="margin-bottom:0;">
+  <span class="meta-label">Assignment:</span>
+  <% if (selected) { %>
+    <span class="meta-strong"><%= selected.name %></span>
+    &nbsp;|&nbsp; <span class="meta-label">Category:</span> <span class="meta-strong"><%= selected.category_name || 'Uncategorized' %></span>
+    &nbsp;|&nbsp; <span class="meta-label">Points possible:</span> <span class="meta-strong"><%= Number(selected.points) %></span>
+    &nbsp;|&nbsp; <span class="meta-label">Due:</span> <span class="meta-strong"><%= selected.due_on ? String(selected.due_on).slice(0, 10) : '--' %></span>
+    &nbsp;|&nbsp; <span class="meta-label">Published:</span> <span class="meta-strong"><%= selected.published ? 'YES' : 'no' %></span>
+  <% } else { %>
+    <span class="meta-strong">(no assignments &mdash; add one in Setup)</span>
+  <% } %>
+  &nbsp;|&nbsp;
+  <form method="get" action="/grading/scores" style="display:inline;">
+    <input type="hidden" name="section" value="<%= section.id %>">
+    <span class="meta-label">Select assignment:</span>
+    <select name="assignment">
+      <% assignments.forEach(function (a) { %>
+        <option value="<%= a.id %>"<%= selected && selected.id === a.id ? ' selected' : '' %>><%= a.name %> (<%= Number(a.points) %> pts)<%= a.published ? ' [PUB]' : '' %></option>
+      <% }); %>
+    </select>
+    <button type="submit" class="sis-button">Go</button>
+  </form>
+  &nbsp;|&nbsp; <a href="/grading/setup?section=<%= section.id %>">Setup</a>
+</div>
+
+<form method="post" action="/grading/scores">
+  <input type="hidden" name="section" value="<%= section.id %>">
+  <input type="hidden" name="assignment" value="<%= selected ? selected.id : '' %>">
+
+  <table class="sis-table" style="border-top:none;">
+    <thead>
+      <tr>
+        <th>STUDENTS (<%= roster.length %>)</th>
+        <% assignments.forEach(function (a, idx) { %>
+          <%
+            var cls = [];
+            if (selected && selected.id === a.id) cls.push('col-current');
+            else cls.push(idx % 2 === 0 ? 'col-accent-blue' : 'col-accent-orange');
+          %>
+          <th class="<%= cls.join(' ') %>">
+            <%= a.name %>
+            <% if (a.published) { %><span style="font-weight:bold;"> PUB</span><% } %>
+            <br><span class="fineprint" style="color:#dbeaf5;"><%= a.due_on ? String(a.due_on).slice(0, 10) : '--' %> / <%= Number(a.points) %></span>
+          </th>
+        <% }); %>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!roster.length) { %>
+        <tr><td colspan="<%= assignments.length + 1 %>">No students in this roster.</td></tr>
+      <% } %>
+      <% roster.forEach(function (st, i) { %>
+        <tr>
+          <td>
+            <span class="num"><%= i + 1 %>.</span>
+            <a href="/grading/student?section=<%= section.id %>&amp;student=<%= st.id %>"><%= st.last_name %>, <%= st.first_name %></a>
+          </td>
+          <% assignments.forEach(function (a) { %>
+            <%
+              var cur = selected && selected.id === a.id;
+              var v = cellValue(a, st);
+            %>
+            <td class="<%= cur ? 'col-current' : '' %>">
+              <input type="text" size="4" name="score_<%= a.id %>_<%= st.id %>" value="<%= v %>">
+            </td>
+          <% }); %>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <p style="margin:6px 0;">
+    <button type="submit" class="sis-button-go">Save Scores</button>
+    <span class="fineprint">Enter a number, or M (missing) / X (exempt). Leave blank for missing.</span>
+  </p>
+</form>
+
+<div class="sis-box">
+  <div class="sis-box-title">Bulk Fill &mdash; <%= section.course_name %> / <%= selected ? selected.name : '(no assignment)' %></div>
+  <div class="sis-box-body">
+    <% if (selected) { %>
+      <form method="post" action="/grading/scores/bulk">
+        <input type="hidden" name="section" value="<%= section.id %>">
+        <input type="hidden" name="assignment" value="<%= selected.id %>">
+        <label>Value:</label>
+        <input type="text" name="value" size="6" value="0">
+        <label>Scope:</label>
+        <select name="scope">
+          <option value="missing">Only students currently missing a score</option>
+          <option value="all">All students (overwrite)</option>
+        </select>
+        <button type="submit" class="sis-button-warn">Apply to Grid</button>
+      </form>
+      <p class="fineprint">Context: due <%= selected.due_on ? String(selected.due_on).slice(0, 10) : '--' %> &middot; <%= Number(selected.points) %> pts &middot; <%= section.section_code %> &middot; period <%= section.period %>.</p>
+    <% } else { %>
+      <p>Add an assignment before bulk filling.</p>
+    <% } %>
+  </div>
+</div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

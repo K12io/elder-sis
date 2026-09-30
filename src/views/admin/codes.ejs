@@ -1,0 +1,67 @@
+<%- include('../partials/header', { pageTitle: 'Grade Codes', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">Grade Codes</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Scale:</span>
+  <span class="meta-strong">Letter grades &amp; percentage ranges</span>
+  &nbsp;|&nbsp; <span class="meta-label">Rules:</span> min &le; max, ranges may not overlap
+</div>
+
+<% if (message) { %>
+  <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
+    <span class="meta-strong">Saved:</span> <%= message %>
+  </div>
+<% } %>
+<% if (error) { %>
+  <div class="sis-metabar" style="border-color:#d8a0a0;background:#fbeaea;">
+    <span class="meta-strong">Error:</span> <%= error %>
+  </div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Grade Scale</div>
+  <div class="sis-box-body">
+    <form action="/admin/codes" method="post">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th style="width:80px;">Code</th>
+            <th>Label</th>
+            <th style="width:90px;">Min %</th>
+            <th style="width:90px;">Max %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% codes.forEach(function (c) { %>
+          <tr>
+            <td>
+              <input type="hidden" name="id" value="<%= c.id %>">
+              <input type="text" name="code" value="<%= c.code %>" size="4">
+            </td>
+            <td><input type="text" name="label" value="<%= c.label %>" size="34"></td>
+            <td><input type="text" name="min_percent" value="<%= c.min_percent %>" size="6" class="num"></td>
+            <td><input type="text" name="max_percent" value="<%= c.max_percent %>" size="6" class="num"></td>
+          </tr>
+          <% }); %>
+          <% if (!codes.length) { %>
+          <tr><td colspan="4">No grade codes defined.</td></tr>
+          <% } %>
+
+          <tr>
+            <td><input type="text" name="new_code" value="" size="4" placeholder="A+"></td>
+            <td><input type="text" name="new_label" value="" size="34" placeholder="New code label"></td>
+            <td><input type="text" name="new_min_percent" value="" size="6" class="num"></td>
+            <td><input type="text" name="new_max_percent" value="" size="6" class="num"></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin:6px 0 0;">
+        <button type="submit" class="sis-button-go">Save grade codes</button>
+      </p>
+    </form>
+    <p class="fineprint">Leave the bottom row blank to skip adding a new code. Percentages are stored with two decimals.</p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -2,38 +2,33 @@
 
 <div class="sis-page-title">Student Search</div>
 
-<table class="layout">
-<tr>
-<td class="col-left">
+<%
+  // /students/search is a thin alias of the main roster screen. The quick-search
+  // box in the header posts a single q term (name or ID); route it into the same
+  // criteria table the full roster form uses.
+%>
 
-  <div class="sis-box">
-    <div class="sis-box-title">Search Criteria</div>
-    <div class="sis-box-body">
-      <form action="/students/search" method="get">
-        <table class="sis-table kv">
-          <tr>
-            <th>Last name / ID</th>
-            <td><input type="text" name="q" value="<%= q %>" size="24"> <button type="submit" class="btn">Search</button></td>
-          </tr>
-        </table>
-      </form>
-      <p class="fineprint">Current query: <code><%= q.length ? q : '(none)' %></code></p>
-    </div>
+<div class="sis-box">
+  <div class="sis-box-title">Search</div>
+  <div class="sis-box-body">
+    <p>Quick student lookup by name or State ID.</p>
+    <form action="/students" method="get">
+      <table class="sis-table kv">
+        <tr>
+          <th>Name or State ID</th>
+          <td>
+            <input type="text" name="last" size="24" value="">
+            <button type="submit" class="btn">Search</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+    <p class="fineprint">
+      Tip: the header Search box accepts a single term and resolves to
+      <a href="/students/search">/students/search</a>. Use
+      <a href="/students">Student Records</a> for fielded criteria.
+    </p>
   </div>
-
-</td>
-<td class="col-right">
-
-  <div class="sis-box">
-    <div class="sis-box-title">Results</div>
-    <div class="sis-box-body">
-      <p>No records to display yet &mdash; student search arrives with the Student Records slice.</p>
-      <p class="fineprint">Module scaffold &mdash; working screens land in a later slice (see LOOP.md).</p>
-    </div>
-  </div>
-
-</td>
-</tr>
-</table>
+</div>
 
 <%- include('../partials/footer') %>

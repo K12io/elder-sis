@@ -1,0 +1,85 @@
+<%- include('../partials/header', { pageTitle: 'Attendance Grid', activeTab: 'attend' }) %>
+
+<div class="sis-page-title">Attendance Grid</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Section:</span> <span class="meta-strong"><%= section.course_name %> [<%= section.section_code %>]</span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Teacher:</span> <span class="meta-strong"><%= section.teacher_name %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">School:</span> <span class="meta-strong"><%= section.school_name %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Period:</span> <span class="meta-strong"><%= section.period %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Room:</span> <span class="meta-strong"><%= section.room %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Week of:</span> <span class="meta-strong"><%= week[0] %> &ndash; <%= week[4] %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Roster:</span> <span class="meta-strong"><%= roster.length %></span> students
+</div>
+
+<% if (saved !== null) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-body">
+    <strong>Attendance saved for <%= saved %> students.</strong>
+  </div>
+</div>
+<% } %>
+
+<form action="/attendance/grid" method="post">
+<input type="hidden" name="section" value="<%= section.id %>">
+<input type="hidden" name="date" value="<%= date %>">
+
+<table class="sis-table" style="margin-top:8px;">
+  <thead>
+    <tr>
+      <th style="width:24px;">#</th>
+      <th>Student</th>
+      <th style="width:80px;">Grade</th>
+      <% weekdayLabels.forEach(function (lbl, i) { %>
+      <th class="col-accent-blue" style="width:52px; text-align:center;"><%= lbl %><br><span style="font-weight:normal;"><%= week[i].slice(5) %></span></th>
+      <% }); %>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (roster.length === 0) { %>
+    <tr><td colspan="8">No active students found for this school.</td></tr>
+    <% } %>
+    <% roster.forEach(function (st, idx) { %>
+    <tr>
+      <td class="num"><%= idx + 1 %></td>
+      <td>
+        <%= st.last_name %>, <%= st.first_name %>
+        <span class="fineprint"><%= st.state_id %></span>
+      </td>
+      <td class="num"><%= st.grade_level %></td>
+      <% week.forEach(function (d) { %>
+      <td style="text-align:center;">
+        <input type="text" name="code_<%= st.id %>_<%= d %>" size="2" maxlength="2"
+               value="<%= existing[st.id + '|' + d] || '' %>"
+               style="width:26px; text-align:center; text-transform:uppercase;">
+      </td>
+      <% }); %>
+    </tr>
+    <% }); %>
+  </tbody>
+</table>
+
+<p style="margin-top:8px;">
+  <button type="submit" class="sis-button-go">Save Week Attendance</button>
+  <a href="/attendance?date=<%= date %>&section=<%= section.id %>">&laquo; Back to Attendance</a>
+</p>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Code Legend</div>
+  <div class="sis-box-body">
+    <% codes.forEach(function (c) { %>
+    <span style="margin-right:14px;"><strong><%= c.code %></strong> = <%= c.label %><% if (c.counts_absent) { %><span class="fineprint"> (absent)</span><% } %><% if (c.excused) { %><span class="fineprint"> (excused)</span><% } %></span>
+    <% }); %>
+    <p class="fineprint">Leave a cell blank to skip it, or enter <strong>P</strong> for present. Untouched cells default to P.</p>
+  </div>
+</div>
+
+</form>
+
+<%- include('../partials/footer') %>

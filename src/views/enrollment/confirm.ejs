@@ -1,0 +1,65 @@
+<%- include('../partials/header', { pageTitle: 'Enrollment Confirmation', activeTab: 'students' }) %>
+
+<div class="sis-page-title">Enrollment Confirmation</div>
+
+<% if (error) { %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Error</div>
+  <div class="sis-box-body">
+    <p><strong><%= error %></strong></p>
+    <p><a href="/enrollment">Return to Enrollment</a></p>
+  </div>
+</div>
+
+<% } else { %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Registration Complete</div>
+  <div class="sis-box-body">
+    <p><strong><%= student.last_name %>, <%= student.first_name %><% if (student.middle_name) { %> <%= student.middle_name %><% } %></strong>
+    has been registered and enrolled. The new state ID is
+    <strong class="num"><%= student.state_id %></strong>.</p>
+
+    <table class="sis-table kv">
+      <tr><th>State ID</th><td class="num"><%= student.state_id %></td></tr>
+      <tr><th>Name</th><td><%= student.last_name %>, <%= student.first_name %><% if (student.middle_name) { %> <%= student.middle_name %><% } %></td></tr>
+      <tr><th>Grade level</th><td class="num"><%= student.grade_level === null ? '' : (Number(student.grade_level) === 0 ? 'K' : student.grade_level) %></td></tr>
+      <tr><th>School</th><td><%= student.school_name || '—' %></td></tr>
+      <tr><th>Term</th><td><%= enrollment ? (enrollment.term_name || '—') : '—' %></td></tr>
+      <tr><th>Entry date</th><td class="num"><%= enrollment && enrollment.entry_date ? String(enrollment.entry_date).slice(0, 10) : '—' %></td></tr>
+      <tr><th>Enrollment code</th><td><%= enrollment ? (enrollment.code || '—') : '—' %></td></tr>
+      <tr><th>Status</th><td><%= student.status %></td></tr>
+    </table>
+
+    <p style="margin-top:8px;">
+      <a class="btn" href="/students/<%= student.id %>"
+         style="display:inline-block;text-decoration:none;padding:1px 10px;border:1px solid #7f7f7f;background:#e6e2da;color:#1a1a1a;">Open student record</a>
+      <a class="btn" href="/enrollment/new"
+         style="display:inline-block;text-decoration:none;padding:1px 10px;border:1px solid #7f7f7f;background:#e6e2da;color:#1a1a1a;">Register another</a>
+      <a class="btn" href="/enrollment"
+         style="display:inline-block;text-decoration:none;padding:1px 10px;border:1px solid #7f7f7f;background:#e6e2da;color:#1a1a1a;">Enrollment home</a>
+      <% if (enrollment && !enrollment.exit_date) { %>
+      <form action="/enrollment/<%= student.id %>/withdraw" method="post" style="display:inline;margin:0;">
+        <button type="submit" class="sis-button-warn">Withdraw student</button>
+      </form>
+      <% } %>
+    </p>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">What Happens Next</div>
+  <div class="sis-box-body">
+    <ul class="links">
+      <li>Assign courses and sections in <a href="/scheduling">Scheduling</a>.</li>
+      <li>Confirm demographics and contacts on the student's 360 record.</li>
+      <li>The enrollment is effective <%= enrollment && enrollment.entry_date ? String(enrollment.entry_date).slice(0, 10) : 'today' %> for
+        <%= enrollment ? (enrollment.term_name || 'the current term') : 'the current term' %>.</li>
+    </ul>
+  </div>
+</div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

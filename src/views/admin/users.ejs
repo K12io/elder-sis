@@ -1,0 +1,96 @@
+<%- include('../partials/header', { pageTitle: 'Users', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">Users</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Staff accounts:</span>
+  <span class="meta-strong"><%= users.length %></span>
+  &nbsp;|&nbsp; <span class="meta-label">Note:</span> passwords are out of scope for this demo &mdash; accounts exist for role mapping only.
+</div>
+
+<% if (message) { %>
+  <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
+    <span class="meta-strong">Saved:</span> <%= message %>
+  </div>
+<% } %>
+<% if (error) { %>
+  <div class="sis-metabar" style="border-color:#d8a0a0;background:#fbeaea;">
+    <span class="meta-strong">Error:</span> <%= error %>
+  </div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Accounts &amp; Roles</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Display Name</th>
+          <th>Email</th>
+          <th style="width:60px;">Active</th>
+          <th>Roles</th>
+          <th style="width:230px;">Assign Roles</th>
+          <th style="width:110px;">Account</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function (u) { %>
+        <tr>
+          <td><%= u.username %></td>
+          <td><%= u.display_name %></td>
+          <td><%= u.email || '\u2014' %></td>
+          <td><%= u.active ? 'YES' : 'no' %></td>
+          <td><%= (u.roles && u.roles.length) ? u.roles.join(', ') : '(none)' %></td>
+          <td>
+            <form action="/admin/users/roles" method="post" style="margin:0;">
+              <input type="hidden" name="user_id" value="<%= u.id %>">
+              <select name="role_id" multiple size="<%= Math.min(Math.max(roles.length,1),4) %>">
+                <% roles.forEach(function (r) { %>
+                  <option value="<%= r.id %>"<%= (u.role_ids || []).indexOf(r.id) >= 0 ? ' selected' : '' %>><%= r.name %></option>
+                <% }); %>
+              </select>
+              <button type="submit" class="sis-button-go">Save</button>
+            </form>
+          </td>
+          <td>
+            <form action="/admin/users/toggle" method="post" style="margin:0;">
+              <input type="hidden" name="user_id" value="<%= u.id %>">
+              <button type="submit" class="<%= u.active ? 'sis-button-warn' : 'sis-button-go' %>"><%= u.active ? 'Deactivate' : 'Activate' %></button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!users.length) { %>
+        <tr><td colspan="7">No users defined.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+    <p class="fineprint">Roles replace the whole set on save. Passwords are explicitly out of scope &mdash; no password is stored or checked.</p>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Add User</div>
+  <div class="sis-box-body">
+    <form action="/admin/users" method="post">
+      <table class="sis-table kv">
+        <tr>
+          <th>Username</th>
+          <td><input type="text" name="username" size="18" placeholder="jdoe"></td>
+          <th>Display name</th>
+          <td><input type="text" name="display_name" size="24" placeholder="Jane Doe"></td>
+        </tr>
+        <tr>
+          <th>Email</th>
+          <td><input type="text" name="email" size="30" placeholder="jane.doe@vvsd.example"></td>
+          <th>&nbsp;</th>
+          <td><button type="submit" class="sis-button-go">Add user</button></td>
+        </tr>
+      </table>
+    </form>
+    <p class="fineprint">New accounts start active with no roles assigned. Assign roles from the table above.</p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

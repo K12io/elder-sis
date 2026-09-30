@@ -1,0 +1,14 @@
+<%- include('../partials/header', { pageTitle: 'Student Not Found', activeTab: 'students' }) %>
+
+<div class="sis-page-title">Student Not Found</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">No Matching Record</div>
+  <div class="sis-box-body">
+    <p>No student exists with the requested identifier (<code><%= studentId %></code>).</p>
+    <p><a href="/students">&laquo; Back to roster search</a></p>
+    <p class="fineprint">The record may have been removed, or the ID may be mistyped.</p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

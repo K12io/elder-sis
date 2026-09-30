@@ -1,0 +1,191 @@
+<%- include('../partials/header', { pageTitle: 'Student ' + student.state_id, activeTab: 'students' }) %>
+
+<div class="sis-page-title">
+  Student 360 &mdash; <%= student.last_name %>, <%= student.first_name %> &nbsp;<span class="fineprint">(<%= student.state_id %>)</span>
+</div>
+
+<% if (typeof saved !== 'undefined' && saved) { %>
+<div class="sis-metabar"><span class="meta-strong">Record saved.</span> Your changes were applied to this student record.</div>
+<% } %>
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-metabar" style="background:#fdf0ef;border-color:#d99;color:#6b241f;"><span class="meta-strong">Not saved:</span> <%= error %></div>
+<% } %>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Demographics</div>
+    <div class="sis-box-body">
+      <table class="sis-table kv">
+        <tr><th>Name</th><td><%= student.last_name %>, <%= student.first_name %><% if (student.middle_name) { %> <%= student.middle_name %><% } %></td></tr>
+        <tr><th>State ID</th><td><%= student.state_id %></td></tr>
+        <tr><th>Grade level</th><td><%= intToGrade(student.grade_level) %></td></tr>
+        <tr><th>Gender</th><td><%= student.gender || '' %></td></tr>
+        <tr><th>Date of birth</th><td><%= student.dob ? String(student.dob).slice(0, 10) : '' %></td></tr>
+        <tr><th>School</th><td><%= student.school_name || '' %></td></tr>
+        <tr><th>Status</th><td><%= student.status %></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Edit Demographics</div>
+    <div class="sis-box-body">
+      <form action="/students/<%= student.id %>" method="post">
+        <table class="sis-table kv">
+          <tr>
+            <th>First name</th>
+            <td><input type="text" name="first_name" value="<%= student.first_name %>" size="18"></td>
+            <th>Last name</th>
+            <td><input type="text" name="last_name" value="<%= student.last_name %>" size="18"></td>
+          </tr>
+          <tr>
+            <th>Middle name</th>
+            <td><input type="text" name="middle_name" value="<%= student.middle_name || '' %>" size="18"></td>
+            <th>Grade level</th>
+            <td>
+              <select name="grade_level">
+                <% grades.forEach(function (g) { %>
+                <option value="<%= g.value %>"<% if (intToGrade(student.grade_level) === g.value) { %> selected<% } %>><%= g.label %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Gender</th>
+            <td>
+              <select name="gender">
+                <option value=""<% if (!student.gender) { %> selected<% } %>></option>
+                <option value="M"<% if (student.gender === 'M') { %> selected<% } %>>M</option>
+                <option value="F"<% if (student.gender === 'F') { %> selected<% } %>>F</option>
+              </select>
+            </td>
+            <th>Date of birth</th>
+            <td><input type="text" name="dob" value="<%= student.dob ? String(student.dob).slice(0, 10) : '' %>" size="12" placeholder="YYYY-MM-DD"></td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>
+              <select name="status">
+                <% statuses.forEach(function (st) { %>
+                <option value="<%= st %>"<% if (student.status === st) { %> selected<% } %>><%= st %></option>
+                <% }); %>
+              </select>
+            </td>
+            <td colspan="2"><button type="submit" class="sis-button-go">Save</button></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Enrollment History</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Term</th>
+            <th>School</th>
+            <th>Grade</th>
+            <th>Entry date</th>
+            <th>Exit date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (enrollments.length === 0) { %>
+          <tr><td colspan="5"><em>No enrollment records</em></td></tr>
+          <% } else { %>
+          <% enrollments.forEach(function (e) { %>
+          <tr>
+            <td><%= e.term_name || '' %></td>
+            <td><%= e.school_name || '' %></td>
+            <td class="num"><%= intToGrade(e.grade_level) %></td>
+            <td class="num"><%= e.entry_date ? String(e.entry_date).slice(0, 10) : '' %></td>
+            <td class="num"><%= e.exit_date ? String(e.exit_date).slice(0, 10) : '' %></td>
+          </tr>
+          <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Contacts</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Relationship</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Primary</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (contacts.length === 0) { %>
+          <tr><td colspan="5"><em>No contacts on file</em></td></tr>
+          <% } else { %>
+          <% contacts.forEach(function (c) { %>
+          <tr>
+            <td><%= c.name %></td>
+            <td><%= c.relationship || '' %></td>
+            <td><%= c.phone || '' %></td>
+            <td><%= c.email || '' %></td>
+            <td class="num"><%= c.is_primary ? 'Yes' : '' %></td>
+          </tr>
+          <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Alerts</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (alerts.length === 0) { %>
+          <tr><td colspan="3"><em>No alerts</em></td></tr>
+          <% } else { %>
+          <% alerts.forEach(function (a) { %>
+          <tr>
+            <td class="num"><%= a.alert_date ? String(a.alert_date).slice(0, 10) : '' %></td>
+            <td><%= a.alert_type || '' %></td>
+            <td><%= a.message || '' %></td>
+          </tr>
+          <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Actions</div>
+    <div class="sis-box-body">
+      <p><a href="/students">&laquo; Back to roster search</a></p>
+      <p class="fineprint">Editing is limited to demographics in this module. Enrollment changes belong to the Enrollment module.</p>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

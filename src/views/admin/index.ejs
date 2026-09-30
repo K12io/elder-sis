@@ -2,19 +2,32 @@
 
 <div class="sis-page-title">Administration</div>
 
+<div class="sis-metabar">
+  <span class="meta-label">Current term:</span>
+  <span class="meta-strong"><%= termName || '(none set)' %></span>
+  &nbsp;|&nbsp; <span class="meta-label">District:</span> Valley View Unified
+  &nbsp;|&nbsp; <span class="meta-label">Build:</span> demo
+</div>
+
 <table class="layout">
 <tr>
 <td class="col-left">
 
   <div class="sis-box">
-    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-title">School Year</div>
     <div class="sis-box-body">
-      <ul class="links">
-        <li>School year &amp; terms &mdash; calendar setup and current-term selection</li>
-        <li>Grade levels &mdash; level definitions and ordering</li>
-        <li>Codes &mdash; attendance and grade code tables</li>
-        <li>Users &amp; roles &mdash; staff accounts and permissions</li>
-      </ul>
+      <p>Term calendar setup and current-term selection.</p>
+      <p><a href="/admin/school-year">Open School Year &amp; Terms</a>
+         &nbsp;<span class="fineprint"><%= counts.terms %> terms</span></p>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Codes</div>
+    <div class="sis-box-body">
+      <p>Grade scale codes with editable percentage ranges.</p>
+      <p><a href="/admin/codes">Open Grade Codes</a>
+         &nbsp;<span class="fineprint"><%= counts.codes %> codes</span></p>
     </div>
   </div>
 
@@ -22,9 +35,20 @@
 <td class="col-right">
 
   <div class="sis-box">
-    <div class="sis-box-title">Status</div>
+    <div class="sis-box-title">Users</div>
     <div class="sis-box-body">
-      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
+      <p>Staff accounts and role assignments (no passwords in this demo).</p>
+      <p><a href="/admin/users">Open Users</a>
+         &nbsp;<span class="fineprint"><%= counts.users %> users</span></p>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Roles</div>
+    <div class="sis-box-body">
+      <p>Role descriptions and module-visibility notes.</p>
+      <p><a href="/admin/roles">Open Roles</a>
+         &nbsp;<span class="fineprint"><%= counts.roles %> roles</span></p>
     </div>
   </div>
 

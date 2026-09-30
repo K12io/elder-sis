@@ -1,37 +1,62 @@
 <%- include('../partials/header', { pageTitle: 'Grading', activeTab: 'grades' }) %>
 
-<div class="sis-page-title">Grading</div>
+<div class="sis-page-title">Grading &mdash; Sections</div>
 
-<table class="layout">
-<tr>
-<td class="col-left">
+<div class="sis-box">
+  <div class="sis-box-title">Section List</div>
+  <div class="sis-box-body">
 
-  <div class="sis-box">
-    <div class="sis-box-title">Module Contents</div>
-    <div class="sis-box-body">
-      <ul class="links">
-        <li>Assignments &mdash; create and schedule graded work</li>
-        <li>Categories &amp; weights &mdash; term weighting rules per section</li>
-        <li>Score grid &mdash; roster-by-assignment entry</li>
-        <li>Missing / exempt &mdash; per-score special handling</li>
-        <li>Bulk fill &mdash; apply a score to many students at once</li>
-        <li>Publish &mdash; release grades to students and parents</li>
-      </ul>
-    </div>
+    <form method="get" action="/grading" style="margin-bottom:6px;">
+      <label for="school"><strong>School:</strong></label>
+      <select id="school" name="school">
+        <option value="">All schools</option>
+        <% schools.forEach(function (s) { %>
+          <option value="<%= s.id %>"<%= String(schoolId) === String(s.id) ? ' selected' : '' %>><%= s.name %></option>
+        <% }); %>
+      </select>
+      <button type="submit" class="sis-button">Filter</button>
+      <% if (schoolId) { %>
+        <a href="/grading">Clear</a>
+      <% } %>
+    </form>
+
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Section</th>
+          <th>Teacher</th>
+          <th>Period</th>
+          <th>Room</th>
+          <th>School</th>
+          <th class="num">Assignments</th>
+          <th>Setup</th>
+          <th>Scores</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!sections.length) { %>
+          <tr><td colspan="9">No sections found.</td></tr>
+        <% } %>
+        <% sections.forEach(function (s) { %>
+          <tr>
+            <td><%= s.course_name %></td>
+            <td><%= s.section_code %></td>
+            <td><%= s.teacher_name %></td>
+            <td class="num"><%= s.period %></td>
+            <td><%= s.room %></td>
+            <td><%= s.school_name %></td>
+            <td class="num"><%= s.assignment_count %></td>
+            <td><a href="/grading/setup?section=<%= s.id %>">Setup</a></td>
+            <td><a href="/grading/scores?section=<%= s.id %>">Scores</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <p class="fineprint"><%= sections.length %> section<%= sections.length === 1 ? '' : 's' %> listed.</p>
+
   </div>
-
-</td>
-<td class="col-right">
-
-  <div class="sis-box">
-    <div class="sis-box-title">Status</div>
-    <div class="sis-box-body">
-      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
-    </div>
-  </div>
-
-</td>
-</tr>
-</table>
+</div>
 
 <%- include('../partials/footer') %>

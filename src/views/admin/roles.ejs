@@ -1,0 +1,96 @@
+<%- include('../partials/header', { pageTitle: 'Roles', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">Roles</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Roles:</span>
+  <span class="meta-strong"><%= roles.length %></span>
+  &nbsp;|&nbsp; <span class="meta-label">Module visibility is descriptive only.</span>
+  The header navigation is NOT driven by these checkboxes in this demo.
+</div>
+
+<% if (message) { %>
+  <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
+    <span class="meta-strong">Saved:</span> <%= message %>
+  </div>
+<% } %>
+<% if (error) { %>
+  <div class="sis-metabar" style="border-color:#d8a0a0;background:#fbeaea;">
+    <span class="meta-strong">Error:</span> <%= error %>
+  </div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Role Definitions</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th style="width:130px;">Role</th>
+          <th>Description</th>
+          <th>Visible Modules</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% roles.forEach(function (r) { %>
+        <tr>
+          <td><%= r.name %></td>
+          <td><%= r.description || '\u2014' %></td>
+          <td><%= (r.visible_modules || '').split(',').filter(Boolean).join(', ') || '(none)' %></td>
+        </tr>
+        <% }); %>
+        <% if (!roles.length) { %>
+        <tr><td colspan="3">No roles defined.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+    <p class="fineprint">This table is descriptive. The checkboxes below are stored on the role row and are not enforced anywhere yet.</p>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Edit Module Visibility</div>
+  <div class="sis-box-body">
+    <% roles.forEach(function (r) { %>
+      <%
+        var selected = (r.visible_modules || '').split(',').filter(Boolean);
+      %>
+      <form action="/admin/roles" method="post" style="margin:0 0 8px;">
+        <input type="hidden" name="role_id" value="<%= r.id %>">
+        <table class="sis-table kv">
+          <tr>
+            <th style="width:130px;">Role</th>
+            <td>
+              <strong><%= r.name %></strong>
+              <span class="fineprint">&mdash; check the nav modules this role would see</span>
+            </td>
+          </tr>
+          <tr>
+            <th>Visible modules</th>
+            <td>
+              <% navModules.forEach(function (m) { %>
+                <label style="margin-right:12px;white-space:nowrap;">
+                  <input type="checkbox" name="visible_modules" value="<%= m[0] %>"<%= selected.indexOf(m[0]) >= 0 ? ' checked' : '' %>>
+                  <%= m[1] %>
+                </label>
+              <% }); %>
+            </td>
+          </tr>
+          <tr>
+            <th>&nbsp;</th>
+            <td><button type="submit" class="sis-button-go">Save visibility</button></td>
+          </tr>
+        </table>
+      </form>
+    <% }); %>
+    <% if (!roles.length) { %>
+      <p>No roles to edit.</p>
+    <% } %>
+    <p class="fineprint">
+      Not enforced: the SIS header renders every tab for every user regardless of these
+      settings. This screen records intent for a future permissions slice.
+    </p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

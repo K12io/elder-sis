@@ -1,0 +1,106 @@
+<%- include('../partials/header', { pageTitle: 'Enrollment', activeTab: 'students' }) %>
+
+<div class="sis-page-title">Enrollment</div>
+
+<% if (notice) { %>
+<div class="sis-box">
+  <div class="sis-box-body">
+    <strong>Notice:</strong> <span class="notice"><%= notice %></span>
+  </div>
+</div>
+<% } %>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Enrollment</div>
+    <div class="sis-box-body">
+      <p>Register, admit, and withdraw students for the
+      <%= currentTerm ? currentTerm.name : 'current' %> term.</p>
+      <p>
+        <a class="sis-button sis-button-go" href="/enrollment/new"
+           style="display:inline-block;text-decoration:none;padding:2px 10px;border:1px solid #2f7038;background:#3f8f4a;color:#fff;font-weight:bold;">Register a new student</a>
+        <a class="sis-button" href="/students"
+           style="display:inline-block;text-decoration:none;padding:2px 10px;border:1px solid #7f7f7f;background:#e6e2da;color:#1a1a1a;">Student Records</a>
+      </p>
+      <table class="sis-table kv">
+        <tr><th>Current term</th><td><%= currentTerm ? currentTerm.name : '— none —' %></td></tr>
+        <tr><th>Actively enrolled</th><td class="num"><%= activeCount %></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Recent Enrollments (25 most recent)</div>
+    <div class="sis-box-body">
+      <% if (!recent.length) { %>
+        <p class="fineprint">No enrollment records yet.</p>
+      <% } else { %>
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>School</th>
+            <th>Term</th>
+            <th>Entry</th>
+            <th>Code</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% recent.forEach(function (e) { %>
+          <tr>
+            <td>
+              <a href="/students/<%= e.student_id %>"><%= e.last_name %>, <%= e.first_name %></a>
+              <span class="fineprint">(<%= e.state_id %>)</span>
+            </td>
+            <td><%= e.school_name || '—' %></td>
+            <td><%= e.term_name || '—' %><% if (e.term_current) { %> <span class="fineprint">(current)</span><% } %></td>
+            <td class="num"><%= e.entry_date ? String(e.entry_date).slice(0, 10) : '—' %></td>
+            <td><%= e.code || '—' %></td>
+            <td>
+              <% if (!e.exit_date) { %>
+              <form action="/enrollment/<%= e.student_id %>/withdraw" method="post" style="margin:0;">
+                <button type="submit" class="sis-button-warn">Withdraw</button>
+              </form>
+              <% } else { %>
+              <span class="fineprint">exited <%= String(e.exit_date).slice(0, 10) %></span>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Enrollment Codes</div>
+    <div class="sis-box-body">
+      <table class="sis-table kv">
+        <tr><th>M</th><td>Member — regular enrollment</td></tr>
+        <tr><th>T</th><td>Temporary / transfer</td></tr>
+        <tr><th>N</th><td>Non-member / part-time</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Reminders</div>
+    <div class="sis-box-body">
+      <p class="fineprint">This is a demonstration system. All records are
+      <strong>synthetic</strong> and describe no real person.</p>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

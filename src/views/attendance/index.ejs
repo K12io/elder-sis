@@ -2,18 +2,55 @@
 
 <div class="sis-page-title">Attendance</div>
 
+<div class="sis-metabar">
+  <span class="meta-label">Date:</span> <span class="meta-strong"><%= date %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Sections available:</span> <span class="meta-strong"><%= totalSections %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Recording:</span> daily attendance by section
+</div>
+
 <table class="layout">
 <tr>
 <td class="col-left">
 
   <div class="sis-box">
-    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-title">Take Attendance</div>
     <div class="sis-box-body">
-      <ul class="links">
-        <li>Teacher grid &mdash; period-by-period attendance entry</li>
-        <li>Office corrections &mdash; adjust posted attendance with reason codes</li>
-        <li>Mass entry &mdash; whole-class or whole-day attendance posting</li>
-      </ul>
+      <form action="/attendance" method="get">
+        <table class="kv">
+          <tr>
+            <th>Date</th>
+            <td>
+              <input type="text" name="date" value="<%= date %>" size="12" maxlength="10" placeholder="YYYY-MM-DD">
+              <span class="fineprint">(YYYY-MM-DD)</span>
+            </td>
+          </tr>
+          <tr>
+            <th>Section</th>
+            <td>
+              <select name="section">
+                <option value="">-- select a section --</option>
+                <% groups.forEach(function (g) { %>
+                <optgroup label="<%= g.name %> (<%= g.code %>)">
+                  <% g.sections.forEach(function (s) { %>
+                  <option value="<%= s.id %>"<% if (selected === s.id) { %> selected<% } %>>
+                    P<%= s.period %> &middot; <%= s.course_name %> &middot; <%= s.teacher_name %> &middot; Rm <%= s.room %> [<%= s.section_code %>]
+                  </option>
+                  <% }); %>
+                </optgroup>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+        </table>
+        <p>
+          <button type="submit" class="sis-button-go">Open Teacher Grid</button>
+        </p>
+      </form>
+      <% if (selected) { %>
+      <p><a href="/attendance/grid?section=<%= selected %>&date=<%= date %>">Go directly to the grid for the selected section &rarr;</a></p>
+      <% } %>
     </div>
   </div>
 
@@ -21,9 +58,34 @@
 <td class="col-right">
 
   <div class="sis-box">
-    <div class="sis-box-title">Status</div>
+    <div class="sis-box-title">Office Tools</div>
     <div class="sis-box-body">
-      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
+      <ul class="links">
+        <li><a href="/attendance/office">Attendance Office</a> &mdash; search and correct daily marks, mass entry</li>
+        <li><a href="/attendance/letters">Attendance Letters</a> &mdash; absence/tardy threshold notices</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Attendance Codes</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr><th>Code</th><th>Label</th><th>Counts as absent</th><th>Excused</th></tr>
+        </thead>
+        <tbody>
+          <% codes.forEach(function (c) { %>
+          <tr>
+            <td><strong><%= c.code %></strong></td>
+            <td><%= c.label %></td>
+            <td><%= c.counts_absent ? 'Yes' : 'No' %></td>
+            <td><%= c.excused ? 'Yes' : 'No' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <p class="fineprint">Default for untouched grid cells is <strong>P</strong> (present).</p>
     </div>
   </div>
 

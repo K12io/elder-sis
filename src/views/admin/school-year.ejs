@@ -1,0 +1,95 @@
+<%- include('../partials/header', { pageTitle: 'School Year & Terms', activeTab: 'admin' }) %>
+
+<div class="sis-page-title">School Year &amp; Terms</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Current term:</span>
+  <span class="meta-strong"><%= current ? current.name : '(none set)' %></span>
+  <% if (current) { %>
+    &nbsp;|&nbsp; <span class="meta-label">Starts:</span> <%= current.starts_on ? String(current.starts_on).slice(0,10) : '\u2014' %>
+    &nbsp;|&nbsp; <span class="meta-label">Ends:</span> <%= current.ends_on ? String(current.ends_on).slice(0,10) : '\u2014' %>
+  <% } %>
+</div>
+
+<% if (message) { %>
+  <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
+    <span class="meta-strong">Saved:</span> <%= message %>
+  </div>
+<% } %>
+<% if (error) { %>
+  <div class="sis-metabar" style="border-color:#d8a0a0;background:#fbeaea;">
+    <span class="meta-strong">Error:</span> <%= error %>
+  </div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Terms &amp; Years</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Term</th>
+          <th>School</th>
+          <th>Starts</th>
+          <th>Ends</th>
+          <th>Current</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% terms.forEach(function (t) { %>
+        <tr>
+          <td><%= t.name %></td>
+          <td><%= t.school_name || 'All District' %></td>
+          <td class="num"><%= t.starts_on ? String(t.starts_on).slice(0,10) : '\u2014' %></td>
+          <td class="num"><%= t.ends_on ? String(t.ends_on).slice(0,10) : '\u2014' %></td>
+          <td<%= t.is_current ? ' class="col-current"' : '' %>><%= t.is_current ? 'YES' : '' %></td>
+          <td>
+            <% if (t.is_current) { %>
+              <span class="fineprint">in use</span>
+            <% } else { %>
+              <form action="/admin/school-year/current" method="post" style="margin:0;">
+                <input type="hidden" name="term_id" value="<%= t.id %>">
+                <button type="submit" class="sis-button-warn">Set as current term</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!terms.length) { %>
+        <tr><td colspan="6">No terms defined.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+    <p class="fineprint">Only one term can be current; saving one clears the flag on all others in a single transaction.</p>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Add Term</div>
+  <div class="sis-box-body">
+    <form action="/admin/school-year" method="post">
+      <table class="sis-table kv">
+        <tr>
+          <th>Term name</th>
+          <td><input type="text" name="name" size="28" placeholder="2027-28 Fall"></td>
+        </tr>
+        <tr>
+          <th>Start date</th>
+          <td><input type="text" name="starts_on" size="12" placeholder="2027-09-01"></td>
+        </tr>
+        <tr>
+          <th>End date</th>
+          <td><input type="text" name="ends_on" size="12" placeholder="2027-12-17"></td>
+        </tr>
+        <tr>
+          <th>&nbsp;</th>
+          <td><button type="submit" class="sis-button-go">Add term</button></td>
+        </tr>
+      </table>
+    </form>
+    <p class="fineprint">Dates use YYYY-MM-DD. New terms default to district-wide (all schools).</p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

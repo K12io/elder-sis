@@ -1,0 +1,231 @@
+<%- include('../partials/header', { pageTitle: 'Register a New Student', activeTab: 'students' }) %>
+
+<div class="sis-page-title">Register a New Student</div>
+
+<%#
+  Dense classic-SIS fieldset grid. Scoped to this view because the shared
+  app.css does not (yet) define .sis-fieldset / .field-grid; other module
+  slices may add a global version without colliding with this block.
+%>
+<style>
+  fieldset.sis-fieldset {
+    border: 1px solid #9a958c;
+    background: #fdfdfb;
+    margin: 0 0 10px;
+    padding: 6px 8px 8px;
+  }
+  fieldset.sis-fieldset legend {
+    font-weight: bold;
+    font-size: 11px;
+    color: #1f3d57;
+    padding: 0 4px;
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 18px;
+    row-gap: 4px;
+  }
+  .field-row { display: flex; align-items: center; }
+  .field-row > label {
+    flex: 0 0 120px;
+    padding-right: 6px;
+    text-align: right;
+    color: #333;
+  }
+  .field-row > input,
+  .field-row > select { flex: 0 1 auto; }
+  .req { color: #b03000; font-weight: bold; }
+</style>
+
+<% if (errors && errors.length) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Error — Please Correct the Following</div>
+  <div class="sis-box-body">
+    <ul class="links">
+      <% errors.forEach(function (msg) { %>
+      <li><strong><%= msg %></strong></li>
+      <% }); %>
+    </ul>
+  </div>
+</div>
+<% } %>
+
+<% if (duplicates && duplicates.length) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Possible Duplicate</div>
+  <div class="sis-box-body">
+    <p><strong>This student may already be enrolled.</strong> The system found
+    <%= duplicates.length %> existing record<%= duplicates.length === 1 ? '' : 's' %>
+    matching the last name and birth date you entered. Review
+    <%= duplicates.length === 1 ? 'this match' : 'these matches' %> before continuing.</p>
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>State ID</th>
+          <th>Grade</th>
+          <th>School</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% duplicates.forEach(function (d) { %>
+        <tr>
+          <td><a href="/students/<%= d.id %>"><%= d.last_name %>, <%= d.first_name %><% if (d.middle_name) { %> <%= d.middle_name %><% } %></a></td>
+          <td class="num"><%= d.state_id %></td>
+          <td class="num"><%= d.grade_level === null ? '' : (Number(d.grade_level) === 0 ? 'K' : d.grade_level) %></td>
+          <td><%= d.school_name || '—' %></td>
+          <td><%= d.status %></td>
+        </tr>
+      <% }); %>
+      </tbody>
+    </table>
+    <p style="margin-top:8px;">
+      <form action="/enrollment/new" method="post" style="display:inline;margin:0;">
+        <input type="hidden" name="confirm" value="1">
+        <input type="hidden" name="last_name" value="<%= values.last_name || '' %>">
+        <input type="hidden" name="first_name" value="<%= values.first_name || '' %>">
+        <input type="hidden" name="middle_name" value="<%= values.middle_name || '' %>">
+        <input type="hidden" name="dob" value="<%= values.dob || '' %>">
+        <input type="hidden" name="gender" value="<%= values.gender || '' %>">
+        <input type="hidden" name="grade_level" value="<%= values.grade_level || '' %>">
+        <input type="hidden" name="school_id" value="<%= values.school_id || '' %>">
+        <input type="hidden" name="entry_date" value="<%= values.entry_date || '' %>">
+        <input type="hidden" name="term_id" value="<%= values.term_id || '' %>">
+        <input type="hidden" name="code" value="<%= values.code || '' %>">
+        <input type="hidden" name="guardian_name" value="<%= values.guardian_name || '' %>">
+        <input type="hidden" name="guardian_relationship" value="<%= values.guardian_relationship || '' %>">
+        <input type="hidden" name="guardian_phone" value="<%= values.guardian_phone || '' %>">
+        <input type="hidden" name="guardian_email" value="<%= values.guardian_email || '' %>">
+        <button type="submit" class="sis-button-warn">Enroll anyway</button>
+      </form>
+      <a class="btn" href="/enrollment/new"
+         style="display:inline-block;text-decoration:none;padding:1px 10px;border:1px solid #7f7f7f;background:#e6e2da;color:#1a1a1a;">Cancel</a>
+    </p>
+  </div>
+</div>
+<% } %>
+
+<form action="/enrollment/new" method="post">
+
+  <fieldset class="sis-fieldset">
+    <legend>Student</legend>
+    <div class="field-grid">
+      <div class="field-row">
+        <label for="last_name">Last name <span class="req">*</span></label>
+        <input type="text" id="last_name" name="last_name" size="24" maxlength="60" value="<%= form.last_name || '' %>">
+      </div>
+      <div class="field-row">
+        <label for="first_name">First name <span class="req">*</span></label>
+        <input type="text" id="first_name" name="first_name" size="24" maxlength="60" value="<%= form.first_name || '' %>">
+      </div>
+      <div class="field-row">
+        <label for="middle_name">Middle name</label>
+        <input type="text" id="middle_name" name="middle_name" size="24" maxlength="60" value="<%= form.middle_name || '' %>">
+      </div>
+      <div class="field-row">
+        <label for="dob">Birth date <span class="req">*</span></label>
+        <input type="text" id="dob" name="dob" size="12" maxlength="10" placeholder="YYYY-MM-DD" value="<%= form.dob || '' %>">
+      </div>
+      <div class="field-row">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender">
+          <option value="">—</option>
+          <% genders.forEach(function (g) { %>
+          <option value="<%= g %>"<%= form.gender === g ? ' selected' : '' %>><%= g %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="field-row">
+        <label for="grade_level">Grade level <span class="req">*</span></label>
+        <select id="grade_level" name="grade_level">
+          <option value="">—</option>
+          <% grades.forEach(function (g) { %>
+          <option value="<%= g %>"<%= String(form.grade_level || '') === g ? ' selected' : '' %>>Grade <%= g %></option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="sis-fieldset">
+    <legend>School</legend>
+    <div class="field-grid">
+      <div class="field-row">
+        <label for="school_id">Enrolling school <span class="req">*</span></label>
+        <select id="school_id" name="school_id">
+          <option value="">— select —</option>
+          <% schools.forEach(function (s) { %>
+          <option value="<%= s.id %>"<%= String(form.school_id || '') === String(s.id) ? ' selected' : '' %>><%= s.name %> (<%= s.code %>)</option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="sis-fieldset">
+    <legend>Enrollment</legend>
+    <div class="field-grid">
+      <div class="field-row">
+        <label for="entry_date">Entry date <span class="req">*</span></label>
+        <input type="text" id="entry_date" name="entry_date" size="12" maxlength="10" placeholder="YYYY-MM-DD" value="<%= form.entry_date || '' %>">
+      </div>
+      <div class="field-row">
+        <label for="term_id">Term <span class="req">*</span></label>
+        <select id="term_id" name="term_id">
+          <option value="">— select —</option>
+          <% terms.forEach(function (t) { %>
+          <option value="<%= t.id %>"<%= String(form.term_id || '') === String(t.id) ? ' selected' : '' %>><%= t.name %><%= t.is_current ? ' (current)' : '' %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="field-row">
+        <label for="code">Enrollment code <span class="req">*</span></label>
+        <select id="code" name="code">
+          <option value="">—</option>
+          <% codes.forEach(function (c) { %>
+          <option value="<%= c.value %>"<%= form.code === c.value ? ' selected' : '' %>><%= c.label %></option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="sis-fieldset">
+    <legend>Household / Guardian</legend>
+    <div class="field-grid">
+      <div class="field-row">
+        <label for="guardian_name">Guardian name</label>
+        <input type="text" id="guardian_name" name="guardian_name" size="28" maxlength="80" value="<%= form.guardian_name || '' %>">
+      </div>
+      <div class="field-row">
+        <label for="guardian_relationship">Relationship</label>
+        <select id="guardian_relationship" name="guardian_relationship">
+          <option value="">—</option>
+          <% relationships.forEach(function (r) { %>
+          <option value="<%= r %>"<%= form.guardian_relationship === r ? ' selected' : '' %>><%= r %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="field-row">
+        <label for="guardian_phone">Phone</label>
+        <input type="text" id="guardian_phone" name="guardian_phone" size="20" maxlength="25" value="<%= form.guardian_phone || '' %>">
+      </div>
+      <div class="field-row">
+        <label for="guardian_email">Email</label>
+        <input type="text" id="guardian_email" name="guardian_email" size="28" maxlength="120" value="<%= form.guardian_email || '' %>">
+      </div>
+    </div>
+  </fieldset>
+
+  <p>
+    <button type="submit" class="sis-button-go">Register student</button>
+    <a class="btn" href="/enrollment"
+       style="display:inline-block;text-decoration:none;padding:1px 10px;border:1px solid #7f7f7f;background:#e6e2da;color:#1a1a1a;">Cancel</a>
+    <span class="fineprint">Fields marked <span class="req">*</span> are required.</span>
+  </p>
+
+</form>
+
+<%- include('../partials/footer') %>

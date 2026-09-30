@@ -1,0 +1,106 @@
+<%- include('../partials/header', { pageTitle: pageTitle, activeTab: 'grades' }) %>
+
+<div class="sis-page-title">Student Grades &mdash; <%= student.last_name %>, <%= student.first_name %></div>
+
+<div class="sis-metabar" style="margin-bottom:8px;">
+  <span class="meta-label">Student:</span> <span class="meta-strong"><%= student.last_name %>, <%= student.first_name %></span>
+  (<%= student.state_id %>)
+  &nbsp;|&nbsp; <span class="meta-label">Grade:</span> <span class="meta-strong"><%= student.grade_level %></span>
+  &nbsp;|&nbsp; <span class="meta-label">Section:</span> <span class="meta-strong"><%= section.course_name %> (<%= section.section_code %>)</span>
+  &nbsp;|&nbsp; <span class="meta-label">Teacher:</span> <span class="meta-strong"><%= section.teacher_name %></span>
+  &nbsp;|&nbsp; <a href="/grading/scores?section=<%= section.id %>">Back to grid</a>
+</div>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Scores &mdash; <%= section.course_name %></div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Assignment</th>
+            <th>Category</th>
+            <th class="num">Score</th>
+            <th class="num">Possible</th>
+            <th>Due</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!rows.length) { %>
+            <tr><td colspan="6">No assignments for this section.</td></tr>
+          <% } %>
+          <% rows.forEach(function (r, i) { %>
+            <tr>
+              <td class="num"><%= i + 1 %></td>
+              <td><%= r.name %><%= r.published ? ' (PUB)' : '' %></td>
+              <td><%= r.category_name || '\u2014' %></td>
+              <td class="num">
+                <% if (r.code === 'X') { %>X
+                <% } else if (r.code === 'M') { %>M
+                <% } else if (r.earned != null) { %><%= Number(r.earned) %>
+                <% } else { %>&mdash;<% } %>
+              </td>
+              <td class="num"><%= Number(r.possible) %></td>
+              <td><%= r.due_on ? String(r.due_on).slice(0, 10) : '\u2014' %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <p class="fineprint">M = missing (counts as 0) &middot; X = exempt (excluded). Blank = no score entered.</p>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Category Subtotals</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th class="num">Earned</th>
+            <th class="num">Possible</th>
+            <th class="num">Pct</th>
+            <th class="num">Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!categories.length) { %>
+            <tr><td colspan="5">No categories.</td></tr>
+          <% } %>
+          <% categories.forEach(function (c) { %>
+            <tr>
+              <td><%= c.name %></td>
+              <td class="num"><%= c.earned %></td>
+              <td class="num"><%= c.possible %></td>
+              <td class="num"><%= c.pct == null ? '\u2014' : c.pct.toFixed(2) %></td>
+              <td class="num"><%= c.weight %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Term Grade</div>
+    <div class="sis-box-body">
+      <table class="kv">
+        <tr><th>Weighted average</th><td><strong><%= weightedPct == null ? '\u2014' : weightedPct.toFixed(2) + '%' %></strong></td></tr>
+        <tr><th>Letter grade</th><td><strong><%= letter || '\u2014' %></strong></td></tr>
+      </table>
+      <p class="fineprint">Band: A 90+ &middot; B 80+ &middot; C 70+ &middot; D 60+ &middot; F below.</p>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

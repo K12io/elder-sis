@@ -1,18 +1,52 @@
 <%- include('../partials/header', { pageTitle: 'Student Records', activeTab: 'students' }) %>
 
-<div class="sis-page-title">Student Records</div>
+<div class="sis-page-title">Student Records &mdash; Roster Search</div>
 
 <table class="layout">
 <tr>
 <td class="col-left">
 
   <div class="sis-box">
-    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-title">Search Criteria</div>
     <div class="sis-box-body">
-      <ul class="links">
-        <li>Search roster &mdash; find students by name, ID, grade level, or status</li>
-        <li>Student 360 &mdash; demographics, contacts, enrollment history, alerts</li>
-      </ul>
+      <form action="/students" method="get">
+        <table class="sis-table kv">
+          <tr>
+            <th>Last name</th>
+            <td><input type="text" name="last" value="<%= criteria.last %>" size="18"></td>
+            <th>First name</th>
+            <td><input type="text" name="first" value="<%= criteria.first %>" size="18"></td>
+          </tr>
+          <tr>
+            <th>State ID</th>
+            <td><input type="text" name="state_id" value="<%= criteria.stateId %>" size="14"></td>
+            <th>Grade level</th>
+            <td>
+              <select name="grade">
+                <option value="">(any)</option>
+                <% grades.forEach(function (g) { %>
+                <option value="<%= g.value %>"<% if (criteria.grade === g.value) { %> selected<% } %>><%= g.label %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>
+              <select name="status">
+                <option value="">(any)</option>
+                <% statuses.forEach(function (st) { %>
+                <option value="<%= st %>"<% if (criteria.status === st) { %> selected<% } %>><%= st %></option>
+                <% }); %>
+              </select>
+            </td>
+            <td colspan="2">
+              <button type="submit" class="btn">Search</button>
+              &nbsp;<a href="/students">Clear</a>
+            </td>
+          </tr>
+        </table>
+      </form>
     </div>
   </div>
 
@@ -20,15 +54,65 @@
 <td class="col-right">
 
   <div class="sis-box">
-    <div class="sis-box-title">Status</div>
+    <div class="sis-box-title">Search Notes</div>
     <div class="sis-box-body">
-      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
-      <p class="fineprint">Quick Search (top right) resolves to <code>/students/search</code>.</p>
+      <p>Name and State ID fields match on a partial value. Grade and status must match exactly.</p>
+      <p class="fineprint">Roster results are capped at 50 rows; refine criteria to narrow a large match.</p>
     </div>
   </div>
 
 </td>
 </tr>
 </table>
+
+<div class="sis-box">
+  <div class="sis-box-title">Roster Results</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      <% if (hasCriteria) { %>
+      <strong><%= total %></strong> record<%= total === 1 ? '' : 's' %> found matching the search criteria.
+      <% } else { %>
+      Showing the first <strong><%= rows.length %></strong> of <strong><%= total %></strong> students (ordered by last, first). Enter criteria to narrow the list.
+      <% } %>
+    </p>
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>State ID</th>
+          <th>Last</th>
+          <th>First</th>
+          <th>Grade</th>
+          <th>Gender</th>
+          <th>Birth date</th>
+          <th>School</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (rows.length === 0) { %>
+        <tr>
+          <td colspan="8"><em>No records to display</em></td>
+        </tr>
+        <% } else { %>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><a href="/students/<%= r.id %>"><%= r.state_id %></a></td>
+          <td><%= r.last_name %></td>
+          <td><%= r.first_name %></td>
+          <td class="num"><%= intToGrade(r.grade_level) %></td>
+          <td><%= r.gender || '' %></td>
+          <td class="num"><%= r.dob ? String(r.dob).slice(0, 10) : '' %></td>
+          <td><%= r.school_name || '' %></td>
+          <td><%= r.status %></td>
+        </tr>
+        <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+    <% if (total > rows.length) { %>
+    <p class="fineprint">Listing first <%= rows.length %> of <%= total %>. Refine criteria to see the rest.</p>
+    <% } %>
+  </div>
+</div>
 
 <%- include('../partials/footer') %>

@@ -1,0 +1,13 @@
+<%- include('../partials/header', { pageTitle: 'Attendance', activeTab: 'attend' }) %>
+
+<div class="sis-page-title">Attendance &mdash; Notice</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Request could not be completed</div>
+  <div class="sis-box-body">
+    <p><strong><%= status %></strong> &mdash; <%= message %></p>
+    <p class="fineprint">Return to the <a href="/attendance">Attendance start page</a>.</p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

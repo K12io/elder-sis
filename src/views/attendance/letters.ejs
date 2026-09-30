@@ -1,0 +1,143 @@
+<%- include('../partials/header', { pageTitle: 'Attendance Letters', activeTab: 'attend' }) %>
+
+<style>
+  @media print {
+    #topbar, #topbar-context, #tabbar, #footer, .no-print { display: none !important; }
+    #content { padding: 0 !important; }
+    body { background: #fff !important; }
+    .letter { page-break-after: always; }
+  }
+  .letter {
+    border: 1px solid #9a958c;
+    background: #fff;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+    font-size: 12px;
+  }
+  .letter .district { text-align: center; border-bottom: 2px solid #2b5570; padding-bottom: 6px; margin-bottom: 12px; }
+  .letter h3 { margin: 0 0 2px; font-size: 14px; }
+  .letter .sig { margin-top: 34px; }
+  .letter .sig .line { border-top: 1px solid #000; width: 260px; }
+</style>
+
+<div class="sis-page-title">Attendance Letters</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Range:</span> <span class="meta-strong"><%= from %> &ndash; <%= to %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Threshold:</span> <span class="meta-strong">&ge; <%= threshold %></span> (absences + tardies)
+  &nbsp;|&nbsp;
+  <span class="meta-label">Students:</span> <span class="meta-strong"><%= rows.length %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Generated:</span> <span class="meta-strong"><%= generatedAt %></span>
+</div>
+
+<div class="sis-box no-print" style="margin-top:8px;">
+  <div class="sis-box-title">Selection</div>
+  <div class="sis-box-body">
+    <form action="/attendance/letters" method="get">
+      <table class="kv">
+        <tr>
+          <th>From</th>
+          <td><input type="text" name="from" value="<%= from %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>To</th>
+          <td><input type="text" name="to" value="<%= to %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>Absence threshold</th>
+          <td><input type="text" name="threshold" value="<%= threshold %>" size="4" maxlength="3"></td>
+          <th>School</th>
+          <td>
+            <select name="school">
+              <option value="">All schools</option>
+              <% schools.forEach(function (sc) { %>
+              <option value="<%= sc.id %>"<% if (schoolId === sc.id) { %> selected<% } %>><%= sc.name %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <p><button type="submit" class="sis-button-go">Generate</button></p>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Students Over Threshold</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Student</th><th>ID</th><th>School</th><th>Grade</th>
+          <th class="num">Unexcused absences</th><th class="num">Tardies</th><th class="num">Excused</th><th class="num">Total over</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (rows.length === 0) { %>
+        <tr><td colspan="8">No students meet the threshold for this range.</td></tr>
+        <% } %>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><%= r.last_name %>, <%= r.first_name %></td>
+          <td><%= r.state_id %></td>
+          <td><%= r.school_code %></td>
+          <td class="num"><%= r.grade_level %></td>
+          <td class="num"><%= r.absences %></td>
+          <td class="num"><%= r.tardies %></td>
+          <td class="num"><%= r.excused %></td>
+          <td class="num"><%= r.absences + r.tardies %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="fineprint no-print">Print this page to produce one notice per student (each notice starts on a new page).</p>
+  </div>
+</div>
+
+<% rows.forEach(function (r) { %>
+<div class="letter">
+  <div class="district">
+    <h3>Valley View Unified School District</h3>
+    <div><%= r.school_name %></div>
+    <div class="fineprint">Office of Student Attendance</div>
+  </div>
+
+  <p><strong>Date:</strong> <%= generatedAt.slice(0, 10) %></p>
+  <p><strong>To the parent/guardian of:</strong> <%= r.first_name %> <%= r.last_name %> (ID <%= r.state_id %>, Grade <%= r.grade_level %>)</p>
+
+  <p>
+    Dear Parent or Guardian,
+  </p>
+  <p>
+    Our records show that during the period <strong><%= from %></strong> through <strong><%= to %></strong>,
+    <%= r.first_name %> <%= r.last_name %> accumulated
+    <strong><%= r.absences %></strong> unexcused absence(s) and
+    <strong><%= r.tardies %></strong> tardy arrival(s),
+    for a combined total of <strong><%= r.absences + r.tardies %></strong>, which meets or exceeds the
+    district threshold of <strong><%= threshold %></strong>.
+  </p>
+  <p>
+    Regular attendance is essential to academic success. Please review the attendance record below and
+    contact the school office if you believe this information is in error or to discuss support options.
+  </p>
+
+  <table class="sis-table" style="width:auto; margin:10px 0;">
+    <thead>
+      <tr><th>Unexcused absences</th><th>Tardies</th><th>Excused absences</th><th>Threshold</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num"><%= r.absences %></td>
+        <td class="num"><%= r.tardies %></td>
+        <td class="num"><%= r.excused %></td>
+        <td class="num"><%= threshold %></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="sig">
+    <div class="line"></div>
+    <div>Attendance Officer, <%= r.school_name %></div>
+  </div>
+</div>
+<% }); %>
+
+<%- include('../partials/footer') %>

@@ -246,3 +246,26 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · vet: pending x5 · status: 3 done, 5 in-progress, 5 queued
   · next up: triage the five reports (batched in ONE codemode call), then S7/S8/S10 once
   their data edges are met.
+- 2026-09-30 · tick 9 (coordinator) · **5-way fan-out landed and verified; 5 slices closed.**
+  All five DeepInfra agents returned (12 min wall-clock total). Coordinator verification by
+  execution, one pass: **all 24 routes 200**; twelve new tables present and seeded
+  (contacts 24, alerts 9, attendance_codes 4, grade_categories 2, grade_assignments 4,
+  grade_scores 37, grade_codes 5, app_users 3, app_roles 4, user_roles 3); HTTP writes
+  proven (attendance POST -> 302 + 2 rows; enrollment POST -> 303 + student created +
+  enrolment event logged; admin set-current-term -> 302 with exactly one current term);
+  **migration idempotency proven by restart** (seed counts unchanged); S6 renders the
+  deferred S1b devices (.sis-metabar, .col-current on 31 elements, accent bars) so that
+  obligation is CLEARED; ownership audit shows every change inside slice-owned
+  directories and zero edits to shared files. Coordinator test data removed afterwards.
+  Jev batched triage (one call, 2,102 tokens, 10 atomic questions): **matches 0.88-0.96
+  for all five** (delivered as claimed) but `close` 0.49-0.65 — a product-level
+  completeness signal, not a defect signal, and the honest answer is a fair "not yet":
+  so the low scores were converted into an explicit **knownGaps** list in registry.json
+  (no auth by design, roles descriptive-only, attendance roster approximated pending S4,
+  orphan students/search.ejs, thin seeded categories, no events UI) instead of being
+  waved through. Question-wording lesson: a `close` question invites a whole-product
+  judgement; keep acceptance questions scoped to the slice's own criteria.
+  Honest metrics: **6/10 first-pass** across the run so far.
+  · status: 8 done, 0 in-progress, 5 queued (S4, S7, S8, S10, QA) ·
+  next up: second fan-out — S4 scheduling, S7 transcripts, S8 reports, S10 discipline/health
+  (all dependencies now satisfied; S7 needs S6 scores, S8 needs S2+S5 data, S10 needs S2).

@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 8,
+  "tick": 9,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -154,9 +154,18 @@
         "Find a student and understand their situation"
       ],
       "refweight": 589,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT-WITH-NOTE (matches 0.96 / close 0.54). Delivered as claimed and verified by execution; the low `close` score is a product-level completeness signal, answered by the tracked gap list rather than rework.",
+        "notes": "Concurrent fan-out slice. Verified by the coordinator: route 200, its tables present and seeded, HTTP write path exercised, migration idempotent across a restart, shared files untouched."
+      },
+      "evidence": [
+        "db/migrations/*-s2.sql",
+        "coordinator boot+curl+psql+restart pass"
+      ],
       "failedTicks": 0,
       "notes": "ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s2-students."
     },
@@ -173,9 +182,18 @@
         "Admit, enroll, move, or withdraw a student"
       ],
       "refweight": 117,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT-WITH-NOTE (matches 0.88 / close 0.57). Delivered as claimed and verified by execution; the low `close` score is a product-level completeness signal, answered by the tracked gap list rather than rework.",
+        "notes": "Concurrent fan-out slice. Verified by the coordinator: route 200, its tables present and seeded, HTTP write path exercised, migration idempotent across a restart, shared files untouched."
+      },
+      "evidence": [
+        "db/migrations/*-s3.sql",
+        "coordinator boot+curl+psql+restart pass"
+      ],
       "failedTicks": 0,
       "notes": "Known dead link until this slice: home.ejs -> /enrollment/register (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s3-enrollment."
     },
@@ -211,9 +229,18 @@
         "Record and correct attendance"
       ],
       "refweight": 611,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT-WITH-NOTE (matches 0.89 / close 0.64). Delivered as claimed and verified by execution; the low `close` score is a product-level completeness signal, answered by the tracked gap list rather than rework.",
+        "notes": "Concurrent fan-out slice. Verified by the coordinator: route 200, its tables present and seeded, HTTP write path exercised, migration idempotent across a restart, shared files untouched."
+      },
+      "evidence": [
+        "db/migrations/*-s5.sql",
+        "coordinator boot+curl+psql+restart pass"
+      ],
       "failedTicks": 0,
       "notes": "ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s5-attendance."
     },
@@ -230,11 +257,20 @@
         "Create assignments and enter scores rapidly"
       ],
       "refweight": 1593,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT-WITH-NOTE (matches 0.93 / close 0.65). Delivered as claimed and verified by execution; the low `close` score is a product-level completeness signal, answered by the tracked gap list rather than rework.",
+        "notes": "Concurrent fan-out slice. Verified by the coordinator: route 200, its tables present and seeded, HTTP write path exercised, migration idempotent across a restart, shared files untouched."
+      },
+      "evidence": [
+        "db/migrations/*-s6.sql",
+        "coordinator boot+curl+psql+restart pass"
+      ],
       "failedTicks": 0,
-      "notes": "MUST render the S1b devices: use .sis-metabar for the assignment meta strip and .col-current for the active score-entry column, plus .col-accent-blue/orange column bars (acceptance for S1b was satisfied at the CSS level only). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s6-grading."
+      "notes": "MUST render the S1b devices: use .sis-metabar for the assignment meta strip and .col-current for the active score-entry column, plus .col-accent-blue/orange column bars (acceptance for S1b was satisfied at the CSS level only). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s6-grading. | S1b device obligation CLEARED: score grid renders .sis-metabar and .col-current (31 elements, active column header+cells) and accent bars."
     },
     {
       "id": "S7",
@@ -292,9 +328,18 @@
         "Configure a school year and access"
       ],
       "refweight": 338,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT-WITH-NOTE (matches 0.92 / close 0.49). Delivered as claimed and verified by execution; the low `close` score is a product-level completeness signal, answered by the tracked gap list rather than rework.",
+        "notes": "Concurrent fan-out slice. Verified by the coordinator: route 200, its tables present and seeded, HTTP write path exercised, migration idempotent across a restart, shared files untouched."
+      },
+      "evidence": [
+        "db/migrations/*-s9.sql",
+        "coordinator boot+curl+psql+restart pass"
+      ],
       "failedTicks": 0,
       "notes": "ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s9-admin."
     },
@@ -337,13 +382,13 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": " | Must additionally: (a) remove the orphan src/views/students/search.ejs (the /search route renders students/index), (b) verify every entry in registry.knownGaps is either fixed or documented in BUILD-REPORT.md."
     }
   ],
   "metrics": {
-    "ticks": 8,
-    "firstPassVetPass": 1,
-    "firstPassVetTotal": 5,
+    "ticks": 9,
+    "firstPassVetPass": 6,
+    "firstPassVetTotal": 10,
     "retries": 2,
     "blockedCount": 0
   },
@@ -388,6 +433,10 @@
     {
       "tick": 8,
       "note": "ADR-002 contention removal; Jev lane decision; 5-way parallel fan-out (S2,S3,S5,S6,S9) on flash-fleet"
+    },
+    {
+      "tick": 9,
+      "note": "5-way fan-out verified (24 routes 200, 12 tables seeded, writes+idempotency proven); all five accepted; 6 known gaps tracked"
     }
   ],
   "guidance": [
@@ -409,6 +458,32 @@
         "db/migrations/README.md",
         "all 11 routes verified 200 after the refactor"
       ]
+    }
+  ],
+  "knownGaps": [
+    {
+      "gap": "No authentication/login; every page is open (by design for v1).",
+      "owner": "QA / future"
+    },
+    {
+      "gap": "Role module-visibility is descriptive only; the nav is not gated by roles.",
+      "owner": "S9 (stated on page)"
+    },
+    {
+      "gap": "Attendance grid rosters a whole school, not a true section roster \u2014 section-level student assignment is not modelled yet.",
+      "owner": "S4 (scheduling) then S5"
+    },
+    {
+      "gap": "src/views/students/search.ejs is orphaned (route reuses students/index).",
+      "owner": "QA cleanup"
+    },
+    {
+      "gap": "Grading ships 2 seeded categories; weighting math verified by the slice but not by the coordinator.",
+      "owner": "QA"
+    },
+    {
+      "gap": "enrollment_events has no UI listing yet.",
+      "owner": "S3 follow-up / QA"
     }
   ]
 }
