@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 25,
+  "tick": 26,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -653,11 +653,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
-      "vet": null,
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 post-wave coordinator pass: applied, booted twice with identical counts, targets met.",
+        "notes": "Wave-5 data slice. Coordinator verification: all five migrations re-run idempotently (boot1 == boot2), targets hit, no cross-file edits."
+      },
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: flash-fleet. Fill section_roster to ~85% of capacity per section by school+grade, every student in >=2 sections, and guarantee the graded sections get rosters."
+      "notes": "Lane: flash-fleet. Fill section_roster to ~85% of capacity per section by school+grade, every student in >=2 sections, and guarantee the graded sections get rosters. | VERIFIED: section_roster 936 rows; all 42 of 42 sections have rosters; 257/300 students in >=2 sections (the remaining 43 are elementary students with a single homeroom, which is realistic and accepted)."
     },
     {
       "id": "D2",
@@ -671,11 +677,11 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: flash-fleet. Depends on D1. 3 categories/section summing to 100, 8-10 assignments/section, scores for rostered students with realistic M/X/blank distribution."
+      "notes": "Lane: flash-fleet. Depends on D1. 3 categories/section summing to 100, 8-10 assignments/section, scores for rostered students with realistic M/X/blank distribution. | Dispatched (tick 26) after D1's rosters landed; owns one migration file."
     },
     {
       "id": "D3",
@@ -689,11 +695,11 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: flash-fleet. Depends on D1. Realistic code mix (P/T/A/E), a few absence-heavy students for the letters report, and today's rows so office screens are non-empty."
+      "notes": "Lane: flash-fleet. Depends on D1. Realistic code mix (P/T/A/E), a few absence-heavy students for the letters report, and today's rows so office screens are non-empty. | Dispatched (tick 26) after D1's rosters landed; owns one migration file."
     },
     {
       "id": "D4",
@@ -707,11 +713,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
-      "vet": null,
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 post-wave coordinator pass: applied, booted twice with identical counts, targets met.",
+        "notes": "Wave-5 data slice. Coordinator verification: all five migrations re-run idempotently (boot1 == boot2), targets hit, no cross-file edits."
+      },
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: flash-fleet. 1-2 contacts per student; alerts for ~40; prior-year enrollment rows; ~15 withdrawn students with exit dates; ~10 mid-year entrants."
+      "notes": "Lane: flash-fleet. 1-2 contacts per student; alerts for ~40; prior-year enrollment rows; ~15 withdrawn students with exit dates; ~10 mid-year entrants. | VERIFIED: contacts 408 with 0 students uncovered; alerts 68; enrollments 900; 15 withdrawn; 8 null middle names; 5 null DOB; 3 primary contacts with null phone; exactly 2 duplicate-name pairs (migration edge cases present)."
     },
     {
       "id": "D5",
@@ -725,11 +737,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
-      "vet": null,
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 post-wave coordinator pass: applied, booted twice with identical counts, targets met.",
+        "notes": "Wave-5 data slice. Coordinator verification: all five migrations re-run idempotently (boot1 == boot2), targets hit, no cross-file edits."
+      },
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: flash-fleet. Spread across schools, grades and codes over the current term."
+      "notes": "Lane: flash-fleet. Spread across schools, grades and codes over the current term. | VERIFIED: 134 incidents (dates 2026-09-01..09-29, inside the term, 50 distinct students), 90 encounters, 76 flags, 26 not-parent-notified."
     },
     {
       "id": "D6",
@@ -743,11 +761,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
-      "vet": null,
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 post-wave coordinator pass: applied, booted twice with identical counts, targets met.",
+        "notes": "Wave-5 data slice. Coordinator verification: all five migrations re-run idempotently (boot1 == boot2), targets hit, no cross-file edits."
+      },
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: flash-fleet. Fees assigned district-wide (~600), ~180 payments incl. partials; 2 more assessments with scores; announcements to ~15 with recipients."
+      "notes": "Lane: flash-fleet. Fees assigned district-wide (~600), ~180 payments incl. partials; 2 more assessments with scores; announcements to ~15 with recipients. | VERIFIED: student_fees 600 (district-wide), payments 225, 10 waived; billed 19250.00 / collected 5100.00 / outstanding 14150.00; assessments 6 with 669 scores (the lower-than-estimated total is correct: the new bands add 240 in-range students to the existing 429); announcements 15 with 1676 recipients."
     },
     {
       "id": "D7",
@@ -761,11 +785,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
-      "vet": null,
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 post-wave coordinator pass: applied, booted twice with identical counts, targets met.",
+        "notes": "Wave-5 data slice. Coordinator verification: all five migrations re-run idempotently (boot1 == boot2), targets hit, no cross-file edits."
+      },
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: flash-fleet. Registrars/counselors/teachers/admin linked to app_roles; reuse the seeded scrypt hash for demo1234 so every account is sign-in-able."
+      "notes": "Lane: flash-fleet. Registrars/counselors/teachers/admin linked to app_roles; reuse the seeded scrypt hash for demo1234 so every account is sign-in-able. | VERIFIED: 13 users / 14 role links, 1 inactive, 1 multi-role, 2 Administrators, 5 Teachers, 2 Registrars, 2 Counselors; a brand-new account (h.benton) signed in live returning roles [\"Registrar\"]. Three distinct hashes are per-user salts of the same demo password."
     },
     {
       "id": "V1",
@@ -787,9 +817,9 @@
     }
   ],
   "metrics": {
-    "ticks": 25,
-    "firstPassVetPass": 14,
-    "firstPassVetTotal": 21,
+    "ticks": 26,
+    "firstPassVetPass": 19,
+    "firstPassVetTotal": 26,
     "retries": 3,
     "blockedCount": 0
   },
@@ -906,6 +936,10 @@
     {
       "tick": 25,
       "note": "ADR-005 (migration-demo purpose: dense data + capture fidelity); F7 replaced by data wave D1-D7 + V1; dispatched D1/D4/D5/D6/D7"
+    },
+    {
+      "tick": 26,
+      "note": "D1/D4/D5/D6/D7 verified done (idempotent, targets met); D2+D3 dispatched"
     }
   ],
   "guidance": [
@@ -996,14 +1030,11 @@
   ],
   "wave": {
     "active": [
-      "D1 rosters",
-      "D4 people",
-      "D5 conduct-health",
-      "D6 finance-assess-comms",
-      "D7 users"
+      "D2 grading data",
+      "D3 attendance history"
     ],
-    "note": "wave 5: data population (D2/D3 next, after D1 rosters land)",
-    "dispatchedAt": "tick 25"
+    "note": "wave 5b (data depth)",
+    "dispatchedAt": "tick 26"
   },
   "purpose": "Legacy reference SIS: a 'fake PowerSchool' populated with dense, realistic demo data, run alongside a newer SIS to demonstrate DATA MIGRATION and ad-hoc adaptability. Data depth and visual fidelity to the reference capture corpus are therefore first-class requirements, not polish."
 }
