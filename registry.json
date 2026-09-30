@@ -124,11 +124,11 @@
         "nav/chrome fidelity vs captures"
       ],
       "refweight": 0,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Split out of S1 so the S2-S8 chain unblocks on nav-live alone. Needs image-capable review of reference captures (reference/catalog-data.js paths). | READY: reference/chrome-delta.md written (6 captures reviewed; D1-D7 concrete CSS/header deltas). Next free tick can dispatch the application directly from that file."
+      "notes": "Split out of S1 so the S2-S8 chain unblocks on nav-live alone. Needs image-capable review of reference captures (reference/catalog-data.js paths). | READY: reference/chrome-delta.md written (6 captures reviewed; D1-D7 concrete CSS/header deltas). Next free tick can dispatch the application directly from that file. | Tick 6 dispatched the application to flash-fleet (s1b-apply-chrome) from reference/chrome-delta.md D1-D7, with three preservation requirements (topbar -> /admin, grades label single-escape, no app.js edits). Verification lands next tick."
     },
     {
       "id": "S2",
@@ -378,6 +378,10 @@
     {
       "tick": 6,
       "note": "S1 closed (FIX-THEN-SHIP applied+verified in blob); Jev vindicated; post-commit verification rule added"
+    },
+    {
+      "tick": 6,
+      "note": "S1b chrome-delta application dispatched to flash-fleet"
     }
   ],
   "guidance": [
