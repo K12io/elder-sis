@@ -1,0 +1,167 @@
+<%- include('../partials/header', { pageTitle: 'Post Final Grades', activeTab: 'transcripts' }) %>
+
+<div class="sis-page-title">Post Final Grades</div>
+
+<% var s = typeof section !== 'undefined' ? section : null; %>
+<% if (typeof noSection !== 'undefined' && noSection) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Notice</div>
+  <div class="sis-box-body">
+    <p><%= typeof message !== 'undefined' ? message : '' %> <% if (typeof error !== 'undefined' && error) { %><%= error %><% } %></p>
+    <p><a href="/grades">&laquo; Back to Grades &amp; Transcripts</a></p>
+  </div>
+</div>
+<% } else if (s) { %>
+
+<div class="sis-metabar">
+  Section: <strong><%= s.section_code %></strong> &middot; <%= s.course_name %> &middot;
+  Teacher: <%= s.teacher_name || '' %> &middot; Term: <%= s.term_name %> &middot; <%= s.school_name %>
+</div>
+
+<% if (typeof postedFlag !== 'undefined' && postedFlag) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Posted</div>
+  <div class="sis-box-body">
+    <p><strong>Final grades posted and locked.</strong>
+    <% if (typeof postedCount !== 'undefined') { %>
+      Posted <strong><%= postedCount %> of <%= (typeof rosterSize !== 'undefined' ? rosterSize : (typeof attemptedCount !== 'undefined' ? attemptedCount : postedCount)) %></strong> enrolled students.
+      <% if (typeof notScoredCount !== 'undefined' && notScoredCount) { %><strong><%= notScoredCount %></strong> student(s) had no scores and were listed but skipped (not posted).<% } %>
+    <% } %>
+    Use "Unlock and re-post" below to delete and re-post this section's rows.</p>
+  </div>
+</div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Not Posted</div>
+  <div class="sis-box-body">
+    <p><strong><%= error %></strong></p>
+  </div>
+</div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Weight Check</div>
+  <div class="sis-box-body">
+    <% if (!categories.length) { %>
+      <p><strong>No grade categories for this section.</strong> Set up categories and weights in the Grading module first.</p>
+    <% } else { %>
+      <p>
+        Category weights: <% categories.forEach(function (c, i) { %><% if (i) { %> + <% } %><%= c.name %> <%= Number(c.weight).toFixed(1) %>%<% }); %>
+        = <strong><%= weightsTotal.toFixed(1) %>%</strong>
+        <% if (!weightsOk) { %>
+          &mdash; <span class="sis-button-warn">does NOT total 100%; posting is refused.</span>
+        <% } else { %>
+          &mdash; OK.
+        <% } %>
+      </p>
+    <% } %>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Computed Standings</div>
+  <div class="sis-box-body">
+
+    <% if (typeof untaggedAssignments !== 'undefined' && untaggedAssignments.length) { %>
+    <p class="fineprint">
+      <strong>Note:</strong> this section has <%= untaggedAssignments.length %> assignment(s) with no category (or a category from another section):
+      <% untaggedAssignments.forEach(function (a, i) { %><% if (i) { %>, <% } %><%= a.name %> (#<%= a.id %>, category <%= a.category_id === null ? 'none' : a.category_id %>)<% }); %>.
+      Scores on these assignments cannot count toward a weighted category; they are collected in the
+      &ldquo;Uncategorized&rdquo; column below and, when a student has nothing else, their percent is the raw earned/possible ratio.
+    </p>
+    <% } %>
+
+    <p>Listed: <strong><%= students.length %></strong> enrolled student(s) &middot;
+       scored: <strong><%= (typeof scoredCount !== 'undefined' ? scoredCount : students.filter(function (s) { return s.hasScores; }).length) %></strong> &middot;
+       not scored (skipped on post): <strong><%= (typeof notScoredCount !== 'undefined' ? notScoredCount : 0) %></strong> &middot;
+       posted: <strong><%= postedMap.size %></strong></p>
+
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <% categories.forEach(function (c) { %>
+            <th class="num"><%= c.name %> (<%= Number(c.weight).toFixed(1) %>%*)</th>
+          <% }); %>
+          <th class="num">Uncategorized</th>
+          <th class="num">Missing</th>
+          <th class="num">Exempt</th>
+          <th class="num">Weighted %</th>
+          <th>Letter</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!students.length) { %>
+          <tr><td colspan="<%= categories.length + 6 %>">No students on this section's roster.</td></tr>
+        <% } %>
+        <% students.forEach(function (st) { %> 
+          <% var p = postedMap.get(st.studentId); %>
+          <tr>
+            <td><%= st.name %></td>
+            <% categories.forEach(function (c) { %>
+              <% var b = st.cats[c.id]; %>
+              <td class="num">
+                <% if (b.pct === null) { %>&mdash;<% } else { %><%= b.earned.toFixed(1) %>/<%= b.possible.toFixed(1) %> = <%= b.pct.toFixed(1) %>%<% } %>
+              </td>
+            <% }); %>
+            <td class="num">
+              <% var u = st.uncategorized; %>
+              <% if (!u || u.possible === 0) { %>&mdash;<% } else { %><%= u.earned.toFixed(1) %>/<%= u.possible.toFixed(1) %> = <%= u.pct !== null ? u.pct.toFixed(1) + '%' : '&mdash;' %><% } %>
+            </td>
+            <td class="num"><%= st.missing %></td>
+            <td class="num"><%= st.exempt %></td>
+            <td class="num"><strong><% if (st.pct === null) { %>&mdash;<% } else { %><%= st.pct.toFixed(1) %>%<% } %></strong></td>
+            <td><strong><%= st.letter || '&mdash;' %></strong></td>
+            <td>
+              <% if (p) { %>
+                <strong>Posted</strong> (posted_on <%= new Date(p.posted_on).toISOString().slice(0, 10) %> by <%= p.posted_by || '' %>)
+              <% } else if (!st.hasScores) { %>
+                <strong>Not scored</strong> &mdash; no scores in this section; not posted
+              <% } else { %>
+                Not posted
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="fineprint">
+      * Category subtotal = points earned / points possible in that category; 'M' totals as zero,
+      exempt ('X') work is excluded from the category entirely. Weighted % =
+      &Sigma;(category % &times; category weight) / &Sigma;(category weight). Letter comes from the district grade scale.
+    </p>
+
+  </div>
+</div>
+
+<% if (weightsOk && categories.length) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Posting Action</div>
+  <div class="sis-box-body">
+    <form method="post" action="/grades/post">
+      <input type="hidden" name="section" value="<%= s.id %>">
+      <label for="posted_by">Posted by:</label>
+      <input type="text" name="posted_by" id="posted_by" value="Demo User" size="20">
+      &nbsp;
+      <button type="submit" class="sis-button-go">
+        <%= postedMap.size ? 'Unlock and re-post this section' : 'Post final grades' %>
+      </button>
+    </form>
+    <p class="fineprint">
+      <% if (postedMap.size) { %>
+        Re-posting DELETES the existing <%= postedMap.size %> rows for this section and writes fresh ones.
+      <% } else { %>
+        One grade of record is written per enrolled student with at least one score;
+        students with no scores are listed above but skipped.
+      <% } %>
+    </p>
+  </div>
+</div>
+<% } %>
+
+<% } %>
+
+<%- include('../partials/footer') %>

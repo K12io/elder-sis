@@ -1,0 +1,163 @@
+<%- include('../partials/header', { pageTitle: 'Discipline Incidents', activeTab: 'discipline' }) %>
+
+<div class="sis-page-title">Discipline &mdash; Incident Register</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Showing:</span> <span class="meta-strong"><%= rows.length %></span> row(s)
+  &nbsp;|&nbsp;
+  <span class="meta-label">Matching filters:</span> <span class="meta-strong"><%= total %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Limit:</span> 500
+</div>
+
+<% if (saved) { %>
+<div class="sis-box"><div class="sis-box-body"><strong>Incident saved.</strong></div></div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <form action="/discipline/incidents" method="get">
+      <table class="kv">
+        <tr>
+          <th>Date from</th>
+          <td><input type="text" name="from" value="<%= filters.from %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>Date to</th>
+          <td><input type="text" name="to" value="<%= filters.to %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>School</th>
+          <td>
+            <select name="school">
+              <option value="">All schools</option>
+              <% schools.forEach(function (sc) { %>
+              <option value="<%= sc.id %>"<% if (filters.school === sc.id) { %> selected<% } %>><%= sc.name %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Grade</th>
+          <td>
+            <select name="grade">
+              <option value="">All grades</option>
+              <% ['K','1','2','3','4','5','6','7','8','9','10','11','12'].forEach(function (g) { %>
+              <option value="<%= g %>"<% if (filters.grade === g) { %> selected<% } %>>Grade <%= g %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Code</th>
+          <td>
+            <select name="code">
+              <option value="">Any code</option>
+              <% codes.forEach(function (c) { %>
+              <option value="<%= c.code %>"<% if (filters.code === c.code) { %> selected<% } %>><%= c.code %> &mdash; <%= c.label %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Student last name</th>
+          <td><input type="text" name="last" value="<%= filters.last %>" size="14" placeholder="starts with..."></td>
+        </tr>
+      </table>
+      <p>
+        <button type="submit" class="sis-button-go">Apply Filters</button>
+        <a href="/discipline/incidents">Clear</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Incidents</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Student</th><th>Grade</th><th>School</th>
+          <th>Code</th><th>Description</th><th>Action taken</th>
+          <th>Parent notified</th><th>Follow-up</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (rows.length === 0) { %>
+        <tr><td colspan="9">No incidents match these filters.</td></tr>
+        <% } %>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td class="num"><%= String(r.incident_date).slice(0, 10) %></td>
+          <td>
+            <a href="/students/<%= r.student_id %>"><%= r.last_name %>, <%= r.first_name %></a>
+          </td>
+          <td class="num"><%= r.grade_level %></td>
+          <td><%= r.school_code %></td>
+          <td><strong><%= r.code %></strong> <span class="fineprint"><%= r.code_label %></span></td>
+          <td><%= snippet(r.description, 60) %></td>
+          <td><%= snippet(r.action_taken, 40) %></td>
+          <td class="num"><%= r.parent_notified ? 'Yes' : 'No' %></td>
+          <td class="num"><%= r.follow_up_date ? String(r.follow_up_date).slice(0, 10) : '' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Add Incident</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      Role-scoped writing is not modelled in this demo: any visitor can file an incident.
+    </p>
+    <form action="/discipline/incidents" method="post">
+      <table class="kv">
+        <tr>
+          <th>Student</th>
+          <td>
+            <select name="student_id">
+              <option value="">-- select a student --</option>
+              <% students.forEach(function (s) { %>
+              <option value="<%= s.id %>"><%= s.last_name %>, <%= s.first_name %> [<%= s.state_id %>] &middot; Gr <%= s.grade_level %></option>
+              <% }); %>
+            </select>
+            <span class="fineprint">(first 300 active students; search by name in Student Records)</span>
+          </td>
+        </tr>
+        <tr>
+          <th>Incident date</th>
+          <td><input type="text" name="incident_date" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+        </tr>
+        <tr>
+          <th>Code</th>
+          <td>
+            <select name="code">
+              <% codes.forEach(function (c) { %>
+              <option value="<%= c.code %>"><%= c.code %> &mdash; <%= c.label %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Description</th>
+          <td><textarea name="description" rows="3" cols="60"></textarea></td>
+        </tr>
+        <tr>
+          <th>Action taken</th>
+          <td><input type="text" name="action_taken" size="60"></td>
+        </tr>
+        <tr>
+          <th>Reported by</th>
+          <td><input type="text" name="reported_by" size="30" placeholder="staff member"></td>
+        </tr>
+        <tr>
+          <th>Parent notified</th>
+          <td><input type="checkbox" name="parent_notified" value="on"> Yes, guardian was contacted</td>
+        </tr>
+        <tr>
+          <th>Follow-up date</th>
+          <td><input type="text" name="follow_up_date" size="12" maxlength="10" placeholder="YYYY-MM-DD (optional)"></td>
+        </tr>
+      </table>
+      <p><button type="submit" class="sis-button-go">Save Incident</button></p>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

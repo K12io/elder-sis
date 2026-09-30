@@ -1,0 +1,124 @@
+<%- include('../partials/header', { pageTitle: 'Discipline & Health', activeTab: 'discipline' }) %>
+
+<div class="sis-page-title">Discipline &amp; Health</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Term:</span>
+  <span class="meta-strong"><%= term ? term.name : 'no term on file' %></span>
+  <% if (termFrom && termTo) { %>
+  <span class="meta-label">(<%= termFrom %> &ndash; <%= termTo %>)</span>
+  <% } %>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Incidents this term:</span> <span class="meta-strong"><%= incidentCount %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Students with health flags:</span> <span class="meta-strong"><%= flaggedStudents %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Health encounters this term:</span> <span class="meta-strong"><%= encounterCount %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Access notice</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      This demo SIS does not model user roles or permissions. Every page here is
+      readable and writable by any visitor, and discipline / health records are
+      <strong>not</strong> access-scoped. In a real district system these areas are
+      restricted to administrators, counselors, and health-office staff.
+    </p>
+  </div>
+</div>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Discipline</div>
+    <div class="sis-box-body">
+      <p>
+        Office referrals and disciplinary incidents: reason code, description,
+        action taken, whether the parent/guardian was notified, and any follow-up date.
+      </p>
+      <table class="kv">
+        <tr>
+          <th>Incidents this term</th>
+          <td class="num"><strong><%= incidentCount %></strong></td>
+        </tr>
+        <tr>
+          <th>Reason codes on file</th>
+          <td class="num"><%= codeCount %></td>
+        </tr>
+      </table>
+
+      <% if (byCode.length) { %>
+      <table class="sis-table" style="margin-top:6px;">
+        <thead><tr><th>Code</th><th>Label</th><th>Incidents</th></tr></thead>
+        <tbody>
+          <% byCode.forEach(function (c) { %>
+          <tr>
+            <td><strong><%= c.code %></strong></td>
+            <td><%= c.label %></td>
+            <td class="num"><%= c.n %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p class="fineprint">No incidents recorded for this term yet.</p>
+      <% } %>
+
+      <p style="margin-top:6px;">
+        <a href="/discipline/incidents">Open the incident register &rarr;</a>
+      </p>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Health</div>
+    <div class="sis-box-body">
+      <p>
+        Health-office encounters and persistent health flags (conditions, allergies,
+        medication on file) recorded for students.
+      </p>
+      <table class="kv">
+        <tr>
+          <th>Students with health flags</th>
+          <td class="num"><strong><%= flaggedStudents %></strong></td>
+        </tr>
+        <tr>
+          <th>Flag records</th>
+          <td class="num"><%= flagCount %></td>
+        </tr>
+        <tr>
+          <th>Encounters this term</th>
+          <td class="num"><strong><%= encounterCount %></strong></td>
+        </tr>
+      </table>
+      <p style="margin-top:6px;">
+        <a href="/discipline/health">Open the health office &rarr;</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">By Student</div>
+    <div class="sis-box-body">
+      <p class="fineprint">
+        Per-student records live on the two student pages below. Use the student id
+        (<code>?student=&lt;id&gt;</code>) from the Student Records module.
+      </p>
+      <ul class="links">
+        <li><a href="/discipline/incidents/student?student=1">/discipline/incidents/student?student=1</a> &mdash; incident history</li>
+        <li><a href="/discipline/health/student?student=1">/discipline/health/student?student=1</a> &mdash; health record</li>
+      </ul>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

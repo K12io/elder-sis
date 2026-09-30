@@ -1,33 +1,107 @@
 <%- include('../partials/header', { pageTitle: 'Reports', activeTab: 'reports' }) %>
 
-<div class="sis-page-title">Reports</div>
+<div class="sis-page-title">Reports &mdash; Standard Reports</div>
 
-<table class="layout">
-<tr>
-<td class="col-left">
+<div class="sis-metabar">
+  <span class="meta-label">Available reports:</span> <span class="meta-strong"><%= reports.length %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Saved:</span> <span class="meta-strong"><%= savedReports.length %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Recent runs shown:</span> <span class="meta-strong"><%= recentRuns.length %></span>
+</div>
 
-  <div class="sis-box">
-    <div class="sis-box-title">Module Contents</div>
-    <div class="sis-box-body">
-      <ul class="links">
-        <li>Parameterized operational reports &mdash; select school, term, and grouping</li>
-        <li>CSV / print output &mdash; export or print any report</li>
-      </ul>
-    </div>
+<% if (savedNotice) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-body"><strong><%= savedNotice %></strong></div>
+</div>
+<% } %>
+
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Standard Reports</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Report</th>
+          <th>Description</th>
+          <th>Parameters</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reports.forEach(function (rep) { %>
+        <tr>
+          <td><a href="<%= rep.path %>"><%= rep.name %></a></td>
+          <td><%= rep.description %></td>
+          <td><a href="<%= rep.path %>">Select parameters&hellip;</a></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
   </div>
+</div>
 
-</td>
-<td class="col-right">
-
-  <div class="sis-box">
-    <div class="sis-box-title">Status</div>
-    <div class="sis-box-body">
-      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
-    </div>
+<div class="sis-box">
+  <div class="sis-box-title">Saved Reports</div>
+  <div class="sis-box-body">
+    <% if (savedReports.length === 0) { %>
+    <p class="fineprint"><em>No saved reports. Run a report and use &ldquo;Save this report&rdquo; to store its parameters.</em></p>
+    <% } else { %>
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Report</th>
+          <th>Saved</th>
+          <th>Saved by</th>
+          <th>Re-run</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% savedReports.forEach(function (s) { %>
+        <tr>
+          <td><%= s.name %></td>
+          <td><%= s.report_name %></td>
+          <td class="num"><%= s.created_on ? String(s.created_on).slice(0, 10) : '' %></td>
+          <td><%= s.created_by || '' %></td>
+          <td><a href="<%= s.href %>">Run</a></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
   </div>
+</div>
 
-</td>
-</tr>
-</table>
+<div class="sis-box">
+  <div class="sis-box-title">Recent Runs (last 15)</div>
+  <div class="sis-box-body">
+    <% if (recentRuns.length === 0) { %>
+    <p class="fineprint"><em>No report runs logged yet.</em></p>
+    <% } else { %>
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Report</th>
+          <th>Rows</th>
+          <th>Parameters</th>
+          <th>Ran</th>
+          <th>Run by</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recentRuns.forEach(function (r) { %>
+        <tr>
+          <td><a href="/reports/<%= r.report_key %>?<%= r.query %>"><%= r.report_name %></a></td>
+          <td class="num"><%= r.row_count %></td>
+          <td><%= r.query %></td>
+          <td class="num"><%= r.ran_on_display %></td>
+          <td><%= r.ran_by || '' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
 
 <%- include('../partials/footer') %>

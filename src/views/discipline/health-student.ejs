@@ -1,0 +1,113 @@
+<%- include('../partials/header', { pageTitle: 'Health Record', activeTab: 'discipline' }) %>
+
+<div class="sis-page-title">
+  Health Record &mdash;
+  <a href="/students/<%= student.id %>"><%= student.last_name %>, <%= student.first_name %></a>
+</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">State ID:</span> <span class="meta-strong"><%= student.state_id %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Grade:</span> <span class="meta-strong"><%= student.grade_level %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">School:</span> <span class="meta-strong"><%= student.school_name || '' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Flags:</span> <span class="meta-strong"><%= flags.length %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Encounters:</span> <span class="meta-strong"><%= encounters.length %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Health Flags</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead><tr><th>Flag</th><th>Note</th><th>Recorded</th></tr></thead>
+      <tbody>
+        <% if (flags.length === 0) { %>
+        <tr><td colspan="3">No health flags on file for this student.</td></tr>
+        <% } %>
+        <% flags.forEach(function (f) { %>
+        <tr>
+          <td><strong><%= f.flag %></strong></td>
+          <td><%= f.note || '' %></td>
+          <td class="num"><%= String(f.recorded_on).slice(0, 10) %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="fineprint">
+      Add or update flags on the <a href="/discipline/health">health office</a> page.
+    </p>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Encounter History</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Type</th><th>Complaint</th><th>Treatment</th>
+          <th>Disposition</th><th>Seen by</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (encounters.length === 0) { %>
+        <tr><td colspan="6">No health encounters on file for this student.</td></tr>
+        <% } %>
+        <% encounters.forEach(function (e) { %>
+        <tr>
+          <td class="num"><%= String(e.encounter_date).slice(0, 10) %></td>
+          <td><%= e.encounter_type %></td>
+          <td><%= e.complaint || '' %></td>
+          <td><%= e.treatment || '' %></td>
+          <td><%= e.disposition || '' %></td>
+          <td><%= e.seen_by || '' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Student Alerts (read-only)</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      These alerts are maintained by the <strong>Student Records</strong> module, not by
+      Discipline &amp; Health. They are shown here read-only for context; edit them on the
+      <a href="/students/<%= student.id %>">Student 360 page</a>.
+    </p>
+    <table class="sis-table">
+      <thead><tr><th>Date</th><th>Type</th><th>Message</th></tr></thead>
+      <tbody>
+        <% if (alerts.length === 0) { %>
+        <tr><td colspan="3">No alerts on file for this student.</td></tr>
+        <% } %>
+        <% alerts.forEach(function (a) { %>
+        <tr>
+          <td class="num"><%= a.alert_date ? String(a.alert_date).slice(0, 10) : '' %></td>
+          <td><%= a.alert_type || '' %></td>
+          <td><%= a.message || '' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Discipline</div>
+  <div class="sis-box-body">
+    <p>
+      <a href="/discipline/incidents/student?student=<%= student.id %>">View this student's incident history &rarr;</a>
+    </p>
+  </div>
+</div>
+
+<p>
+  <a href="/discipline/health">&larr; Back to the health office</a> &nbsp;|&nbsp;
+  <a href="/students/<%= student.id %>">Open Student 360 &rarr;</a>
+</p>
+
+<%- include('../partials/footer') %>

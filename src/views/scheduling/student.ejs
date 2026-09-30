@@ -1,0 +1,85 @@
+<%- include('../partials/header', { pageTitle: 'Student Schedule', activeTab: 'schedule' }) %>
+
+<div class="sis-page-title">Student Schedule &mdash; <%= student.last_name %>, <%= student.first_name %></div>
+
+<% if (msg) { %>
+  <div class="sis-metabar"><span class="meta-label">Status:</span> <span class="meta-strong"><%= msg %></span></div>
+<% } %>
+<% if (err) { %>
+  <div class="sis-metabar" style="background:#fdf0ef; border-color:#c98a85; border:2px solid #a94442;"><span class="meta-label">Conflict:</span> <span class="meta-strong"><%= err %></span></div>
+<% } %>
+
+<div class="sis-metabar" style="margin-bottom: 8px;">
+  <span class="meta-label">Student ID:</span> <span class="meta-strong"><%= student.id %></span>
+  &nbsp; <span class="meta-label">State ID:</span> <span class="meta-strong"><%= student.state_id %></span>
+  &nbsp; <span class="meta-label">Grade:</span> <span class="meta-strong"><%= student.grade_level %></span>
+  &nbsp; <span class="meta-label">School:</span> <span class="meta-strong"><%= student.school_name %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Schedule by Period</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th class="num">Period</th>
+          <th>Course</th>
+          <th>Section Code</th>
+          <th>Teacher</th>
+          <th>Room</th>
+          <th class="num">Assigned On</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!schedule.length) { %>
+        <tr><td colspan="6">No sections assigned yet.</td></tr>
+        <% } %>
+        <% schedule.forEach(function (r) { %>
+        <tr>
+          <td class="num"><%= r.period %></td>
+          <td><a href="/scheduling/section?section=<%= r.section_id %>"><%= r.course_name %></a></td>
+          <td><%= r.section_code %></td>
+          <td><%= r.teacher_name %></td>
+          <td><%= r.room %></td>
+          <td class="num"><%= r.assigned_on %></td>
+        </tr>
+        <% }); %>
+        <tr>
+          <td colspan="5" style="text-align: right; font-weight: bold;">Total Credits</td>
+          <td class="num" style="font-weight: bold;"><%= totalCredits %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<% /* Assign to section: picker grouped by period */ %>
+<div class="sis-box">
+  <div class="sis-box-title">Assign to Section</div>
+  <div class="sis-box-body">
+    <% if (sections.length) { %>
+    <form method="post" action="/scheduling/assign">
+      <input type="hidden" name="student_id" value="<%= student.id %>">
+      <span class="ctx-label">Section:</span>
+      <select name="section_id">
+        <% for (var p of periods) { %>
+        <% var here = sections.filter(function (s) { return (s.period == null ? 0 : s.period) === p; }); %>
+        <% if (here.length) { %>
+        <optgroup label="Period <%= p %><% if (p === 0) { %> (no period)<% } %>">
+          <% here.forEach(function (s) { %>
+          <option value="<%= s.id %>"><%= s.course_name %> &mdash; <%= s.section_code %> &mdash; <%= s.teacher_name %> &mdash; Rm <%= s.room %> (<%= s.enrolled %>/<%= s.capacity %>)</option>
+          <% }); %>
+        </optgroup>
+        <% } %>
+        <% } %>
+      </select>
+      <button type="submit" class="sis-button-go">Assign to Section</button>
+      <span class="fineprint">Refuses if the student already has a section in that period.</span>
+    </form>
+    <% } else { %>
+    <p class="fineprint">No sections available for this student's school.</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

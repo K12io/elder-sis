@@ -1,0 +1,236 @@
+<%- include('../partials/header', { pageTitle: 'Transcript', activeTab: 'transcripts' }) %>
+
+<style>
+  /* Scoped to this view's container; does not touch app.css. */
+  @media print {
+    #topbar, #topbar-context, #tabbar, #footer,
+    .sis-transcript-noprint { display: none !important; }
+    .svc-transcript-sheet { box-shadow: none; border: none; background: #fff; }
+    body { background: #fff; }
+  }
+  .svc-transcript-sheet { background: #fff; padding: 8px 12px; }
+</style>
+
+<div class="sis-page-title"><%= reportCard ? 'Report Card Preview' : 'Transcript of Record' %></div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Notice</div>
+  <div class="sis-box-body"><p><%= error %></p></div>
+</div>
+<% } %>
+
+<div class="sis-box sis-transcript-noprint">
+  <div class="sis-box-title">Select Student</div>
+  <div class="sis-box-body">
+    <form method="get" action="/grades/transcript">
+      <label for="student">Student:</label>
+      <select id="student" name="student">
+        <option value="">-- pick a student --</option>
+        <% studentList.forEach(function (s) { %>
+          <option value="<%= s.id %>"<%= typeof student !== 'undefined' && student && String(student.id) === String(s.id) ? ' selected' : '' %>>
+            [<%= s.id %>] <%= s.last_name %>, <%= s.first_name %> (grade <%= s.grade_level %>)
+          </option>
+        <% }); %>
+      </select>
+      <% if (reportCard) { %>
+        <input type="hidden" name="term" value="<%= reportCardTermId %>">
+        <span class="fineprint">&nbsp;(report card mode &mdash; term <%= reportCardTermId %>)</span>
+      <% } %>
+      <button type="submit" class="sis-button">View</button>
+    </form>
+  </div>
+</div>
+
+<% if (typeof noStudent !== 'undefined' && noStudent) { %>
+  <div class="sis-box"><div class="sis-box-title">Transcript</div>
+  <div class="sis-box-body"><p>Pick a student above.</p></div></div>
+<% } else if (typeof student !== 'undefined' && student) { %>
+
+<div class="sis-service svc-transcript-sheet" id="svc-transcript">
+
+  <div class="sis-metabar">
+    <strong><%= student.last_name %>, <%= student.first_name %> <%= student.middle_name || '' %></strong>
+    &middot; Student ID <%= student.id %> &middot; State ID <%= student.state_id %>
+    &middot; Grade <%= student.grade_level %> &middot; <%= schoolRow ? schoolRow.name : '' %>
+    &middot; DOB <%= student.dob instanceof Date ? student.dob.toISOString().slice(0,10) : student.dob %>
+  </div>
+
+  <% if (typeof correctedFlag !== 'undefined' && correctedFlag) { %>
+  <div class="sis-box">
+    <div class="sis-box-title">Correction Applied</div>
+    <div class="sis-box-body"><p>The grade correction was written to the transcript and logged.</p></div>
+  </div>
+  <% } %>
+
+  <% if (!terms.length) { %>
+    <div class="sis-box"><div class="sis-box-title">Courses</div>
+      <div class="sis-box-body"><p>No final grades of record yet for this student<%= reportCard ? ' in this term' : '' %>.</p></div></div>
+  <% } else { %>
+
+  <div class="sis-box">
+    <div class="sis-box-title"><%= reportCard ? ('Report Card — ' + ((reportCardTerm || {}).term_name || '')) : 'Courses by Term' %></div>
+    <div class="sis-box-body">
+
+      <% terms.forEach(function (t) { %>
+
+        <% var isRC = reportCard; %>
+        <table class="sis-table">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Section</th>
+              <th>Teacher</th>
+              <th class="num">Percent</th>
+              <th>Letter</th>
+              <th class="num">Credits</th>
+              <% if (isRC) { %>
+                <th class="num">Absences</th>
+                <th class="num">Tardies</th>
+              <% } else { %>
+                <th>Term</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% t.courses.forEach(function (r) { %>
+              <tr>
+                <td><%= r.course_name %></td>
+                <td><%= r.section_code %></td>
+                <td><%= r.teacher_name || '' %></td>
+                <td class="num"><strong><%= Number(r.percent).toFixed(1) %></strong></td>
+                <td><strong><%= r.letter %></strong></td>
+                <td class="num"><%= Number(r.credits).toFixed(1) %></td>
+                <% if (isRC) { %>
+                  <td class="num"><%= r.absences %></td>
+                  <td class="num"><%= r.tardies %></td>
+                <% } else { %>
+                  <td><%= t.term_name %></td>
+                <% } %>
+              </tr>
+            <% }); %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="<%= isRC ? 5 : 4 %>"><strong>Term GPA</strong></td>
+              <td class="num" colspan="<%= isRC ? 3 : 2 %>"><strong><%= t.termGpa === null ? '' : Number(t.termGpa).toFixed(2) %></strong></td>
+            </tr>
+          </tfoot>
+        </table>
+        <% if (isRC) { %>
+          <p class="fineprint">
+            Attendance placeholder: absences and tardies are counted per section from the
+            attendance module. Comments: ____________________________
+          </p>
+        <% } else { %>
+          <br>
+        <% } %>
+
+      <% }); %>
+    </div>
+  </div>
+
+  <% if (!reportCard && cumGpa !== null) { %>
+  <div class="sis-box">
+    <div class="sis-box-title">Cumulative Summary</div>
+    <div class="sis-box-body">
+      <table class="sis-table">
+        <thead><tr><th>Metric</th><th class="num">Value</th></tr></thead>
+        <tbody>
+          <tr><td>Grades of record</td><td class="num"><%= terms.reduce(function (a, t) { return a + t.courses.length; }, 0) %></td></tr>
+          <tr><td>Credits attempted<%= creditsEnabled ? '' : ' (equal-weight fallback 1.0 per course)' %></td><td class="num"><%= creditsTotal.toFixed(1) %></td></tr>
+          <tr><td>Cumulative GPA</td><td class="num"><strong><%= Number(cumGpa).toFixed(2) %></strong></td></tr>
+        </tbody>
+      </table>
+      <% if (!creditsEnabled) { %>
+        <p class="fineprint">The course-catalog credits column had no data for this student's courses; GPA and credits use equal weighting.</p>
+      <% } %>
+    </div>
+  </div>
+  <% } %>
+
+  <% } %>
+
+</div>
+
+<% if (!reportCard) { %>
+
+<div class="sis-box sis-transcript-noprint">
+  <div class="sis-box-title">Grade Correction</div>
+  <div class="sis-box-body">
+    <form method="post" action="/grades/correct">
+      <input type="hidden" name="student_id" value="<%= student.id %>">
+      <table class="sis-table">
+        <tbody>
+          <tr>
+            <td><label for="section_id">Course (posted final):</label></td>
+            <td>
+              <select name="section_id" id="section_id">
+                <% terms.forEach(function (t) { t.courses.forEach(function (r) { %>
+                  <option value="<%= r.section_id %>"><%= r.course_name %> (<%= r.section_code %>) &mdash; currently <%= r.letter %></option>
+                <% }); }); %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td><label for="new_letter">New letter:</label></td>
+            <td>
+              <input type="text" name="new_letter" id="new_letter" size="4" maxlength="3" placeholder="B+">
+              <label for="new_percent">New percent (optional):</label>
+              <input type="text" name="new_percent" id="new_percent" size="6" placeholder="88.0">
+            </td>
+          </tr>
+          <tr>
+            <td><label for="reason"><strong>Reason (required):</strong></label></td>
+            <td><input type="text" name="reason" id="reason" size="60" maxlength="240" placeholder="e.g. Transcription error on the posted grade; keywork re-verified 2026-12-01"></td>
+          </tr>
+        </tbody>
+      </table>
+      <button type="submit" class="sis-button-warn">Apply Correction</button>
+    </form>
+    <p class="fineprint">
+      A blank percent uses the floor of the district scale band for the new letter.
+      Every correction is logged to grade_corrections.
+    </p>
+  </div>
+</div>
+
+<div class="sis-box sis-transcript-noprint">
+  <div class="sis-box-title">Correction History</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr><th>Date</th><th>Course</th><th>Old %</th><th>Old</th><th class="arrow">&gt;</th><th>New</th><th>New %</th><th>Reason</th><th>By</th></tr>
+      </thead>
+      <tbody>
+        <% if (!corrections.length) { %><tr><td colspan="9">No corrections on record.</td></tr><% } %>
+        <% corrections.forEach(function (c) { %>
+          <tr>
+            <td><%= c.corrected_on instanceof Date ? c.corrected_on.toISOString().slice(0,10) : c.corrected_on %></td>
+            <td><%= c.course_name %> (<%= c.section_code %>)</td>
+            <td class="num"><%= c.old_percent === null ? '&mdash;' : Number(c.old_percent).toFixed(1) %></td>
+            <td><%= c.old_letter %></td>
+            <td>&gt;</td>
+            <td><strong><%= c.new_letter %></strong></td>
+            <td class="num"><%= c.new_percent === null ? '&mdash;' : Number(c.new_percent).toFixed(1) %></td>
+            <td><%= c.reason %></td>
+            <td><%= c.corrected_by || '' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<% } %>
+
+<p class="sis-transcript-noprint">
+  <% terms.forEach(function (t) { %>
+    <a href="/grades/transcript?student=<%= student.id %>&amp;term=<%= t.term_id %>">Report card: <%= t.term_name %></a> &nbsp;
+  <% }); %>
+  <a href="/grades/transcript?student=<%= student.id %>">Back to full transcript</a>
+</p>
+
+<% } %>
+
+<%- include('../partials/footer') %>

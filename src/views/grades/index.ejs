@@ -2,34 +2,76 @@
 
 <div class="sis-page-title">Grades &amp; Transcripts</div>
 
-<table class="layout">
-<tr>
-<td class="col-left">
+<% var ctName = currentTerm ? String(currentTerm.name || '') : '(no current term)'; %>
 
-  <div class="sis-box">
-    <div class="sis-box-title">Module Contents</div>
-    <div class="sis-box-body">
-      <ul class="links">
-        <li>Final grades &mdash; term and year-end grade posting</li>
-        <li>GPA &mdash; weighted and unweighted calculations</li>
-        <li>Transcripts &mdash; official and unofficial course history</li>
-        <li>Report cards &mdash; printable per-student grade reports</li>
-      </ul>
-    </div>
+<div class="sis-metabar">
+  Posting term: <strong><%= ctName %></strong>
+</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Notice</div>
+  <div class="sis-box-body"><p><%= error %></p></div>
+</div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Sections &mdash; Current Term</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      "Post final grades" computes each student's weighted standing from the Grading
+      module's categories and scores, assigns the district letter from the grade scale,
+      and writes the grades of record. All-in-one-posting: one transaction per section.
+    </p>
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Section</th>
+          <th>Teacher</th>
+          <th>Period</th>
+          <th>Room</th>
+          <th>School</th>
+          <th class="num">Students w/ Scores</th>
+          <th class="num">Posted Finals</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!sections.length) { %>
+          <tr><td colspan="9">No sections in the current term.</td></tr>
+        <% } %>
+        <% sections.forEach(function (s) { %>
+          <tr>
+            <td><%= s.course_name %></td>
+            <td><%= s.section_code %></td>
+            <td><%= s.teacher_name || '' %></td>
+            <td class="num"><%= s.period %></td>
+            <td><%= s.room %></td>
+            <td><%= s.school_name %></td>
+            <td class="num"><%= s.scored_students %></td>
+            <td class="num"><%= s.posted_count %></td>
+            <td>
+              <a href="/grades/post?section=<%= s.id %>">Post final grades</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
   </div>
+</div>
 
-</td>
-<td class="col-right">
-
-  <div class="sis-box">
-    <div class="sis-box-title">Status</div>
-    <div class="sis-box-body">
-      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
-    </div>
+<div class="sis-box">
+  <div class="sis-box-title">Lookups</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><a href="/grades/gpa">GPA Lookup</a></td><td>Per-term and cumulative GPA for one student, weighted by course credits where available.</td></tr>
+        <tr><td><a href="/grades/transcript">Transcript Lookup</a></td><td>Official transcript of record, or a single-term report card preview.</td></tr>
+      </tbody>
+    </table>
   </div>
-
-</td>
-</tr>
-</table>
+</div>
 
 <%- include('../partials/footer') %>

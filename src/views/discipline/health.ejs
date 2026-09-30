@@ -1,0 +1,240 @@
+<%- include('../partials/header', { pageTitle: 'Health Office', activeTab: 'discipline' }) %>
+
+<div class="sis-page-title">Health &mdash; Office</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Encounters shown:</span> <span class="meta-strong"><%= encounters.length %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Encounters matching filters:</span> <span class="meta-strong"><%= encounterTotal %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Flags shown:</span> <span class="meta-strong"><%= flagRows.length %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Limit:</span> 500
+</div>
+
+<% if (saved === 'encounter') { %>
+<div class="sis-box"><div class="sis-box-body"><strong>Encounter saved.</strong></div></div>
+<% } else if (saved === 'flag') { %>
+<div class="sis-box"><div class="sis-box-body"><strong>Health flag saved (added or updated).</strong></div></div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      The date range applies to encounter dates and to flag recorded dates.
+    </p>
+    <form action="/discipline/health" method="get">
+      <table class="kv">
+        <tr>
+          <th>Date from</th>
+          <td><input type="text" name="from" value="<%= filters.from %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>Date to</th>
+          <td><input type="text" name="to" value="<%= filters.to %>" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+          <th>School</th>
+          <td>
+            <select name="school">
+              <option value="">All schools</option>
+              <% schools.forEach(function (sc) { %>
+              <option value="<%= sc.id %>"<% if (filters.school === sc.id) { %> selected<% } %>><%= sc.name %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Grade</th>
+          <td>
+            <select name="grade">
+              <option value="">All grades</option>
+              <% ['K','1','2','3','4','5','6','7','8','9','10','11','12'].forEach(function (g) { %>
+              <option value="<%= g %>"<% if (filters.grade === g) { %> selected<% } %>>Grade <%= g %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Encounter type</th>
+          <td>
+            <select name="type">
+              <option value="">Any type</option>
+              <% encounterTypes.forEach(function (t) { %>
+              <option value="<%= t %>"<% if (filters.type === t) { %> selected<% } %>><%= t %></option>
+              <% }); %>
+            </select>
+          </td>
+          <th>Flag</th>
+          <td>
+            <select name="flag">
+              <option value="">Any flag</option>
+              <% flagChoices.forEach(function (f) { %>
+              <option value="<%= f %>"<% if (filters.flag === f) { %> selected<% } %>><%= f %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <p>
+        <button type="submit" class="sis-button-go">Apply Filters</button>
+        <a href="/discipline/health">Clear</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Recent Health Encounters</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Student</th><th>Grade</th><th>School</th>
+          <th>Type</th><th>Complaint</th><th>Treatment</th>
+          <th>Disposition</th><th>Seen by</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (encounters.length === 0) { %>
+        <tr><td colspan="9">No health encounters match these filters.</td></tr>
+        <% } %>
+        <% encounters.forEach(function (r) { %>
+        <tr>
+          <td class="num"><%= String(r.encounter_date).slice(0, 10) %></td>
+          <td><a href="/students/<%= r.student_id %>"><%= r.last_name %>, <%= r.first_name %></a></td>
+          <td class="num"><%= r.grade_level %></td>
+          <td><%= r.school_code %></td>
+          <td><%= r.encounter_type %></td>
+          <td><%= snippet(r.complaint, 50) %></td>
+          <td><%= snippet(r.treatment, 40) %></td>
+          <td><%= snippet(r.disposition, 30) %></td>
+          <td><%= r.seen_by || '' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Students with Health Flags</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      One row per flag. A student may appear several times (one row per flag).
+    </p>
+    <table class="sis-table">
+      <thead>
+        <tr><th>Student</th><th>Grade</th><th>School</th><th>Flag</th><th>Note</th><th>Recorded</th></tr>
+      </thead>
+      <tbody>
+        <% if (flagRows.length === 0) { %>
+        <tr><td colspan="6">No health flags match these filters.</td></tr>
+        <% } %>
+        <% flagRows.forEach(function (f) { %>
+        <tr>
+          <td><a href="/discipline/health/student?student=<%= f.student_id %>"><%= f.last_name %>, <%= f.first_name %></a></td>
+          <td class="num"><%= f.grade_level %></td>
+          <td><%= f.school_code %></td>
+          <td><strong><%= f.flag %></strong></td>
+          <td><%= snippet(f.note, 70) %></td>
+          <td class="num"><%= String(f.recorded_on).slice(0, 10) %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Add Encounter</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      Role-scoped writing is not modelled in this demo: any visitor can record an encounter.
+    </p>
+    <form action="/discipline/health/encounters" method="post">
+      <table class="kv">
+        <tr>
+          <th>Student</th>
+          <td>
+            <select name="student_id">
+              <option value="">-- select a student --</option>
+              <% students.forEach(function (s) { %>
+              <option value="<%= s.id %>"><%= s.last_name %>, <%= s.first_name %> [<%= s.state_id %>] &middot; Gr <%= s.grade_level %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Encounter date</th>
+          <td><input type="text" name="encounter_date" size="12" maxlength="10" placeholder="YYYY-MM-DD"></td>
+        </tr>
+        <tr>
+          <th>Type</th>
+          <td>
+            <select name="encounter_type">
+              <% encounterTypes.forEach(function (t) { %>
+              <option value="<%= t %>"><%= t %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Complaint</th>
+          <td><textarea name="complaint" rows="2" cols="60"></textarea></td>
+        </tr>
+        <tr>
+          <th>Treatment</th>
+          <td><input type="text" name="treatment" size="60"></td>
+        </tr>
+        <tr>
+          <th>Disposition</th>
+          <td><input type="text" name="disposition" size="40" placeholder="returned to class / sent home / ..."></td>
+        </tr>
+        <tr>
+          <th>Seen by</th>
+          <td><input type="text" name="seen_by" size="30" placeholder="health office staff"></td>
+        </tr>
+      </table>
+      <p><button type="submit" class="sis-button-go">Save Encounter</button></p>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Add / Update Health Flag</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      Saving an existing student + flag pair updates that flag's note (upsert on the unique pair).
+    </p>
+    <form action="/discipline/health/flags" method="post">
+      <table class="kv">
+        <tr>
+          <th>Student</th>
+          <td>
+            <select name="student_id">
+              <option value="">-- select a student --</option>
+              <% students.forEach(function (s) { %>
+              <option value="<%= s.id %>"><%= s.last_name %>, <%= s.first_name %> [<%= s.state_id %>] &middot; Gr <%= s.grade_level %></option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Flag</th>
+          <td>
+            <select name="flag">
+              <% flagChoices.forEach(function (f) { %>
+              <option value="<%= f %>"><%= f %></option>
+              <% }); %>
+            </select>
+            <span class="fineprint">or name an "Other" flag:</span>
+            <input type="text" name="flag_other" size="24" placeholder="custom flag name">
+          </td>
+        </tr>
+        <tr>
+          <th>Note</th>
+          <td><textarea name="note" rows="2" cols="60"></textarea></td>
+        </tr>
+      </table>
+      <p><button type="submit" class="sis-button-warn">Save Health Flag</button></p>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

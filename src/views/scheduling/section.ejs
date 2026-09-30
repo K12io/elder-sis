@@ -1,0 +1,77 @@
+<%- include('../partials/header', { pageTitle: 'Section Roster', activeTab: 'schedule' }) %>
+
+<div class="sis-page-title">Section &mdash; <%= section.course_name %> (<%= section.section_code %>)</div>
+
+<% if (msg) { %>
+  <div class="sis-metabar"><span class="meta-label">Status:</span> <span class="meta-strong"><%= msg %></span></div>
+<% } %>
+<% if (err) { %>
+  <div class="sis-metabar" style="background:#fdf0ef; border-color:#c98a85;"><span class="meta-label">Error:</span> <span class="meta-strong"><%= err %></span></div>
+<% } %>
+
+<div class="sis-metabar" style="margin-bottom: 8px;">
+  <span class="meta-label">School:</span> <span class="meta-strong"><%= section.school_name %></span>
+  &nbsp; <span class="meta-label">Teacher:</span> <span class="meta-strong"><%= section.teacher_name %></span>
+  &nbsp; <span class="meta-label">Period:</span> <span class="meta-strong"><%= section.period %></span>
+  &nbsp; <span class="meta-label">Room:</span> <span class="meta-strong"><%= section.room %></span>
+  &nbsp; <span class="meta-label">Term:</span> <span class="meta-strong"><%= section.term_name %></span>
+  &nbsp; <span class="meta-label">Capacity:</span> <span class="meta-strong"><%= roster.length %><%= section.capacity != null ? ' / ' + section.capacity : '' %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Roster</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th class="num">Grade</th>
+          <th>State ID</th>
+          <th class="num">Assigned On</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!roster.length) { %>
+        <tr><td colspan="5">No students on this roster yet.</td></tr>
+        <% } %>
+        <% roster.forEach(function (r) { %>
+        <tr>
+          <td><a href="/scheduling/student?student=<%= r.student_id %>"><%= r.last_name %>, <%= r.first_name %></a></td>
+          <td class="num"><%= r.grade_level %></td>
+          <td><%= r.state_id %></td>
+          <td class="num"><%= r.assigned_on %></td>
+          <td>
+            <form method="post" action="/scheduling/unassign" style="margin:0;">
+              <input type="hidden" name="roster_id" value="<%= r.id %>">
+              <input type="hidden" name="section_id" value="<%= section.id %>">
+              <button type="submit" class="sis-button-warn">Remove</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Bulk Assign Grade Level</div>
+  <div class="sis-box-body">
+    <p class="fineprint">Adds all active students of this section's school at the chosen grade level who currently have no other section in period <%= section.period %>. Students who conflict, or who would overflow capacity, are skipped.</p>
+    <form method="post" action="/scheduling/bulk">
+      <input type="hidden" name="section_id" value="<%= section.id %>">
+      <span class="ctx-label">Grade Level:</span>
+      <select name="grade_level">
+        <% [0,1,2,3,4,5,6,7,8,9,10,11,12].forEach(function (g) { %>
+        <option value="<%= g %>"><% if (g === 0) { %>K<% } else { %><%= g %><% } %></option>
+        <% }); %>
+      </select>
+      <button type="submit" class="sis-button-go">Assign Grade Level</button>
+    </form>
+  </div>
+</div>
+
+<p><a href="/scheduling">&laquo; Back to Scheduling</a></p>
+
+<%- include('../partials/footer') %>

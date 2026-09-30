@@ -1,0 +1,277 @@
+<%- include('../partials/header', { pageTitle: pageTitle, activeTab: 'reports' }) %>
+
+<%
+  // Local view helpers (no client JS, no other file edits).
+  function g(v) { return v === 0 ? 'K' : String(v); }
+  function selected(a, b) { return String(a) === String(b) ? ' selected' : ''; }
+  function checked(flag) { return flag ? ' checked' : ''; }
+  var cols = String(params.cols || '').split(',').filter(Boolean);
+%>
+
+<style>
+  /* Scoped print block for the reports module (app.css is not ours to edit). */
+  @media print {
+    #topbar, #topbar-context, #tabbar, #footer { display: none !important; }
+    #content { padding: 0 !important; }
+    body { background: #fff !important; }
+    .report-no-print { display: none !important; }
+    .report-print-only { display: block !important; }
+    .sis-metabar { border: none !important; }
+  }
+  .report-print-only { display: none; }
+  .report-actions { margin: 6px 0; }
+  .report-actions .sis-button-go { text-decoration: none; display: inline-block; }
+  .report-cols td { padding: 1px 10px 1px 2px; }
+  <% if (printMode) { %>
+  /* print=1 preview: hide chrome on screen too, so the page is print-ready. */
+  #topbar, #topbar-context, #tabbar, #footer, .report-no-print { display: none !important; }
+  #content { padding: 0 !important; }
+  .report-print-only { display: block !important; }
+  <% } %>
+</style>
+
+<div class="sis-page-title"><%= report.name %></div>
+
+<div class="sis-metabar">
+  <span class="meta-label">Filters:</span>
+  <span class="meta-strong"><%= filtersSummary.join(' &middot; ') %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Generated:</span> <span class="meta-strong"><%= new Date().toISOString().replace('T',' ').slice(0,16) %></span>
+</div>
+
+<% if (invalidMessage) { %>
+<div class="sis-box" style="margin-top:8px;">
+  <div class="sis-box-title">Error</div>
+  <div class="sis-box-body">
+    <p><strong><%= invalidMessage %></strong> &mdash; check the selections and run the report again.</p>
+    <% if (typeof invalidDetails !== 'undefined' && invalidDetails && invalidDetails.length) { %>
+    <ul class="links">
+      <% invalidDetails.forEach(function (msg) { %>
+      <li><%= msg %></li>
+      <% }); %>
+    </ul>
+    <% } %>
+  </div>
+</div>
+<% } %>
+
+<div class="sis-box report-no-print" style="margin-top:8px;">
+  <div class="sis-box-title">Report parameters</div>
+  <div class="sis-box-body">
+    <form action="<%= report.path %>" method="get">
+      <table class="sis-table kv">
+        <tbody>
+          <% if (report.key === 'roster') { %>
+          <tr>
+            <th>School</th>
+            <td>
+              <select name="school">
+                <option value="">All schools</option>
+                <% schools.forEach(function (sc) { %>
+                <option value="<%= sc.id %>"<%= selected(params.school, sc.id) %>><%= sc.name %></option>
+                <% }); %>
+              </select>
+            </td>
+            <th>Grade level</th>
+            <td>
+              <select name="grade">
+                <option value="">All grades</option>
+                <% grades.forEach(function (gr) { %>
+                <option value="<%= gr %>"<%= selected(params.grade, gr) %>><%= g(gr) %></option>
+                <% }); %>
+              </select>
+            </td>
+            <th>Status</th>
+            <td>
+              <select name="status">
+                <option value="">All statuses</option>
+                <% statuses.forEach(function (st) { %>
+                <option value="<%= st %>"<%= selected(params.status, st) %>><%= st %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <% } else if (report.key === 'attendance') { %>
+          <tr>
+            <th>From</th>
+            <td><input type="date" name="from" value="<%= params.from %>"></td>
+            <th>To</th>
+            <td><input type="date" name="to" value="<%= params.to %>"></td>
+            <th>School</th>
+            <td>
+              <select name="school">
+                <option value="">All schools</option>
+                <% schools.forEach(function (sc) { %>
+                <option value="<%= sc.id %>"<%= selected(params.school, sc.id) %>><%= sc.name %></option>
+                <% }); %>
+              </select>
+            </td>
+            <th>Grade level</th>
+            <td>
+              <select name="grade">
+                <option value="">All grades</option>
+                <% grades.forEach(function (gr) { %>
+                <option value="<%= gr %>"<%= selected(params.grade, gr) %>><%= g(gr) %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <% } else if (report.key === 'transcript') { %>
+          <tr>
+            <th>Grade level</th>
+            <td>
+              <select name="grade">
+                <option value="">All grades</option>
+                <% grades.forEach(function (gr) { %>
+                <option value="<%= gr %>"<%= selected(params.grade, gr) %>><%= g(gr) %></option>
+                <% }); %>
+              </select>
+            </td>
+            <th>Term</th>
+            <td>
+              <select name="term">
+                <option value="">All terms</option>
+                <% terms.forEach(function (tm) { %>
+                <option value="<%= tm.id %>"<%= selected(params.term, tm.id) %>><%= tm.name %><%= tm.is_current ? ' (current)' : '' %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <% } else if (report.key === 'contacts') { %>
+          <tr>
+            <th>School</th>
+            <td>
+              <select name="school">
+                <option value="">All schools</option>
+                <% schools.forEach(function (sc) { %>
+                <option value="<%= sc.id %>"<%= selected(params.school, sc.id) %>><%= sc.name %></option>
+                <% }); %>
+              </select>
+            </td>
+            <th>Grade level</th>
+            <td>
+              <select name="grade">
+                <option value="">All grades</option>
+                <% grades.forEach(function (gr) { %>
+                <option value="<%= gr %>"<%= selected(params.grade, gr) %>><%= g(gr) %></option>
+                <% }); %>
+              </select>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+      <button type="submit" class="sis-button-go">Run report</button>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box report-no-print">
+  <div class="sis-box-title">Optional columns</div>
+  <div class="sis-box-body">
+    <form action="<%= report.path %>" method="get">
+      <!-- Re-submit current non-column params so the toggle is non-destructive. -->
+      <% if (report.key === 'roster') { %>
+        <input type="hidden" name="school" value="<%= params.school %>">
+        <input type="hidden" name="grade" value="<%= params.grade %>">
+        <input type="hidden" name="status" value="<%= params.status %>">
+      <% } else if (report.key === 'attendance') { %>
+        <input type="hidden" name="from" value="<%= params.from %>">
+        <input type="hidden" name="to" value="<%= params.to %>">
+        <input type="hidden" name="school" value="<%= params.school %>">
+        <input type="hidden" name="grade" value="<%= params.grade %>">
+      <% } else if (report.key === 'transcript') { %>
+        <input type="hidden" name="grade" value="<%= params.grade %>">
+        <input type="hidden" name="term" value="<%= params.term %>">
+      <% } else if (report.key === 'contacts') { %>
+        <input type="hidden" name="school" value="<%= params.school %>">
+        <input type="hidden" name="grade" value="<%= params.grade %>">
+      <% } %>
+      <table class="report-cols">
+        <tbody>
+          <tr>
+            <% if (report.key === 'roster') { %>
+            <td><label><input type="checkbox" name="cols" value="phone"<%= checked(cols.indexOf('phone') >= 0) %>> Primary contact phone</label></td>
+            <td><label><input type="checkbox" name="cols" value="dob"<%= checked(cols.indexOf('dob') >= 0) %>> Birth date</label></td>
+            <td><label><input type="checkbox" name="cols" value="gender"<%= checked(cols.indexOf('gender') >= 0) %>> Gender</label></td>
+            <% } else if (report.key === 'attendance') { %>
+            <td><label><input type="checkbox" name="cols" value="breakdown"<%= checked(cols.indexOf('breakdown') >= 0) %>> Code breakdown</label></td>
+            <% } else if (report.key === 'transcript') { %>
+            <td><label><input type="checkbox" name="cols" value="percent"<%= checked(cols.indexOf('percent') >= 0) %>> Percent</label></td>
+            <td><label><input type="checkbox" name="cols" value="points"<%= checked(cols.indexOf('points') >= 0) %>> Points</label></td>
+            <% } else if (report.key === 'contacts') { %>
+            <td><label><input type="checkbox" name="cols" value="email"<%= checked(cols.indexOf('email') >= 0) %>> Email</label></td>
+            <td><label><input type="checkbox" name="cols" value="primary"<%= checked(cols.indexOf('primary') >= 0) %>> Primary flag</label></td>
+            <% } %>
+          </tr>
+        </tbody>
+      </table>
+      <button type="submit" class="sis-button-go">Apply columns</button>
+    </form>
+  </div>
+</div>
+
+<% if (note) { %>
+<div class="sis-box">
+  <div class="sis-box-body"><em><%= note %></em></div>
+</div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title"><%= report.name %> &mdash; Results</div>
+  <div class="sis-box-body">
+    <div class="report-actions report-no-print">
+      <a class="sis-button-go" href="<%= report.path %>?<%= queryString %>&format=csv">Export CSV</a>
+      &nbsp;
+      <a class="sis-button-go" href="<%= report.path %>?<%= queryString %>&print=1" target="_blank">Print view</a>
+    </div>
+
+    <% if (printMode) { %>
+    <p class="report-print-only"><strong><%= report.name %></strong> &mdash; generated from Valley View SIS. Use your browser's Print command to print this view.</p>
+    <% } %>
+
+    <p class="fineprint">
+      <strong><%= rowCount %></strong> row<%= rowCount === 1 ? '' : 's' %> returned.
+    </p>
+
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <% columns.forEach(function (c) { %>
+          <th<%= c.num ? ' class="num"' : '' %>><%= c.label %></th>
+          <% }); %>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (rows.length === 0) { %>
+        <tr>
+          <td colspan="<%= Math.max(1, columns.length) %>"><em>No records to display</em></td>
+        </tr>
+        <% } else { %>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <% columns.forEach(function (c) { %>
+            <td<%= c.num ? ' class="num"' : '' %>><%= c.get(r) %></td>
+          <% }); %>
+        </tr>
+        <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box report-no-print">
+  <div class="sis-box-title">Save this report</div>
+  <div class="sis-box-body">
+    <form action="/reports/save" method="post">
+      <input type="hidden" name="report_path" value="<%= report.path %>">
+      <input type="hidden" name="query" value="<%= queryString %>">
+      <label>Name: <input type="text" name="name" size="30" maxlength="80" placeholder="e.g. Grade 9 Active Roster"></label>
+      <button type="submit" class="sis-button-go">Save</button>
+    </form>
+    <p class="fineprint">Saving stores the current query string so the report can be re-run exactly from the Reports index.</p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

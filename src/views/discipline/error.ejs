@@ -1,0 +1,15 @@
+<%- include('../partials/header', { pageTitle: 'Discipline & Health', activeTab: 'discipline' }) %>
+
+<div class="sis-page-title">Discipline &amp; Health &mdash; Notice</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Request could not be completed</div>
+  <div class="sis-box-body">
+    <p><strong><%= status %></strong> &mdash; <%= message %></p>
+    <p class="fineprint">
+      Return to the <a href="/discipline">Discipline &amp; Health start page</a>.
+    </p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

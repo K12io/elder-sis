@@ -1,0 +1,113 @@
+<%- include('../partials/header', { pageTitle: 'GPA Lookup', activeTab: 'transcripts' }) %>
+
+<div class="sis-page-title">GPA Lookup</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="sis-box">
+  <div class="sis-box-title">Notice</div>
+  <div class="sis-box-body"><p><%= error %></p></div>
+</div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Select Student</div>
+  <div class="sis-box-body">
+    <form method="get" action="/grades/gpa">
+      <label for="student">Student:</label>
+      <select id="student" name="student">
+        <option value="">-- pick a student --</option>
+        <% studentList.forEach(function (s) { %>
+          <option value="<%= s.id %>"<%= typeof student !== 'undefined' && student && String(student.id) === String(s.id) ? ' selected' : '' %>>
+            [<%= s.id %>] <%= s.last_name %>, <%= s.first_name %> (grade <%= s.grade_level %>)
+          </option>
+        <% }); %>
+      </select>
+      <button type="submit" class="sis-button">Compute GPA</button>
+    </form>
+  </div>
+</div>
+
+<% if (typeof noStudent !== 'undefined' && noStudent) { %>
+  <div class="sis-box"><div class="sis-box-title">GPA</div><div class="sis-box-body"><p>Pick a student above.</p></div></div>
+<% } else if (typeof student !== 'undefined' && student) { %>
+
+<div class="sis-metabar">
+  Student: <strong><%= student.last_name %>, <%= student.first_name %> <%= student.middle_name || '' %></strong>
+  &middot; Grade <%= student.grade_level %> &middot; id <%= student.id %>
+  <% if (creditsEnabled) { %>
+    &middot; GPA weighted by course credits from the course catalog
+  <% } else { %>
+    &middot; credits column not available for these courses: <strong>equal weighting applied (all courses count as 1.0 credit)</strong>
+  <% } %>
+</div>
+
+<% if (!perTerm.length) { %>
+<div class="sis-box"><div class="sis-box-title">GPA</div>
+  <div class="sis-box-body"><p>No final grades of record yet for this student.</p></div></div>
+<% } else { %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Per-Term GPA</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th class="num">Percent</th>
+          <th>Letter</th>
+          <th class="num">GPA Points</th>
+          <th class="num">Credits</th>
+          <th>Term</th>
+          <th class="num">Term GPA</th>
+          <th class="num">Cumulative GPA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% perTerm.forEach(function (t) { %>
+          <% t.courses.forEach(function (r, i) { %>
+            <tr>
+              <td><%= r.courseName || r.course_name || '' %></td>
+              <td class="num"><%= Number(r.percent).toFixed(1) %></td>
+              <td><strong><%= r.letter %></strong></td>
+              <td class="num"><%= Number(r.gpa_points).toFixed(2) %></td>
+              <td class="num"><%= Number(r.credits).toFixed(1) %></td>
+              <% if (i === 0) { %>
+                <td rowspan="<%= t.courses.length %>"><%= t.term_name %></td>
+                <td class="num" rowspan="<%= t.courses.length %>"><strong><%= t.termGpa.toFixed(2) %></strong></td>
+                <td class="num" rowspan="<%= t.courses.length %>"><%= cumGpa.toFixed(2) %></td>
+              <% } %>
+            </tr>
+          <% }); %>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="fineprint">
+      Formula: GPA = &Sigma;(gpa_points(letter) &times; credits(course)) / &Sigma;(credits), rounded to two decimals.
+      Cumulative spans every posted term for this student.
+    </p>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Summary</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead><tr><th>Metric</th><th class="num">Value</th></tr></thead>
+      <tbody>
+        <% perTerm.forEach(function (t) { %>
+          <tr><td>Term GPA &mdash; <%= t.term_name %></td><td class="num"><strong><%= t.termGpa.toFixed(2) %></strong></td></tr>
+        <% }); %>
+        <tr><td>Cumulative GPA (all terms)</td><td class="num"><strong><%= cumGpa.toFixed(2) %></strong></td></tr>
+      </tbody>
+    </table>
+    <p class="fineprint">
+      GPA snapshot saved for each term on this computation
+      (<% snapshots.forEach(function (sn, i) { %><% if (i) { %>, <% } %>term <%= sn.term_id %> on <%= new Date(sn.computed_on).toISOString().slice(0, 10) %><% }); %>).
+    </p>
+  </div>
+</div>
+
+<% } %>
+<% } %>
+
+<%- include('../partials/footer') %>

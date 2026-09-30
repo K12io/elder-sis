@@ -1,0 +1,101 @@
+<%- include('../partials/header', { pageTitle: 'Discipline History', activeTab: 'discipline' }) %>
+
+<div class="sis-page-title">
+  Discipline History &mdash;
+  <a href="/students/<%= student.id %>"><%= student.last_name %>, <%= student.first_name %></a>
+</div>
+
+<div class="sis-metabar">
+  <span class="meta-label">State ID:</span> <span class="meta-strong"><%= student.state_id %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Grade:</span> <span class="meta-strong"><%= student.grade_level %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">School:</span> <span class="meta-strong"><%= student.school_name || '' %></span>
+  &nbsp;|&nbsp;
+  <span class="meta-label">Incidents:</span> <span class="meta-strong"><%= incidents.length %></span>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Count by Reason Code</div>
+  <div class="sis-box-body">
+    <% if (byCode.length === 0) { %>
+    <p class="fineprint">No incidents recorded for this student.</p>
+    <% } else { %>
+    <table class="sis-table">
+      <thead><tr><th>Code</th><th>Label</th><th>Incidents</th></tr></thead>
+      <tbody>
+        <% byCode.forEach(function (c) { %>
+        <tr>
+          <td><strong><%= c.code %></strong></td>
+          <td><%= c.label %></td>
+          <td class="num"><%= c.n %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Incident History</div>
+  <div class="sis-box-body">
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Code</th><th>Description</th><th>Action taken</th>
+          <th>Reported by</th><th>Parent notified</th><th>Follow-up</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (incidents.length === 0) { %>
+        <tr><td colspan="7">No incidents on file for this student.</td></tr>
+        <% } %>
+        <% incidents.forEach(function (r) { %>
+        <tr>
+          <td class="num"><%= String(r.incident_date).slice(0, 10) %></td>
+          <td><strong><%= r.code %></strong> <span class="fineprint"><%= r.code_label %></span></td>
+          <td><%= snippet(r.description, 70) %></td>
+          <td><%= snippet(r.action_taken, 50) %></td>
+          <td><%= r.reported_by || '' %></td>
+          <td class="num"><%= r.parent_notified ? 'Yes' : 'No' %></td>
+          <td class="num"><%= r.follow_up_date ? String(r.follow_up_date).slice(0, 10) : '' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Health Flags (read-only here)</div>
+  <div class="sis-box-body">
+    <p class="fineprint">
+      Maintained by the health office on the
+      <a href="/discipline/health/student?student=<%= student.id %>">student health record</a>.
+      Shown here for context only.
+    </p>
+    <table class="sis-table">
+      <thead><tr><th>Flag</th><th>Note</th><th>Recorded</th></tr></thead>
+      <tbody>
+        <% if (flags.length === 0) { %>
+        <tr><td colspan="3">No health flags on file.</td></tr>
+        <% } %>
+        <% flags.forEach(function (f) { %>
+        <tr>
+          <td><strong><%= f.flag %></strong></td>
+          <td><%= f.note || '' %></td>
+          <td class="num"><%= String(f.recorded_on).slice(0, 10) %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p>
+  <a href="/discipline/incidents">&larr; Back to the incident register</a> &nbsp;|&nbsp;
+  <a href="/students/<%= student.id %>">Open Student 360 &rarr;</a>
+</p>
+
+<%- include('../partials/footer') %>

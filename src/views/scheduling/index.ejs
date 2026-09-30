@@ -2,29 +2,98 @@
 
 <div class="sis-page-title">Scheduling</div>
 
+<% if (typeof msg !== 'undefined' && msg) { %>
+  <div class="sis-metabar"><span class="meta-label">Status:</span> <span class="meta-strong"><%= msg %></span></div>
+<% } %>
+
 <table class="layout">
 <tr>
-<td class="col-left">
+<td class="col-left" style="width: 74%; vertical-align: top;">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Sections</div>
+    <div class="sis-box-body">
+
+      <form method="get" action="/scheduling" style="margin-bottom: 6px;">
+        <span class="ctx-label">School:</span>
+        <select name="school">
+          <option value="">All Schools</option>
+          <% schools.forEach(function (s) { %>
+          <option value="<%= s.id %>"<% if (schoolId === s.id) { %> selected<% } %>><%= s.name %></option>
+          <% }); %>
+        </select>
+        &nbsp;
+        <span class="ctx-label">Period:</span>
+        <select name="period">
+          <option value="">All</option>
+          <% periods.forEach(function (p) { %>
+          <option value="<%= p %>"<% if (period === p) { %> selected<% } %>><%= p %></option>
+          <% }); %>
+        </select>
+        <button type="submit" class="btn">Apply Filter</button>
+        <a href="/scheduling">Reset</a>
+      </form>
+
+      <table class="sis-table">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Section Code</th>
+            <th>Teacher</th>
+            <th class="num">Period</th>
+            <th>Room</th>
+            <th>School</th>
+            <th class="num">Enrolled</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!sections.length) { %>
+          <tr><td colspan="7">No sections match the current filter.</td></tr>
+          <% } %>
+          <% sections.forEach(function (s) { %>
+          <tr>
+            <td><a href="/scheduling/section?section=<%= s.id %>"><%= s.course_name %></a></td>
+            <td><%= s.section_code %></td>
+            <td><%= s.teacher_name %></td>
+            <td class="num"><%= s.period %></td>
+            <td><%= s.room %></td>
+            <td><%= s.school_name %></td>
+            <td class="num"><%= s.enrolled %><%= s.capacity != null ? ' / ' + s.capacity : '' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+</td>
+<td class="col-right" style="vertical-align: top;">
 
   <div class="sis-box">
     <div class="sis-box-title">Module Contents</div>
     <div class="sis-box-body">
       <ul class="links">
-        <li>Course catalog &mdash; courses, credit, prerequisites</li>
-        <li>Sections &mdash; periods, rooms, teachers, capacity</li>
-        <li>Student schedules &mdash; per-student course requests and placements</li>
-        <li>Conflict display &mdash; double-booked students and sections</li>
+        <li><a href="/scheduling/catalog">Course catalog</a> &mdash; courses, credit, departments</li>
+        <li><a href="/scheduling/master">Master schedule</a> &mdash; periods &times; teachers grid</li>
+        <li><a href="/scheduling/student?student=1">Student schedule</a> &mdash; by period</li>
       </ul>
     </div>
   </div>
 
-</td>
-<td class="col-right">
-
   <div class="sis-box">
-    <div class="sis-box-title">Status</div>
+    <div class="sis-box-title">Auto-Assign</div>
     <div class="sis-box-body">
-      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
+      <p class="fineprint">Fill section rosters for a school + term. One section per period; period conflicts and full sections are skipped.</p>
+      <form method="post" action="/scheduling/auto">
+        <span class="ctx-label">School:</span>
+        <select name="school_id">
+          <% schools.forEach(function (s) { %>
+          <option value="<%= s.id %>"<% if (schoolId === s.id) { %> selected<% } %>><%= s.name %></option>
+          <% }); %>
+        </select>
+        <button type="submit" class="sis-button-go">Run Auto-Assign</button>
+      </form>
     </div>
   </div>
 

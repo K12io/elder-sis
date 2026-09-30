@@ -1,0 +1,102 @@
+<%- include('../partials/header', { pageTitle: 'Master Schedule', activeTab: 'schedule' }) %>
+
+<div class="sis-page-title">Master Schedule</div>
+
+<% if (typeof err !== 'undefined' && err) { %>
+  <div class="sis-metabar" style="background:#fdf0ef; border-color:#c98a85;"><span class="meta-label">Error:</span> <span class="meta-strong"><%= err %></span></div>
+<% } %>
+
+<div class="sis-box">
+  <div class="sis-box-title">Filters</div>
+  <div class="sis-box-body">
+    <form method="get" action="/scheduling/master">
+      <span class="ctx-label">School:</span>
+      <select name="school">
+        <% schools.forEach(function (s) { %>
+        <option value="<%= s.id %>"<% if (s.id === schoolId) { %> selected<% } %>><%= s.name %></option>
+        <% }); %>
+      </select>
+      <button type="submit" class="btn">Show Grid</button>
+    </form>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Master Grid &mdash; Periods 1&ndash;7 by Teacher</div>
+  <div class="sis-box-body">
+
+    <% var clashKeys = []; for (var p of periods) for (var t of teachers) if (teacherClash.has(p + ':' + t.id)) clashKeys.push(p + ':' + t.id); %>
+
+    <% if (clashKeys.length) { %>
+    <div class="sis-metabar" style="background:#fdf0ef; border-color:#c98a85; margin-bottom:6px;">
+      <span class="meta-strong"><%= clashKeys.length %></span> teacher double-booking(s) highlighted in red below.
+    </div>
+    <% } %>
+
+    <table class="sis-table">
+      <thead>
+        <tr>
+          <th>Period</th>
+          <% teachers.forEach(function (t) { %>
+          <th><%= t.name %></th>
+          <% }); %>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var p of periods) { %>
+        <tr>
+          <td class="num"><%= p %></td>
+          <% teachers.forEach(function (t) { %>
+          <% var isClash = teacherClash.has(p + ':' + t.id); %>
+          <td<% if (isClash) { %> style="background:#f8d7d5; border:2px solid #a94442;"<% } %>>
+            <% var here = sections.filter(function (s) { return s.teacher_id === t.id && s.period === p; }); %>
+            <% here.forEach(function (s) { %>
+              <div<% if (isClash) { %> class="sis-metabar" style="background:#fff3c4;"<% } %>>
+                <a href="/scheduling/section?section=<%= s.id %>"><%= s.course_name %></a>
+                &middot; <%= s.room %> &middot; <%= s.section_code %>
+              </div>
+            <% }); %>
+          </td>
+          <% }); %>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <% if (!teachers.length) { %>
+    <p class="fineprint">No teachers are assigned to this school.</p>
+    <% } %>
+  </div>
+</div>
+
+<div class="sis-box">
+  <div class="sis-box-title">Room Clashes</div>
+  <div class="sis-box-body">
+    <% var roomKeys = []; for (var p of periods) sections.forEach(function (s) { if (s.room && roomClash.has(p + ':' + s.room)) roomKeys.push({ period: p, room: s.room, section: s }); }); %>
+    <% if (roomKeys.length) { %>
+    <table class="sis-table">
+      <thead><tr><th class="num">Period</th><th>Room</th><th>Sections booked</th></tr></thead>
+      <tbody>
+        <% var seen = {}; %>
+        <% roomKeys.forEach(function (k) { %>
+        <% var key = k.period + '|' + k.room; if (seen[key]) return; seen[key] = true; %>
+        <tr>
+          <td class="num"><%= k.period %></td>
+          <td><%= k.room %></td>
+          <td>
+            <% sections.filter(function (s) { return s.period === k.period && s.room === k.room; }).forEach(function (s, i) { %>
+            <% if (i > 0) { %>, <% } %>
+            <a href="/scheduling/section?section=<%= s.id %>"><%= s.course_name %></a>
+            <% }); %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <p class="fineprint">No room double-bookings at this school.</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
