@@ -1,0 +1,34 @@
+<%- include('../partials/header', { pageTitle: 'Student Records', activeTab: 'students' }) %>
+
+<div class="sis-page-title">Student Records</div>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Module Contents</div>
+    <div class="sis-box-body">
+      <ul class="links">
+        <li>Search roster &mdash; find students by name, ID, grade level, or status</li>
+        <li>Student 360 &mdash; demographics, contacts, enrollment history, alerts</li>
+      </ul>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Status</div>
+    <div class="sis-box-body">
+      <p><strong>Module scaffold</strong> &mdash; working screens land in a later slice (see LOOP.md).</p>
+      <p class="fineprint">Quick Search (top right) resolves to <code>/students/search</code>.</p>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('../partials/footer') %>

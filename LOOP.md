@@ -161,3 +161,32 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   subagent dispatches); there have been NO post-directive roscoe dispatches.
   · vet: exec-corroborated, triage accept-with-note ×2 · status: 1 done, 11 queued ·
   next up: S1 on a DeepInfra lane (/long-run tick).
+- 2026-09-30 · tick 4 · S1 (chunk A) · **Nav routes live** dispatched to flash-fleet
+  (`s1-nav-routes`; default lane per Guidance-002 — bulk per-file wiring that later
+  slices replace, flash tier suffices). Scope of chunk A: 7 module routers mounted at
+  the header's exact hrefs (/students, /scheduling, /attendance, /grading, /grades,
+  /reports, /administration) + era-correct placeholder index pages + Quick Search stub;
+  chrome/CSS/db files are read-only for the worker. Chunk B (design-fidelity pass vs
+  ~12 PowerSchool/Aeries captures) deferred to its own chunk. Self-vet conditional
+  (ultra-6A); coordinator curl+triage gate when the report lands.
+  · vet: pending · status: 1 done, 1 in-progress, 10 queued ·
+  next up: S1 chunk B (capture-fidelity review) or S9 (independent of S2–S8 chain).
+- 2026-09-30 · tick 4b/5 (coordinator gate + concurrent fired tick) · S1 · **Chunk A gate
+  history**: worker report (16 files / 60s, execution evidence; codemode unavailable in
+  flash-fleet lane -> not-vetted at worker level per ultra-6A). Independent verification
+  by BOTH the coordinator and a concurrent fired tick 5 (evidence/tick5-s1-chunkA-
+  verify.md): 8/8 correct active tabs, home counts 300/42/12, healthz up, additive
+  app.js. REAL DEFECT found + fixed: double-escaped grades tab label (header.ejs:24 —
+  rendered "&amp;amp;"). Probe note: chrome reads "Valley View Unified School District",
+  so the coordinator's literal "Valley View USD" marker probe was the error, not the app.
+  /administration alias added (header hard-codes /admin; spec prose said /administration —
+  both now 200). Jev triage: r1 0.47/0.53 (narrative-padded state), r2 0.78/0.85
+  (facts-only); per ultra-6B a third look is not a re-roll -> ESCALATED to mimo-heavy
+  `s1-adjudicate`: residual-defect hunt incl. an XSS probe on the /students/search echo,
+  and a ruling on quality-vs-framing of the classifier scores. ultra-6B triage-hygiene
+  clause added (facts-only states; never re-run a gate to fish for a pass). S1b
+  (capture-fidelity) split out so the S2–S8 chain unblocks on nav-live alone.
+  · vet: 0/1 first-pass (gate after rework), adjudication pending ·
+  status: 1 done, 1 in-progress, 11 queued · next up: adjudicator verdict -> close S1,
+  then S2 (Student Records) as first module slice · next up: S1 on a
+  DeepInfra lane, per operator guidance.

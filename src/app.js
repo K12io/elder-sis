@@ -2,6 +2,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import { pool, query, applyDb } from "./db.js";
+import studentsRouter from "./routes/students.js";
+import schedulingRouter from "./routes/scheduling.js";
+import attendanceRouter from "./routes/attendance.js";
+import gradingRouter from "./routes/grading.js";
+import gradesRouter from "./routes/grades.js";
+import reportsRouter from "./routes/reports.js";
+import adminRouter from "./routes/admin.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,6 +44,14 @@ app.get("/healthz", async (req, res) => {
     res.status(500).json({ ok: false, db: "down" });
   }
 });
+
+app.use("/students", studentsRouter);
+app.use("/scheduling", schedulingRouter);
+app.use("/attendance", attendanceRouter);
+app.use("/grading", gradingRouter);
+app.use("/grades", gradesRouter);
+app.use("/reports", reportsRouter);
+app.use("/admin", adminRouter);
 
 const port = Number(process.env.PORT) || 3000;
 

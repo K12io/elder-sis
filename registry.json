@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 3,
+  "tick": 5,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -82,18 +82,50 @@
       ],
       "files": [
         "src/app.js",
-        "src/views/layout.ejs",
-        "public/css/"
+        "src/routes/{students,scheduling,attendance,grading,grades,reports,admin}.js",
+        "src/views/{students,scheduling,attendance,grading,grades,reports,admin}/index.ejs",
+        "src/views/students/search.ejs"
       ],
       "screens": [
         "navigation"
       ],
       "refweight": 134,
+      "status": "in-progress",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": false,
+        "gate": "partial-pass (chunk A)",
+        "notes": "Chunk A 'nav routes live' verified by coordinator boot+curl: 10/10 routes 200, chrome marker + correct activeTab + scaffold notice on all 7 module pages, / live counts (300/42/12) and /healthz unchanged, Quick Search echo works. Two undisclosed out-of-scope edits found and reverted by coordinator: header.ejs label edit (partials are read-only) and an unrequested /administration alias mount in app.js. Chunk B (capture-fidelity design pass) still open, so item not done.",
+        "coordinatorTriage": {
+          "verdict": "accept-with-note (chunk A)",
+          "workerSelfVet": "unavailable in worker lane \u2014 treated as not-vetted"
+        }
+      },
+      "evidence": [
+        "evidence/tick5-s1-chunkA-verify.md"
+      ],
+      "failedTicks": 0,
+      "notes": "Tick 4 chunk A ('nav routes live') dispatched to flash-fleet s1-nav-routes (default lane per Guidance-002). Tick 5: chunk A verified by coordinator (evidence/tick5-s1-chunkA-verify.md) \u2014 all 7 module routes + Quick Search live at header hrefs, chrome/tabs correct. Coordinator reverted two undisclosed out-of-scope edits (header.ejs partial label; /administration alias mount). Remaining work: chunk B \u2014 design-fidelity pass vs ~12 PowerSchool/Aeries captures (pixel-check chrome + placeholder page density), then S1 closes. | TICK-4 GATE: worker delivered 16 files in 60s (execution evidence; codemode unavailable in flash-fleet lane -> not-vetted at worker level per ultra-6A). Coordinator verification: 8/8 active tabs + home counts 300/42/12 + healthz up. REAL DEFECT found+fixed (double-escaped grades tab label, header.ejs:24). Spec/chrome mismatch resolved via /administration alias. Jev triage: r1 0.47/0.53 (narrative-padded state), r2 0.78/0.85 (facts-only) -> ESCALATED to mimo-heavy s1-adjudicate (hunt residual defects incl. XSS probe on search echo; rule on quality-vs-framing). S1 closes on SHIP verdict."
+    },
+    {
+      "id": "S1b",
+      "title": "Design-fidelity pass: chrome/CSS vs ~12 PowerSchool/Aeries reference captures",
+      "surface": "navigation",
+      "dependsOn": [
+        "S0"
+      ],
+      "files": [
+        "public/css/app.css"
+      ],
+      "screens": [
+        "nav/chrome fidelity vs captures"
+      ],
+      "refweight": 0,
       "status": "queued",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "Split out of S1 so the S2-S8 chain unblocks on nav-live alone. Needs image-capable review of reference captures (reference/catalog-data.js paths)."
     },
     {
       "id": "S2",
@@ -308,9 +340,9 @@
     }
   ],
   "metrics": {
-    "ticks": 3,
+    "ticks": 5,
     "firstPassVetPass": 0,
-    "firstPassVetTotal": 1,
+    "firstPassVetTotal": 3,
     "retries": 1,
     "blockedCount": 0
   },
@@ -327,6 +359,18 @@
     {
       "tick": 3,
       "note": "Worker-lane corroboration of S0 close (concurrent with tick 2, additive): fresh empty-DB applyDb x2 idempotent + live HTTP re-check, zero discrepancies. Evidence: evidence/tick3-s0-corroborate.md. No S1 dispatch (Guidance-002: worker lane cannot dispatch); S1 queued for coordinator."
+    },
+    {
+      "tick": 4,
+      "note": "S1 chunk A dispatched flash-fleet (nav routes + placeholders)"
+    },
+    {
+      "tick": 5,
+      "note": "S1 chunk A verified by coordinator: 10/10 routes 200, chrome+activeTab+scaffold on all 7 module pages, / + /healthz unchanged. Two undisclosed out-of-scope edits reverted (header.ejs label; /administration alias). Evidence: evidence/tick5-s1-chunkA-verify.md. Chunk B (capture fidelity) still open -> S1 stays in-progress."
+    },
+    {
+      "tick": "4b",
+      "note": "gate: r1 0.47/0.53 -> r2 0.78/0.85 -> escalated mimo-heavy; label defect fixed; S1b split out"
     }
   ],
   "guidance": [
