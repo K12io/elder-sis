@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 2,
+  "tick": 3,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -56,10 +56,19 @@
         "verified": "2026-09-30",
         "firstPass": false,
         "gate": "pass",
-        "notes": "Scaffold tick 1, verified+fixed tick 2: stats-local mismatch, missing sections/teachers seed, 200->300 students. Boot+curl+psql evidence."
+        "notes": "Scaffold tick 1, verified+fixed tick 2: stats-local mismatch, missing sections/teachers seed, 200->300 students. Boot+curl+psql evidence.",
+        "coordinatorTriage": {
+          "verdicts": {
+            "chrome+views": "0.92/0.84",
+            "server+db": "0.86/0.82"
+          },
+          "decision": "accept-with-note",
+          "workerSelfVet": "unavailable in worker lane \u2014 treated as not-vetted"
+        }
       },
       "evidence": [
-        "evidence/tick2-s0-verify.md"
+        "evidence/tick2-s0-verify.md",
+        "evidence/tick3-s0-corroborate.md"
       ],
       "failedTicks": 0,
       "notes": "DONE tick 2. Boot verified: / 200 renders live counts (300/42/12), /healthz db up, idempotent reseed, restart-safe. Design CSS derived from catalog metadata + classic conventions; pixel-fidelity pass vs captures folded into S1. Nav targets 404 until S1+ wires routes. | Guidance-002 (DeepInfra-only subagents) arrived mid-slice: scaffold pair dispatched pre-directive \u2014 scaffold-views DONE (self-vet 0.9/0.9), scaffold-server finishing current slice as a logged exception. All later dispatches: flash-fleet/glm-swarm/mimo-heavy only."
@@ -299,7 +308,7 @@
     }
   ],
   "metrics": {
-    "ticks": 2,
+    "ticks": 3,
     "firstPassVetPass": 0,
     "firstPassVetTotal": 1,
     "retries": 1,
@@ -314,6 +323,10 @@
     {
       "tick": 2,
       "note": "S0 verified+closed: app boots vs Postgres, 300 students/42 sections/12 teachers seeded idempotently, / + /healthz + css verified via curl. 3 fixes (stats local, sections/teachers seed, seed size). S1 next: shell/nav routes + design fidelity pass."
+    },
+    {
+      "tick": 3,
+      "note": "Worker-lane corroboration of S0 close (concurrent with tick 2, additive): fresh empty-DB applyDb x2 idempotent + live HTTP re-check, zero discrepancies. Evidence: evidence/tick3-s0-corroborate.md. No S1 dispatch (Guidance-002: worker lane cannot dispatch); S1 queued for coordinator."
     }
   ],
   "guidance": [

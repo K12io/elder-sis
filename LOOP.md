@@ -13,7 +13,7 @@
 - **Run protocol:** the `/long-run` prompt template (`~/.pi/agent/prompts/long-run.md`).
   One bounded chunk per tick; orchestration and the Jev vet loop follow the rules in
   `~/.pi/agent/prompts/ultra.md`.
-- **Status:** OPEN · **Tick:** 2 (S0 done; S1 next)(see registry.json)
+- **Status:** OPEN · **Tick:** 3 (S0 done+corroborated; S1 next)(see registry.json)
 
 ## Reference corpus (harvested facts)
 
@@ -137,3 +137,27 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   mimo-heavy); roscoe-* and Explore off the dispatch table; sensitive slices stay in the
   main session. No in-flight cloud work affected. · vet: unchanged (0/1 first-pass)
   · status: 1 done, 11 queued · next up: S1 on a DeepInfra lane.
+- 2026-09-30 · tick 3 (worker, roscoe lane — last one, per Guidance-002) · S0 ·
+  **Independent re-verification of the tick-2 close** (started before it landed; additive,
+  no history rewritten, no duplicate entry). Fresh empty scratch DB → `applyDb()` ×2:
+  schema+seed clean and idempotent (300 students / 300 enrollments / 42 sections /
+  12 teachers / 4 terms); live boot on :3123: `/healthz` 200 db:up, `/` 200 with live
+  stats, css 200; server stopped + scratch DB dropped afterward. Zero discrepancies.
+  Evidence: evidence/tick3-s0-corroborate.md. No S1 dispatch attempted — worker lane
+  cannot dispatch under Guidance-002; S1 stays queued for coordinator.
+  · vet: corroborated (exec-based; no new claim to vet) · status: 1 done, 11 queued
+  · next up: S1 on a DeepInfra lane, per operator guidance.
+- 2026-09-30 · tick 3c (coordinator triage, main session) · S0 · **Coordinator triage on
+  both S0 reports**: chrome+views 0.92/0.84, server+db 0.86/0.82 (matches_evidence /
+  ready_to_ship) -> ACCEPT-WITH-NOTE both, under a new ultra-6B clause: execution
+  evidence stands (boot + HTTP + DB counts + empty-DB idempotency), and the only low
+  answer is `ready_to_ship` dinged by honest follow-up notes (CSS not yet pixel-checked
+  -> tracked in S1). Protocol adaptations logged from this turn's findings:
+  (1) ultra-6A — worker Jev self-vet is CONDITIONAL; codemode/classifier tools were
+  UNAVAILABLE in the roscoe worker lane, so self-estimated probabilities ("~0.9") are
+  now explicitly treated as "not vetted" and coordinator triage carries the gate;
+  (2) ultra-6B — accept-with-note clause added. Record straight: the tick-3 worker was
+  dispatched BEFORE Guidance-002 (the logged exception) and self-limited under it (no
+  subagent dispatches); there have been NO post-directive roscoe dispatches.
+  · vet: exec-corroborated, triage accept-with-note ×2 · status: 1 done, 11 queued ·
+  next up: S1 on a DeepInfra lane (/long-run tick).
