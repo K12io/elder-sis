@@ -439,3 +439,31 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   **Final state: 14/14 items done, 0 blocked, 0 in flight.** Metrics: 8/15 first-pass,
   3 retries, 7 failed-then-fixed slices — every rework caught by execution verification
   before being marked done. Heartbeat cancelled. Run closed.
+- 2026-09-30 · tick 21 (coordinator) · **WAVE 3 DISPATCHED — building the SIS fully out, leaning
+  free (ADR-004).** The operator asked for a free-model exploration followed by aggressive
+  parallel build-out. Sweep results, all verified with a REAL tool-calling request (the only
+  property that matters for a subagent lane):
+  - **OpenCode Zen free chat models are 403-walled outside OpenCode** ("free tier can only be
+    used from within OpenCode") — big-pickle, longcat-2.5-preview-free, mimo-v2.6-flash-free,
+    mimo-v2.5-free, ling-3.0-flash-fin-free, nemotron-3-ultra-free, nemotron-3.5-lightning-free,
+    muse-spark-1.3-contributor-free: all refused on BOTH chat/completions and /responses.
+  - **Exactly one Zen free model works from pi: `space-bunny-free`** (zero-retention stealth
+    model; real completion + valid tool_call verified).
+  - **`jev-1.13-free` works** via the systemone endpoint — so the Zen key also covers the Jev
+    decision layer for free (opencode/jev-1.13-free now appears in the classifier list).
+  - **Six OpenRouter free models pass tool-calling**: nemotron-3-ultra-550b-a55b, nemotron-3.5-
+    lightning, qwen3.8-27b, gemma-4-31b, ling-3.0-flash-sante, dots-3-note-preview (two more
+    returned 429, two are agentic-only 403). Two of them resolve natively through pi with no
+    config change.
+  - **Four free lanes wired** (`free-worker`=space-bunny, `free-qwen`, `free-nemotron`,
+    `free-gemma`), each carrying the full worker discipline; flash-fleet retained as the paid
+    fallback; roscoe pair untouched as the sensitive-data path. Paid muse declined by the
+    operator and its lane retired.
+  **Wave 3 = six slices in parallel on five different models** (deliberately spread so no single
+  free model's rate limit bottlenecks the wave): F1 authentication (sessions + scrypt hashes +
+  role middleware, flash-fleet), F2 teacher workspace (space-bunny), F3 parent/student portal
+  (qwen3.8-27b), F4 communications (nemotron-3-ultra), F5 fees (gemma-4-31b), F6 assessment
+  (flash-fleet). All six are file-disjoint via the auto-mount + per-slice migration conventions,
+  so this is real parallelism, not pseudo-parallelism. Coordinator-only work queued for after
+  F1 lands: wiring `attachUser` into `src/app.js` and adding the new nav tabs to
+  `src/views/partials/header.ejs` (shared files stay coordinator-owned).
