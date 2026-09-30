@@ -1,8 +1,8 @@
 {
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
-  "status": "open",
-  "tick": 19,
+  "status": "complete",
+  "tick": 20,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -418,17 +418,26 @@
         "all claimed screens"
       ],
       "refweight": 0,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 coordinator execution pass on delivered work.",
+        "notes": "Gap 5 genuinely FIXED: the attendance grid now rosters exactly the students in section_roster (verified: 32 rostered students rendered as 32 distinct students x 5 week days = 160 code inputs; empty-roster section shows 'No students assigned to this section'); save path verified (POST -> 302, attendance_daily row persisted, probe cleaned up). Orphan students/search.ejs deleted with /students/search?q= still 200. Run-wide sweep: 14 spot routes all 200. BUILD-REPORT.md written (11.2 KB, factual tone, per-module screens + verification commands + demo walkthrough). Worker session ended when a leaked heartbeat arrived after delivery \u2014 the new one-line leakage cap cost 37.5k tokens instead of the 350k the old behaviour burned."
+      },
+      "evidence": [
+        "BUILD-REPORT.md",
+        "coordinator tick-20 execution pass"
+      ],
       "failedTicks": 0,
       "notes": "Final QA pass dispatched to flash-fleet (qa-final): attendance roster fix using the new section_roster table (closes gap 5), run-wide route sweep, six-gap walk, orphan students/search.ejs deletion, BUILD-REPORT.md. Owns src/routes/attendance.js + src/views/attendance/* + BUILD-REPORT.md only."
     }
   ],
   "metrics": {
-    "ticks": 19,
-    "firstPassVetPass": 7,
-    "firstPassVetTotal": 14,
+    "ticks": 20,
+    "firstPassVetPass": 8,
+    "firstPassVetTotal": 15,
     "retries": 3,
     "blockedCount": 0
   },
@@ -513,6 +522,10 @@
     {
       "tick": 19,
       "note": "no-op tick: wave sentinel listed qa-final (still running, healthy: 29 tool uses / 29k tokens / 97s, mid attendance-roster fix). Nothing else outstanding. No verification, no dispatch, no writes to QA-owned files."
+    },
+    {
+      "tick": 20,
+      "note": "QA verified and closed (attendance roster fix, sweep, gap walk, BUILD-REPORT.md). RUN COMPLETE: 14 items done, 0 blocked."
     }
   ],
   "guidance": [
@@ -573,10 +586,8 @@
     }
   ],
   "wave": {
-    "active": [
-      "qa-final (flash-fleet)"
-    ],
-    "note": "final QA wave",
-    "dispatchedAt": "tick 18"
+    "active": [],
+    "note": "run complete \u2014 no workers in flight",
+    "closedAt": "tick 20"
   }
 }

@@ -99,17 +99,18 @@ async function loadSection(sectionId) {
 
 /**
  * "Which students belong to a section?"
- * Student->section enrollment is NOT modelled yet (enrollments only carries
- * school + grade level). So the roster is every Active student at the section's
- * SCHOOL, ordered by last name/first name. Documented in the report.
+ * Section membership is owned by the Scheduling module via `section_roster`.
+ * The grid rosters exactly those students, ordered by last name. Sections with
+ * no roster rows yet render an empty grid plus a pointer to Scheduling.
  */
 async function loadRoster(section) {
   const r = await query(
-    `SELECT id, state_id, last_name, first_name, grade_level
-       FROM students
-      WHERE school_id = $1 AND status = 'Active'
-      ORDER BY last_name, first_name, id`,
-    [section.school_id]
+    `SELECT st.id, st.state_id, st.last_name, st.first_name, st.grade_level
+       FROM section_roster sr
+       JOIN students st ON st.id = sr.student_id
+      WHERE sr.section_id = $1
+      ORDER BY st.last_name, st.first_name, st.id`,
+    [section.id]
   );
   return r.rows;
 }

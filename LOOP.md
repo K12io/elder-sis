@@ -421,3 +421,21 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   tick's correct action was to record itself and stop. This is the guard working as
   intended — a tick that abstains instead of grading mid-write work and generating a false
   FAIL (which is exactly what happened at tick 11 before the guard existed).
+- 2026-09-30 · tick 20 (coordinator) · **QA verified — RUN COMPLETE.** Coordinator execution
+  pass on the final slice: the attendance grid now rosters **exactly** the students in
+  `section_roster` (verified: 32 rostered students rendered as 32 distinct students across 5
+  week days = 160 code inputs, matching the table exactly), an empty-roster section shows
+  "No students assigned to this section — assign them in Scheduling", and the save path
+  persists to `attendance_daily` (POST 302, row written, probe cleaned up). The orphan
+  `students/search.ejs` is deleted while `/students/search?q=` still returns 200; a 14-route
+  spot sweep across all nine modules returns 200; `BUILD-REPORT.md` (11.2 KB) documents every
+  module's screens, verification commands, limitations and a click-through demo. Gap 5
+  (attendance roster approximation) is **fixed rather than documented** — only possible
+  because S4 built the roster table the same day.
+  Post-mortem on the worker's end: a leaked heartbeat landed in its session *after* it had
+  delivered, and the new one-line leakage cap meant it cost 37.5k tokens to refuse instead of
+  the 350k the old behaviour burned — the cap works, though the leak itself remains an
+  open architectural issue (cron firing into a shared process can reach subagent contexts).
+  **Final state: 14/14 items done, 0 blocked, 0 in flight.** Metrics: 8/15 first-pass,
+  3 retries, 7 failed-then-fixed slices — every rework caught by execution verification
+  before being marked done. Heartbeat cancelled. Run closed.
