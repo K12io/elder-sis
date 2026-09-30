@@ -229,3 +229,20 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · vet: 1/5 first-pass (metric moves for the first time) ·
   status: 3 done, 11 queued · next up: S2 (Student Records) as the first real module
   slice — search roster + student 360 reading from the seeded database.
+- 2026-09-30 · tick 8 (coordinator) · **ADR-002 + 5-way parallel fan-out.** Removed the
+  only real serialiser: shared files. `src/app.js` now auto-mounts every `src/routes/*.js`
+  at `/<basename>` (alias map keeps `/administration`), and `src/db.js` applies
+  `db/migrations/*.sql` in filename order inside the schema transaction, so each slice
+  owns one route file, one view directory and one idempotent migration. Verified: all 11
+  routes still 200 after the refactor, home counts intact. Registry dependencies were
+  therefore revised to TRUE dependencies: module slices are code-independent; the
+  remaining edges are data edges (S7←S6 scores, S8←S2+S5 data, S10←S2 records).
+  **Jev decisions via codemode** (one call, 1,337 tokens, 0.2s, ten atomic questions):
+  all five slices scored `parallel_safe` 0.85 and `needs_heavy_lane` 0.57–0.59 → flash
+  tier suffices; no escalation warranted. Dispatched **five flash-fleet agents
+  concurrently on DeepInfra**: S2 students, S3 enrollment, S5 attendance, S6 grading,
+  S9 administration — each with the S1b device requirement folded in for S6 and explicit
+  ownership boundaries. Verification (run + blob) lands as reports arrive.
+  · vet: pending x5 · status: 3 done, 5 in-progress, 5 queued
+  · next up: triage the five reports (batched in ONE codemode call), then S7/S8/S10 once
+  their data edges are met.

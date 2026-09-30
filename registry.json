@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 7,
+  "tick": 8,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -144,9 +144,7 @@
       "id": "S2",
       "title": "Student records: search roster + student 360 (demographics, contacts, enrollment history, alerts)",
       "surface": "student-records",
-      "dependsOn": [
-        "S1"
-      ],
+      "dependsOn": [],
       "files": [
         "src/routes/students.js",
         "src/views/students/",
@@ -156,19 +154,17 @@
         "Find a student and understand their situation"
       ],
       "refweight": 589,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s2-students."
     },
     {
       "id": "S3",
       "title": "Enrollment: new student registration / admit-enroll-withdraw",
       "surface": "enrollment",
-      "dependsOn": [
-        "S2"
-      ],
+      "dependsOn": [],
       "files": [
         "src/routes/enrollment.js",
         "src/views/enrollment/"
@@ -177,19 +173,17 @@
         "Admit, enroll, move, or withdraw a student"
       ],
       "refweight": 117,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": " | Known dead link until this slice: home.ejs -> /enrollment/register (404)."
+      "notes": "Known dead link until this slice: home.ejs -> /enrollment/register (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s3-enrollment."
     },
     {
       "id": "S4",
       "title": "Scheduling: course catalog, sections, student schedules, conflict display",
       "surface": "scheduling",
-      "dependsOn": [
-        "S3"
-      ],
+      "dependsOn": [],
       "files": [
         "src/routes/scheduling.js",
         "src/views/scheduling/"
@@ -202,15 +196,13 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": " | Known dead link until this slice: home.ejs -> /scheduling/catalog (404)."
+      "notes": "Known dead link until this slice: home.ejs -> /scheduling/catalog (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration."
     },
     {
       "id": "S5",
       "title": "Attendance: teacher grid + office corrections/mass entry",
       "surface": "attendance",
-      "dependsOn": [
-        "S3"
-      ],
+      "dependsOn": [],
       "files": [
         "src/routes/attendance.js",
         "src/views/attendance/"
@@ -219,19 +211,17 @@
         "Record and correct attendance"
       ],
       "refweight": 611,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s5-attendance."
     },
     {
       "id": "S6",
       "title": "Grading: assignment setup, categories/weights, score grid, missing/exempt, bulk fill, publish",
       "surface": "grading",
-      "dependsOn": [
-        "S4"
-      ],
+      "dependsOn": [],
       "files": [
         "src/routes/grading.js",
         "src/views/grading/"
@@ -240,11 +230,11 @@
         "Create assignments and enter scores rapidly"
       ],
       "refweight": 1593,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": " | MUST render the S1b devices: use .sis-metabar for the assignment meta strip and .col-current for the active score-entry column, plus .col-accent-blue/orange column bars (acceptance for S1b was satisfied at the CSS level only)."
+      "notes": "MUST render the S1b devices: use .sis-metabar for the assignment meta strip and .col-current for the active score-entry column, plus .col-accent-blue/orange column bars (acceptance for S1b was satisfied at the CSS level only). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s6-grading."
     },
     {
       "id": "S7",
@@ -293,9 +283,7 @@
       "id": "S9",
       "title": "Administration: school year/terms, grade levels, attendance/grade codes, users + role matrix",
       "surface": "administration",
-      "dependsOn": [
-        "S1"
-      ],
+      "dependsOn": [],
       "files": [
         "src/routes/admin.js",
         "src/views/admin/"
@@ -304,11 +292,11 @@
         "Configure a school year and access"
       ],
       "refweight": 338,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. Dispatched as s9-admin."
     },
     {
       "id": "S10",
@@ -353,7 +341,7 @@
     }
   ],
   "metrics": {
-    "ticks": 7,
+    "ticks": 8,
     "firstPassVetPass": 1,
     "firstPassVetTotal": 5,
     "retries": 2,
@@ -396,6 +384,10 @@
     {
       "tick": 7,
       "note": "S1b chrome fidelity accepted with note (0.87/0.84); first clean first-pass; device demo recorded against S6"
+    },
+    {
+      "tick": 8,
+      "note": "ADR-002 contention removal; Jev lane decision; 5-way parallel fan-out (S2,S3,S5,S6,S9) on flash-fleet"
     }
   ],
   "guidance": [
@@ -403,6 +395,20 @@
       "id": "Guidance-002",
       "tick": 1,
       "text": "deepinfra only for subagents"
+    }
+  ],
+  "adrs": [
+    {
+      "id": "ADR-002",
+      "date": "2026-09-30",
+      "title": "Parallelism model: file-disjoint slices + Jev lane decisions",
+      "decision": "Shared-file contention was the only thing serialising module slices, so: (1) src/app.js auto-mounts every src/routes/*.js at /<basename> (alias map for /administration) \u2014 slices never edit app.js; (2) src/db.js applies db/migrations/*.sql in filename order inside the schema transaction \u2014 each slice owns one idempotent file. Module slices are therefore code-independent; remaining dependencies in the registry are DATA dependencies only (S7 needs S6 scores, S8 needs S2+S5 data, S10 needs S2 records). Lane choice is a Jev decision via codemode (one call, atomic questions); all five current slices scored parallel_safe 0.85 and needs_heavy_lane < 0.6 -> flash-fleet x5 concurrently.",
+      "evidence": [
+        "src/app.js ROUTES_DIR auto-mount",
+        "src/db.js MIGRATIONS_DIR runner",
+        "db/migrations/README.md",
+        "all 11 routes verified 200 after the refactor"
+      ]
     }
   ]
 }
