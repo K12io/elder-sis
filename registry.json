@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 15,
+  "tick": 17,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -210,13 +210,16 @@
         "Build and repair schedules"
       ],
       "refweight": 1521,
-      "status": "in-progress",
+      "status": "done",
       "vet": {
         "verified": "2026-09-30",
-        "gate": "preliminary",
-        "firstPass": null,
-        "verdict": "PRELIMINARY / SUPERSEDED \u2014 verdict was taken while the slice's worker was still running (views pending (worker in flight)). Do not act on it.",
-        "notes": "Tick 11 graded this slice mid-write. Its route and migration files had landed; the remaining files arrived after the sweep. Re-verification happens in the post-wave pass. Kept for the audit trail, not as a fail signal."
+        "firstPass": false,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 verified entirely by the coordinator by execution; the slice's own worker never reported.",
+        "notes": "Worker was abandoned after 308k tokens / 43 min with no report and no writes for the final minutes. Its artifacts verify: all ten /scheduling routes 200 (including the four that 500'd in tick 11 before its views landed), courses seeded 20, section_roster 224 rows, assign works (roster +1 with a success redirect), period conflict refused with a clear message, unassign removes the row, catalog add works (20->21, cleanup restored 20). Master grid renders with clash highlighting present.",
+        "evidence": [
+          "coordinator tick-16/17 execution pass: routes, tables, assign/refuse/unassign/catalog probes"
+        ]
       },
       "evidence": [
         "evidence/tick11-wave2-verify.md"
@@ -423,9 +426,9 @@
     }
   ],
   "metrics": {
-    "ticks": 15,
+    "ticks": 17,
     "firstPassVetPass": 7,
-    "firstPassVetTotal": 13,
+    "firstPassVetTotal": 14,
     "retries": 3,
     "blockedCount": 0
   },
@@ -498,6 +501,10 @@
     {
       "tick": 15,
       "note": "S7 fix verified (30/30 posted, idempotent, GPA snapshot written, transcript rows, roster visible); S7 closed"
+    },
+    {
+      "tick": 17,
+      "note": "S4 closed by coordinator verification (worker lost after 308k tokens, no report); all write paths verified incl. conflict refusal and unassign"
     }
   ],
   "guidance": [
@@ -558,11 +565,8 @@
     }
   ],
   "wave": {
-    "active": [
-      "s4-scheduling (glm-swarm)",
-      "s7-transcripts (glm-swarm)"
-    ],
-    "note": "s8-reports finished; s4/s7 still landing files. IN-FLIGHT GUARD applies.",
-    "dispatchedAt": "2026-09-30 tick 10"
+    "active": [],
+    "note": "wave closed; s4-scheduling worker stuck/deemed lost at 308k tokens with no writes; artifacts verified independently",
+    "closedAt": "tick 16"
   }
 }

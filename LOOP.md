@@ -376,3 +376,24 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · vet: S7 pass (second pass after fix) · status: 11 done, 1 in-progress (S4)
   · metrics 7/13 first-pass, 3 retries · next up: S4 (still running) then the post-wave
   pass + QA (known gaps + orphan view cleanup).
+- 2026-09-30 · tick 16/17 (coordinator) · **S4 closed by coordinator verification; wave 2
+  finished.** The S4 worker never reported — abandoned after **308k tokens / 43 min** with
+  no writes in its final minutes (its sibling S7 burned 342k; both on glm-swarm, versus
+  60–130k for flash-fleet on comparable slices). Its artifacts nonetheless verify fully:
+  ten /scheduling routes 200 (four of them 500'd in tick 11 only because its views had not
+  landed yet), `courses` seeded 20, `section_roster` 224 rows, and every write path
+  exercised end to end — assign (+1 row, success redirect), **period conflict refused**
+  with a clear message and no row written, unassign removes the row, catalog add works.
+  **Coordinator-side lesson, recorded in ultra.md**: four of my probe attempts this run
+  reported false defects purely from guessed form field names (`section` vs `section_id`,
+  `student` vs `student_id`, `student_id` vs `roster_id`). Rule added: read the view's
+  field names or the handler's `req.body` reads BEFORE probing a form POST, and treat a
+  200-with-error-shell as a probe bug until the field names are confirmed.
+  **Run-level pattern worth stating**: both wave-2 slices whose workers spun shipped a
+  write path that was never verified (S7's posting, S4's assign) — and in S7's case the
+  worker explicitly said so. The lesson is not "workers lie" but "unverified write paths
+  are where the defects live; the coordinator's execution pass is what finds them".
+  · vet: S4 pass (coordinator-verified), S7 pass after fix · status: **12 done, 0
+  in-progress, 1 queued (QA)** · metrics 7/14 first-pass · next up: QA — walk the six
+  `knownGaps`, delete the orphan `students/search.ejs`, and write `BUILD-REPORT.md`, then
+  close the run.

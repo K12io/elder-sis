@@ -13,9 +13,9 @@ Workers currently running for this run. **While this list is non-empty:**
 
 ## Active workers
 
-- `s4-scheduling` (glm-swarm) — STILL RUNNING; do not touch /scheduling — S4 scheduling: course catalog, master schedule, student
-  schedule, section roster, conflict detection. Views: src/views/scheduling/*,
-  route: src/routes/scheduling.js, migration: db/migrations/14-scheduling.sql
+(none — wave closed 2026-09-30; s4-scheduling worker deemed stuck at 308k tokens with
+no writes for >3 min; its artifacts are frozen and verified independently.)
+
 
 ## Clear this file when the wave has finished
 
