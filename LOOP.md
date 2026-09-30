@@ -512,3 +512,34 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   the five new modules, gate nav by role/`visible_modules`, and fix the falsified copy — which also closes
   knownGaps 1 and 2 (no auth; role visibility descriptive only). Per-slice verification cannot catch either
   hand-off; this is the third cross-slice consistency find of the wave (after F2's seed incoherence).
+- 2026-09-30 · tick 23 (coordinator) · **Wave 3 CLOSED: F1-F6 all verified and done
+  (19 of 21 items).** Post-wave pass was fully green: boot clean, **21 of 21 new wave-3
+  routes returned 200**, all 13 pre-existing routes still 200, new tables seeded coherently
+  (announcements 3 + 426 recipients; fee_catalog 5 + 200 assignments + 20 payments;
+  assessments 4 + 429 scores; auth_sessions 0 as expected until first login), and a restart
+  proved migration idempotency (3-5-429-5 unchanged). Free-lane scoreboard for the wave:
+  space-bunny (Zen) delivered a clean module; the OpenRouter free models died on shared-pool
+  429s under concurrency (ADR-004a) and were re-dispatched on flash-fleet; F4 on a free lane
+  burned **727k tokens / 21 min** — free in dollars, not in time, and the same drift shape as
+  glm-swarm. Lane economics now clear: free lanes for serial work, flash-fleet for waves.
+
+## Remaining work (wave 4 — what the loop should pick up, in order)
+
+1. **F8 — auth integration (coordinator-owned, shared files).** Insert
+   `app.use(attachUser)` before the route auto-mount in `src/app.js`; add nav tabs for the
+   five new modules (Teacher, Portal, Communications, Fees, Assessment); gate the nav by the
+   signed-in user's `roles`/`modules` and wrap the sensitive mounts (`/admin`, `/fees`,
+   `/discipline`) in `requireRole`, keeping the rest public so the demo stays walkable;
+   fix `src/views/admin/users.ejs`, whose "passwords are out of scope" copy F1 falsified.
+   Also add a login/logout affordance plus the current user's name to the header. Closes
+   `knownGaps` 1 and 2. Verify: log in as the demo user, confirm the gated tab appears and a
+   gated route redirects when logged out, and that every public route still 200s.
+2. **F7 — seed coherence (idempotent migration, dispatches one flash-fleet worker).** Give the
+   sections that already have categories/assignments/scores real `section_roster` rows (and a
+   few `attendance_daily` rows), so at least 3-4 sections work end to end: teacher standings
+   show real percents, the portal shows grades for enrolled students, and the grading ->
+   transcripts path has coherent inputs. Verify by posting grades for one such section and
+   reading the transcript back.
+3. **Refresh `BUILD-REPORT.md`** to cover the five new modules (screens, verification
+   commands, limitations drawn from the workers' honest caveats), then run the final
+   whole-app sweep and close the run and cancel this heartbeat.
