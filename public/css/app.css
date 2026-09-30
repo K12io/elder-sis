@@ -1,0 +1,191 @@
+/* ================================================================
+   Valley View SIS — design system
+   Classic-SIS chrome after PowerSchool/Aeries/Skyward-era screens
+   (reference corpus: see reference/catalog-data.js).
+   Constraints: no bundler, no webfonts, small serif-free type,
+   hard 1px borders, alternating table rows, dense layout.
+   ================================================================ */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #d4d0c8;            /* warm desktop gray */
+  color: #1a1a1a;
+  font: 11px/1.45 Verdana, Tahoma, "DejaVu Sans", Arial, sans-serif;
+}
+
+#shell {
+  width: 980px;
+  margin: 8px auto;
+  background: #fff;
+  border: 1px solid #7f7f7f;
+}
+
+.clear { clear: both; }
+
+/* ---------- top bar ---------- */
+
+#topbar {
+  background: #33506e;            /* slate blue band */
+  color: #fff;
+  padding: 5px 10px 4px;
+  border-bottom: 2px solid #1e3a55;
+}
+#topbar-title {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+}
+#topbar-context {
+  margin-top: 2px;
+  font-size: 10px;
+  color: #cfdcea;
+}
+#topbar a.topbar-link,
+#topbar a.topbar-link:visited { color: #ffe9a8; }
+
+/* ---------- tab bar (module nav) ---------- */
+
+#tabbar {
+  background: #e8e6e1;
+  border-bottom: 1px solid #9a958c;
+  padding: 4px 8px 0;
+}
+ul.tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  float: left;
+}
+ul.tabs li {
+  float: left;
+  margin: 0 1px 0 0;
+  border: 1px solid #9a958c;
+  border-bottom: none;
+  background: #d5d2cb;
+}
+ul.tabs li a {
+  display: block;
+  padding: 3px 9px 2px;
+  text-decoration: none;
+  color: #204060;
+  font-weight: bold;
+}
+ul.tabs li a:hover { background: #f2efe8; }
+ul.tabs li.active {
+  background: #fff;
+  position: relative;
+  top: 1px;                        /* active tab merges into page body */
+}
+ul.tabs li.active a { color: #1a1a1a; }
+
+.quicksearch {
+  float: right;
+  padding: 2px 2px 4px;
+  font-size: 10px;
+  color: #555;
+}
+.quicksearch input { font-size: 11px; }
+
+/* ---------- content ---------- */
+
+#content { padding: 8px 10px 10px; }
+
+table.layout { width: 100%; border-collapse: collapse; }
+table.layout > tbody > tr > td { vertical-align: top; padding: 0; }
+td.col-left  { width: 58%; padding-right: 8px !important; }
+td.col-right { width: 42%; }
+
+/* ---------- boxed panels ---------- */
+
+.sis-box {
+  border: 1px solid #9a958c;
+  background: #fdfdfb;
+  margin-bottom: 10px;
+}
+.sis-box-title {
+  background: #dcd8d0;
+  border-bottom: 1px solid #9a958c;
+  padding: 3px 8px;
+  font-weight: bold;
+  font-size: 11px;
+  color: #333;
+}
+.sis-box-body { padding: 7px 8px; }
+.sis-box-body p { margin: 0 0 6px; }
+
+/* ---------- tables ---------- */
+
+table.sis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+table.sis-table th,
+table.sis-table td {
+  border: 1px solid #c5c0b8;
+  padding: 2px 6px;
+  text-align: left;
+}
+table.sis-table th {
+  background: #e6e2da;
+  font-weight: bold;
+}
+table.sis-table tr:nth-child(even) > td { background: #f4f2ee; }
+table.sis-table td.num { text-align: right; font-family: "Lucida Console", Menlo, monospace; font-size: 10px; }
+
+table.kv th { width: 38%; font-weight: bold; }
+table.kv th, table.kv td { border: none; border-bottom: 1px dotted #ccc5bb; padding: 3px 4px; }
+
+/* ---------- links / lists ---------- */
+
+ul.links { list-style: square; margin: 0; padding-left: 18px; }
+ul.links li { margin-bottom: 3px; }
+
+a, a:visited { color: #1c4f8b; }
+a:hover { color: #b03000; }
+
+.fineprint { font-size: 10px; color: #666; }
+
+/* ---------- forms & buttons ---------- */
+
+input, select, textarea, button {
+  font: 11px Verdana, Arial, sans-serif;
+  color: #1a1a1a;
+}
+input[type="text"], input[type="search"], select, textarea {
+  border: 1px solid #8a8a8a;
+  border-top-color: #6a6a6a;
+  border-left-color: #6a6a6a;
+  background: #fff;
+  padding: 1px 3px;
+}
+.btn, button.btn {
+  background: #e6e2da;
+  border: 1px solid #7f7f7f;
+  border-top-color: #fff;
+  border-left-color: #f0ede6;
+  padding: 1px 10px;
+  cursor: pointer;
+}
+.btn:hover { background: #f0ede6; }
+
+/* ---------- footer ---------- */
+
+#footer {
+  border-top: 1px solid #9a958c;
+  background: #e8e6e1;
+  padding: 4px 10px;
+  font-size: 10px;
+  color: #555;
+}
+.footer-left  { float: left; }
+.footer-right { float: right; }
+
+/* ---------- print ---------- */
+
+@media print {
+  body { background: #fff; font-size: 10pt; }
+  #shell { width: auto; border: none; margin: 0; }
+  #tabbar, .quicksearch { display: none; }
+}

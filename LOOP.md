@@ -13,7 +13,7 @@
 - **Run protocol:** the `/long-run` prompt template (`~/.pi/agent/prompts/long-run.md`).
   One bounded chunk per tick; orchestration and the Jev vet loop follow the rules in
   `~/.pi/agent/prompts/ultra.md`.
-- **Status:** OPEN · **Tick:** 0 (see registry.json)
+- **Status:** OPEN · **Tick:** 2 (S0 done; S1 next)(see registry.json)
 
 ## Reference corpus (harvested facts)
 
@@ -34,13 +34,19 @@
 
 ## Stack decision
 
-- **Status: PROPOSED (S0 decides and records the final ADR here).**
-- Proposal: **Express + EJS (server-rendered) + SQLite via better-sqlite3**, no bundler.
-  Rationale: "traditional" naturally = server-rendered forms/tables; zero build step is
+- **ADR-001 — DECIDED 2026-09-30 (tick 1): Express + EJS (server-rendered) + PostgreSQL 16.**
+  Operator directive: Postgres backend (supersedes the SQLite proposal). Driver:
+  node-postgres (`pg`) with a connection pool; schema/seed live in `db/schema.sql` +
+  `db/seed.sql`, applied idempotently at startup. Server: local Postgres 16 (Docker
+  `appsicle-postgres-1`, localhost:5432), dedicated database `fake_sis`, connection via
+  `DATABASE_URL` in `.env` (same credential pattern as the k12 projects). Zero bundler;
+  Node v26 runs the server directly (`npm start`).
+- Rationale for the rest: "traditional" = server-rendered forms/tables; no build step is
   robust under many parallel agents; per-module route files minimize cross-slice file
-  conflicts; seeding synthetic district data is trivial.
-- Alternatives (operator may override at any tick): Next.js + SQLite; Vite React SPA +
-  Express API.
+  conflicts; synthetic district data seeds trivially.
+- Revisit triggers: if parallel agents repeatedly collide on schema, move migrations to
+  per-module SQL files; if the DB server becomes a bottleneck (unlikely), read replicas
+  are out of scope.
 
 ## Work queue
 
@@ -82,15 +88,52 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
 
 ## Open questions for the operator
 
-1. Stack: accept the Express + EJS + SQLite proposal? (S0 records the ADR.)
-2. Scope cut line: is S10 (discipline/health) in or out for v1?
+1. ~~Stack~~ — **answered (ADR-001): Postgres backend, operator directive.**
+2. Scope cut line: is S10 (discipline/health) in or out for v1? *(Defaulted to:
+   stretch/out of v1 unless the run finishes early — override via `/long-run` guidance.)*
 3. Fidelity bar: match ONE vendor's look (PowerSchool classic) as the primary chrome, or
-   blend per-module ("best-looking module UI wins")? Current plan assumes PowerSchool
-   classic as the chrome, with per-module UI matched to the densest classic source.
+   blend per-module ("best-looking module UI wins")? *(Defaulted to: PowerSchool-classic
+   chrome, per-module UI matched to densest classic source — override any tick.)*
+
+## Operator guidance log (newest first)
+
+- **Guidance-002 · 2026-09-30 (tick 1/2)** — "deepinfra only for subagents": all subagent
+  dispatches run on DeepInfra lanes only (flash-fleet default / glm-swarm mid-weight /
+  mimo-heavy hard reasoning). No roscoe-* or Explore dispatches. Sensitive slices
+  (FERPA data, credentials) run in the MAIN SESSION and are never fanned out.
+  `~/.pi/agent/prompts/ultra.md` rule 3 + `prompts/long-run.md` updated (pi config commit
+  18fa4f2). Logged exception: the S0 scaffold pair landed before this directive.
+- **Guidance-001 · 2026-09-30 (tick 1)** — "use a postgres backend": → ADR-001.
 
 ## Changelog (append-only)
 
+- 2026-09-30 · tick 1 · S0 · **ADR-001: Postgres backend** — dedicated `fake_sis` DB
+  created on local Postgres 16 (Docker appsicle-postgres-1); `DATABASE_URL` written to
+  .env. Scaffold dispatched to the local roscoe pair with disjoint file lists:
+  server+db (package.json, src/app.js, db/schema.sql, db/seed.sql) vs
+  chrome+views (views/partials/*, views/home.ejs, public/css/app.css).
+  District shell: "Valley View USD". Jev self-vet runs in each worker; coordinator
+  triage + curl verification land next tick. · vet: 0/0 · status: 11 queued, 1
+  in-progress · next up: S0 verification + design-system pass against captures.
 - 2026-09-30 · tick 0 (setup, by main session) · Research complete: corpus catalog
   (8,195 assets) downloaded to reference/catalog-data.js; surface-map workflows turned
   into registry items S0–S10+QA; stack proposed. Loop protocol set (/long-run).
   Statuses: all queued. No code written yet.
+- 2026-09-30 · tick 2 · S0 · **S0 verified + closed.** Both scaffold splits landed and
+  were verified against the real stack: `npm start` boots (Express+EJS+pg, Node 26),
+  `/` renders 200 with live DB counts, `/healthz` db:up, CSS served; `applyDb()` is
+  idempotent (restart did not duplicate seed). Seed shipped as deterministic JS in
+  `src/db.js` (no seed.sql — file lists updated): 300 students / 42 sections / 12
+  teachers / 300 enrollments across 3 Valley View schools. Three fixes this tick:
+  app.js `counts`->`stats` local mismatch; added teachers+sections schema+seed (criteria
+  wanted ~30 courses); seed 200->300 students. First-pass vet: NO (verification found
+  the 3 issues; gate passed after in-tick rework). Evidence: evidence/tick2-s0-verify.md.
+  CSS is metadata-derived, not yet pixel-checked against captures — folded into S1. ·
+  vet: 0/1 first-pass (gate pass after rework) · status: 1 done, 11 queued
+  · next up: S1 (shell + nav routes live; design-fidelity pass vs ~12
+  PowerSchool/Aeries captures).
+- 2026-09-30 · tick 2b (operator, main session) · all · **Guidance-002** recorded above:
+  DeepInfra-only subagent routing going forward (flash-fleet default / glm-swarm /
+  mimo-heavy); roscoe-* and Explore off the dispatch table; sensitive slices stay in the
+  main session. No in-flight cloud work affected. · vet: unchanged (0/1 first-pass)
+  · status: 1 done, 11 queued · next up: S1 on a DeepInfra lane.

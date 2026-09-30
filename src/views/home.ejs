@@ -1,0 +1,74 @@
+<%- include('partials/header', { pageTitle: 'Start Page', activeTab: 'start' }) %>
+
+<%
+  // Defensive defaults so the page renders even before the DB layer feeds locals in.
+  var stats = typeof stats !== 'undefined' ? stats : null;
+%>
+
+<table class="layout">
+<tr>
+<td class="col-left">
+
+  <div class="sis-box">
+    <div class="sis-box-title">District Information</div>
+    <div class="sis-box-body">
+      <table class="sis-table kv">
+        <tr><th>District</th><td>Valley View Unified School District</td></tr>
+        <tr><th>School</th><td><%= typeof schoolName !== 'undefined' ? schoolName : 'Valley View High' %> (01)</td></tr>
+        <tr><th>Grade levels served</th><td>9&ndash;12</td></tr>
+        <tr><th>Term 2</th><td>Jan 5, 2027 &ndash; Mar 19, 2027 <span class="fineprint">(10 weeks)</span></td></tr>
+        <tr><th>Bell schedule</th><td>Regular Year &mdash; 7 periods, 54 min</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Enrollment Snapshot</div>
+    <div class="sis-box-body">
+      <% if (stats) { %>
+      <table class="sis-table">
+        <tr><th>Students enrolled</th><td class="num"><%= stats.students %></td></tr>
+        <tr><th>Courses / sections</th><td class="num"><%= stats.sections %></td></tr>
+        <tr><th>Teachers</th><td class="num"><%= stats.teachers %></td></tr>
+      </table>
+      <% } else { %>
+      <p class="fineprint">Enrollment totals will appear here once the database connection is configured
+      (<code>DATABASE_URL</code> in <code>.env</code>).</p>
+      <% } %>
+    </div>
+  </div>
+
+</td>
+<td class="col-right">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Jump To&hellip;</div>
+    <div class="sis-box-body">
+      <ul class="links">
+        <li><a href="/students/search">Find a student</a></li>
+        <li><a href="/enrollment/register">Register / admit a student</a></li>
+        <li><a href="/scheduling/catalog">Course catalog &amp; sections</a></li>
+        <li><a href="/attendance/entry">Attendance entry</a></li>
+        <li><a href="/grading/grades">Gradebook</a></li>
+        <li><a href="/grades/transcript">Print transcript</a></li>
+        <li><a href="/reports">Run a report</a></li>
+        <li><a href="/admin/codes">Attendance &amp; grade codes</a></li>
+        <li><a href="/admin/users">Users and roles</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sis-box">
+    <div class="sis-box-title">Notices</div>
+    <div class="sis-box-body">
+      <p><strong>Reminder:</strong> Second-interim grade deadlines are Mar 12, 2027.</p>
+      <p>This is a demonstration system. All names, IDs, and records are
+      <strong>synthetic</strong> and do not describe any real person.</p>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+
+<%- include('partials/footer') %>

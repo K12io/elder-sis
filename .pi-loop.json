@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "7adcf4af",
+      "cron": "*/15 * * * *",
+      "prompt": "/long-run continue the fake-SIS long-horizon run. State files: ~/Projects/node/fake-sis/LOOP.md and registry.json. Execute exactly one tick: advance one chunk, update both state files. If the /long-run template is unavailable in this session, use ~/.pi/agent/prompts/long-run.md as the protocol. Do not recreate this schedule during a tick.",
+      "createdAt": 1790734913241,
+      "recurring": true,
+      "durable": true,
+      "label": "fake-sis-long-run",
+      "lastFiredAt": 1790735649958
+    }
+  ]
+}

@@ -2,14 +2,13 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 0,
+  "tick": 2,
   "stack": {
-    "decision": "proposed",
-    "value": "Express + EJS (server-rendered) + SQLite (better-sqlite3), no build step",
-    "alternatives": [
-      "Next.js + SQLite",
-      "Vite React SPA + Express API"
-    ]
+    "decision": "decided",
+    "adr": "ADR-001",
+    "decidedIn": "tick 1 \u2014 operator directive: Postgres backend",
+    "value": "Express + EJS (server-rendered) + PostgreSQL 16 via node-postgres (pg); schema/seed in db/*.sql, idempotent at startup",
+    "connection": "DATABASE_URL in .env -> postgres@localhost:5432/fake_sis on Docker appsicle-postgres-1"
   },
   "reference": {
     "catalog": "reference/catalog-data.js",
@@ -38,19 +37,32 @@
       "dependsOn": [],
       "files": [
         "package.json",
-        "src/",
-        "db/",
-        ".gitignore"
+        "src/app.js",
+        "src/db.js",
+        "db/schema.sql",
+        "src/views/partials/header.ejs",
+        "src/views/partials/footer.ejs",
+        "src/views/home.ejs",
+        "public/css/app.css",
+        "SQL via psql/DATABASE_URL",
+        "src/db.js (seed lives here, not seed.sql)"
       ],
       "screens": [
         "chrome: header/nav/tabs/footer, table styles, form styles"
       ],
       "refweight": 0,
-      "status": "queued",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": false,
+        "gate": "pass",
+        "notes": "Scaffold tick 1, verified+fixed tick 2: stats-local mismatch, missing sections/teachers seed, 200->300 students. Boot+curl+psql evidence."
+      },
+      "evidence": [
+        "evidence/tick2-s0-verify.md"
+      ],
       "failedTicks": 0,
-      "notes": ""
+      "notes": "DONE tick 2. Boot verified: / 200 renders live counts (300/42/12), /healthz db up, idempotent reseed, restart-safe. Design CSS derived from catalog metadata + classic conventions; pixel-fidelity pass vs captures folded into S1. Nav targets 404 until S1+ wires routes. | Guidance-002 (DeepInfra-only subagents) arrived mid-slice: scaffold pair dispatched pre-directive \u2014 scaffold-views DONE (self-vet 0.9/0.9), scaffold-server finishing current slice as a logged exception. All later dispatches: flash-fleet/glm-swarm/mimo-heavy only."
     },
     {
       "id": "S1",
@@ -287,12 +299,28 @@
     }
   ],
   "metrics": {
-    "ticks": 0,
+    "ticks": 2,
     "firstPassVetPass": 0,
-    "firstPassVetTotal": 0,
-    "retries": 0,
+    "firstPassVetTotal": 1,
+    "retries": 1,
     "blockedCount": 0
   },
   "blockers": [],
-  "changelog": []
+  "changelog": [
+    {
+      "tick": 1,
+      "note": "ADR-001 Postgres; fake_sis DB created; scaffold dispatched (roscoe pair)"
+    },
+    {
+      "tick": 2,
+      "note": "S0 verified+closed: app boots vs Postgres, 300 students/42 sections/12 teachers seeded idempotently, / + /healthz + css verified via curl. 3 fixes (stats local, sections/teachers seed, seed size). S1 next: shell/nav routes + design fidelity pass."
+    }
+  ],
+  "guidance": [
+    {
+      "id": "Guidance-002",
+      "tick": 1,
+      "text": "deepinfra only for subagents"
+    }
+  ]
 }

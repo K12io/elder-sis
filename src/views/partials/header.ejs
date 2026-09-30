@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1024">
+<title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' :: ' : '' %>Valley View SIS</title>
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+
+<%
+  // Partial guard: works whether or not the view was rendered with these locals.
+  var activeTab = typeof activeTab !== 'undefined' ? activeTab : '';
+  var schoolName = typeof schoolName !== 'undefined' ? schoolName : 'Valley View High';
+  var termName = typeof termName !== 'undefined' ? termName : 'Year 2026–2027 · Term 2';
+  var userName = typeof userName !== 'undefined' ? userName : 'Demo User';
+
+  var tabs = [
+    { id: 'start',   label: 'Start Page',     href: '/' },
+    { id: 'students',label: 'Student Records',href: '/students' },
+    { id: 'schedule',label: 'Scheduling',     href: '/scheduling' },
+    { id: 'attend',  label: 'Attendance',     href: '/attendance' },
+    { id: 'grades',  label: 'Grading',        href: '/grading' },
+    { id: 'transcripts', label: 'Grades &amp; Transcripts', href: '/grades' },
+    { id: 'reports', label: 'Reports',        href: '/reports' },
+    { id: 'admin',   label: 'Administration', href: '/admin' }
+  ];
+%>
+
+<div id="shell">
+
+  <div id="topbar">
+    <div id="topbar-title">Valley View Unified School District &mdash; Student Information System</div>
+    <div id="topbar-context">
+      School: <strong><%= schoolName %></strong>
+      &nbsp;|&nbsp; <%= termName %>
+      &nbsp;|&nbsp; User: <strong><%= userName %></strong>
+      &nbsp;|&nbsp; <a href="/admin/school-select" class="topbar-link">Switch School</a>
+    </div>
+  </div>
+
+  <div id="tabbar" role="navigation">
+    <ul class="tabs">
+      <% tabs.forEach(function (t) { %>
+      <li<% if (t.id === activeTab) { %> class="active"<% } %>><a href="<%= t.href %>"><%= t.label %></a></li>
+      <% }); %>
+    </ul>
+    <form class="quicksearch" action="/students/search" method="get">
+      <label for="quicksearch">Quick Search:</label>
+      <input type="text" id="quicksearch" name="q" size="18" placeholder="Student name or ID">
+      <button type="submit" class="btn">Go</button>
+    </form>
+    <div class="clear"></div>
+  </div>
+
+  <div id="content">
