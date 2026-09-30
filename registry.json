@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 12,
+  "tick": 13,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -222,7 +222,7 @@
         "evidence/tick11-wave2-verify.md"
       ],
       "failedTicks": 0,
-      "notes": "Known dead link until this slice: home.ejs -> /scheduling/catalog (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. | Wave 2: dispatched as s4-scheduling (glm-swarm). | TICK 11: route+migration landed, VIEWS MISSING -> 4 routes 500. Re-dispatch must supply the 4 view files (catalog, master, student, section). | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure."
+      "notes": "Known dead link until this slice: home.ejs -> /scheduling/catalog (404). | ADR-002: dispatched in the 5-way parallel fan-out (DeepInfra flash-fleet per Jev lane decision); files disjoint via route auto-mount + own migration. | Wave 2: dispatched as s4-scheduling (glm-swarm). | TICK 11: route+migration landed, VIEWS MISSING -> 4 routes 500. Re-dispatch must supply the 4 view files (catalog, master, student, section). | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure. | COST WATCH: worker burned >268k tokens with few tool calls and no recent file writes \u2014 suspected reasoning spin; steered to wrap up."
     },
     {
       "id": "S5",
@@ -307,7 +307,7 @@
         "evidence/tick11-wave2-verify.md"
       ],
       "failedTicks": 0,
-      "notes": "Wave 2: dispatched as s7-transcripts (glm-swarm). | TICK 11: NOT DELIVERED \u2014 grades.js unchanged (9-line stub), no views, no tables. Re-dispatch; consider flash-fleet for the mechanical screen work or glm-swarm again with the S6 scores schema contract. | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure."
+      "notes": "Wave 2: dispatched as s7-transcripts (glm-swarm). | TICK 11: NOT DELIVERED \u2014 grades.js unchanged (9-line stub), no views, no tables. Re-dispatch; consider flash-fleet for the mechanical screen work or glm-swarm again with the S6 scores schema contract. | Race note: tick 11's FAIL verdict was premature (verified while in flight); failedTicks reset to 0, not counted as a real failure. | COST WATCH: worker burned >268k tokens with few tool calls and no recent file writes \u2014 suspected reasoning spin; steered to wrap up."
     },
     {
       "id": "S8",
@@ -325,9 +325,18 @@
         "Build and distribute operational reports"
       ],
       "refweight": 316,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": false,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 verified by execution (tick 13). Tick 11 found a real CSV bug (c.value vs c.get) and this pass confirms the current tree exports CSV correctly.",
+        "notes": "5 report routes 200; CSV export 200 text/csv with quoted header and 26 rows for the roster report; saved_reports seeding guarded; report_runs logs runs. Tick 11 also disclosed its cleanup removed 27 report_runs activity rows."
+      },
+      "evidence": [
+        "evidence/tick11-wave2-verify.md",
+        "coordinator tick-13 execution pass"
+      ],
       "failedTicks": 0,
       "notes": "Wave 2: dispatched as s8-reports (flash-fleet)."
     },
@@ -374,9 +383,18 @@
         "Record health, discipline, and support work"
       ],
       "refweight": 317,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 verified by execution (tick 13), second independent pass after tick 11.",
+        "notes": "5 routes 200; incident POST -> row persisted; health-flag upsert POST x2 -> exactly one row for the student+flag pair; XSS probe on the incidents filter echoed escaped (0 raw script tags); friendly 4xx on bad input per tick 11; probe rows cleaned up."
+      },
+      "evidence": [
+        "evidence/tick11-wave2-verify.md",
+        "coordinator tick-13 execution pass"
+      ],
       "failedTicks": 0,
       "notes": "Wave 2: dispatched as s10-discipline-health (flash-fleet)."
     },
@@ -402,9 +420,9 @@
     }
   ],
   "metrics": {
-    "ticks": 10,
-    "firstPassVetPass": 6,
-    "firstPassVetTotal": 10,
+    "ticks": 13,
+    "firstPassVetPass": 7,
+    "firstPassVetTotal": 12,
     "retries": 2,
     "blockedCount": 0
   },
@@ -465,6 +483,10 @@
     {
       "tick": 12,
       "note": "fired tick 12 acted on in-flight S4 (wrote/verified its 4 missing views) \u2014 guard did not hold; provenance with the S4 worker is ambiguous; recorded, not credited"
+    },
+    {
+      "tick": 13,
+      "note": "guard-compliant tick: S8 + S10 verified (CSV fixed, upsert XSS ok) and closed; S4/S7 left untouched per sentinel; glm workers steered to wrap up after 580k combined tokens"
     }
   ],
   "guidance": [

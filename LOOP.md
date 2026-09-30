@@ -324,3 +324,19 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · vet: S4 routes 200 (unattributed), S7 in flight · status: 8 done, 3 in-progress
   · next up: last two workers report -> ONE authoritative post-wave pass, batched Jev
   triage, then QA.
+- 2026-09-30 · tick 13 (fired tick) · **Guard-compliant tick: S8 + S10 verified and closed;
+  S4/S7 deliberately untouched.** The sentinel listed s4-scheduling and s7-transcripts as
+  in flight, so this tick verified only unlisted slices and wrote no FAILs — exactly what
+  the hardened protocol prescribes. **S8 reports PASS by execution**: five report routes
+  200; the CSV export that tick 11 found broken now returns 200 `text/csv` with a correct
+  quoted header and 26 rows for the roster report — the `cellOf()` fix is real in the
+  current tree. **S10 discipline/health PASS**: five routes 200; incident POST persisted;
+  health-flag POST twice upserted to exactly one row; XSS probe on the incidents filter
+  echoed escaped (0 raw script tags); all tick-13 probe rows deleted afterwards. Both are
+  now `done` (S10 second-pass clean). **New problem logged: worker cost blowout.** S4 spent
+  268.8k tokens and S7 314.9k (siblings: 60–130k) over ~34 minutes with few tool calls and
+  no recent file writes — reasoning spin rather than productive work. Both were steered to
+  finish their current file and report instead of continuing to explore; their slices stay
+  `in-progress` and the sentinel stays up until they land.
+  · vet: S8 pass, S10 pass (7/12 first-pass overall) · status: 10 done, 2 in-progress (S4, S7)
+  · next up: clear the sentinel once S4/S7 report, then the authoritative post-wave pass.
