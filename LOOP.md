@@ -397,3 +397,18 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   in-progress, 1 queued (QA)** · metrics 7/14 first-pass · next up: QA — walk the six
   `knownGaps`, delete the orphan `students/search.ejs`, and write `BUILD-REPORT.md`, then
   close the run.
+- 2026-09-30 · tick 18 (coordinator) · **Final QA slice dispatched** (`qa-final`,
+  flash-fleet) — the last item in the run. Brief carries the six `knownGaps` inline because
+  workers cannot read run-state files, and includes one genuine upgrade rather than a
+  document-only walk: **gap 5 is now fixable** because S4 built `section_roster` (224 rows),
+  so the attendance grid can roster the students actually in a section instead of
+  approximating with the whole school. QA also runs the full route sweep, deletes the
+  orphan `students/search.ejs`, and writes `BUILD-REPORT.md` (per-module screens, exact
+  verification commands, honest metrics, a click-through demo script). Sentinel updated to
+  list `qa-final` so fired ticks leave it alone. Also re-armed the heartbeat as `bd1b51ec`
+  with a clause disowning non-coordinator readers, after the S4 post-mortem showed a leaked
+  tick prompt burned **350k tokens** in a worker that was refusing it correctly — the lane
+  files now cap that response at one line.
+  · vet: pending · status: 12 done, 1 in-progress (QA) · metrics 7/14 first-pass
+  · next up: verify QA by execution, close the run (BUILD-REPORT.md + LOOP.md CLOSED),
+  cancel the heartbeat.

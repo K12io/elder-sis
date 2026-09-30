@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 17,
+  "tick": 18,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -418,15 +418,15 @@
         "all claimed screens"
       ],
       "refweight": 0,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": " | Must additionally: (a) remove the orphan src/views/students/search.ejs (the /search route renders students/index), (b) verify every entry in registry.knownGaps is either fixed or documented in BUILD-REPORT.md."
+      "notes": "Final QA pass dispatched to flash-fleet (qa-final): attendance roster fix using the new section_roster table (closes gap 5), run-wide route sweep, six-gap walk, orphan students/search.ejs deletion, BUILD-REPORT.md. Owns src/routes/attendance.js + src/views/attendance/* + BUILD-REPORT.md only."
     }
   ],
   "metrics": {
-    "ticks": 17,
+    "ticks": 18,
     "firstPassVetPass": 7,
     "firstPassVetTotal": 14,
     "retries": 3,
@@ -505,6 +505,10 @@
     {
       "tick": 17,
       "note": "S4 closed by coordinator verification (worker lost after 308k tokens, no report); all write paths verified incl. conflict refusal and unassign"
+    },
+    {
+      "tick": 18,
+      "note": "QA dispatched (qa-final, flash-fleet): attendance roster fix + run-wide sweep + gap walk + BUILD-REPORT.md"
     }
   ],
   "guidance": [
@@ -565,8 +569,10 @@
     }
   ],
   "wave": {
-    "active": [],
-    "note": "wave closed; s4-scheduling worker stuck/deemed lost at 308k tokens with no writes; artifacts verified independently",
-    "closedAt": "tick 16"
+    "active": [
+      "qa-final (flash-fleet)"
+    ],
+    "note": "final QA wave",
+    "dispatchedAt": "tick 18"
   }
 }
