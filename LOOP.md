@@ -306,3 +306,21 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   · vet: S8 pass, S10 pass, S4/S7 pending re-verification · status: 8 done, 4 in-progress
   · next up: wait for the three remaining workers, then ONE authoritative post-wave pass
   (all slices quiet), batched Jev triage, then QA.
+- 2026-09-30 · tick 12 (fired tick) + coordinator notes · **In-flight guard did NOT hold —
+  recorded as a guard failure.** Tick 12 saw S4's four missing views (catalog, master,
+  student, section — the ones tick 11 flagged) and, per its evidence, *supplied* them;
+  the S4 worker was still running at the time, so the tick knowingly acted on an in-flight
+  slice and may have raced the worker's own writes to the same files. Outcome is
+  currently healthy (all of S4's routes verify 200, S7's route is 561 lines with gpa/post
+  views landing) but **provenance is ambiguous** — the views exist and verify; whether the
+  worker or the tick authored the surviving bytes is unresolved, so neither gets credited.
+  Two hardening steps taken: (1) every lane definition now explicitly FORBIDS reading or
+  modifying run-state files (LOOP.md, registry.json, evidence/, .pi-loop.json) and sibling
+  modules' sources — one worker spent 294k tokens reading run state and started grading its
+  siblings, which the prohibition addresses at the source; (2) `wave.active` refreshed to
+  the two genuinely-running workers. Still open: the guard is advisory (a JSON field plus
+  prose), and a fired tick in a fresh context evidently did not honour it — a mechanical
+  sentinel file that ticks must check is the likely fix, noted for the next hardening pass.
+  · vet: S4 routes 200 (unattributed), S7 in flight · status: 8 done, 3 in-progress
+  · next up: last two workers report -> ONE authoritative post-wave pass, batched Jev
+  triage, then QA.

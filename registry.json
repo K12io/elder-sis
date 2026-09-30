@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 11,
+  "tick": 12,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -461,6 +461,10 @@
     {
       "tick": 11,
       "note": "tick 11 verified wave 2 mid-flight: S8 PASS (CSV bug found+fixed), S10 PASS, S4/S7 verdicts PRELIMINARY (workers still running) -> race recorded, wave marker added"
+    },
+    {
+      "tick": 12,
+      "note": "fired tick 12 acted on in-flight S4 (wrote/verified its 4 missing views) \u2014 guard did not hold; provenance with the S4 worker is ambiguous; recorded, not credited"
     }
   ],
   "guidance": [
@@ -523,10 +527,9 @@
   "wave": {
     "active": [
       "s4-scheduling (glm-swarm)",
-      "s7-transcripts (glm-swarm)",
-      "s8-reports (flash-fleet)"
+      "s7-transcripts (glm-swarm)"
     ],
-    "dispatchedAt": "2026-09-30 tick 10",
-    "rule": "While wave.active is non-empty, a tick must NOT verify slices whose workers are still running, and must NOT dispatch replacements."
+    "note": "s8-reports finished; s4/s7 still landing files. IN-FLIGHT GUARD applies.",
+    "dispatchedAt": "2026-09-30 tick 10"
   }
 }
