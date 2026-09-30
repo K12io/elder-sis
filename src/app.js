@@ -52,6 +52,7 @@ app.use("/grading", gradingRouter);
 app.use("/grades", gradesRouter);
 app.use("/reports", reportsRouter);
 app.use("/admin", adminRouter);
+app.use('/administration', adminRouter);
 
 const port = Number(process.env.PORT) || 3000;
 
