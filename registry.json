@@ -1,0 +1,298 @@
+{
+  "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
+  "created": "2026-09-30T01:48:36Z",
+  "status": "open",
+  "tick": 0,
+  "stack": {
+    "decision": "proposed",
+    "value": "Express + EJS (server-rendered) + SQLite (better-sqlite3), no build step",
+    "alternatives": [
+      "Next.js + SQLite",
+      "Vite React SPA + Express API"
+    ]
+  },
+  "reference": {
+    "catalog": "reference/catalog-data.js",
+    "structure": "window.SIS_ASSETS=(()=>{const d={keys,tables,rows};...})() \u2014 dictionary-encoded; tables[i] is column i's value dict, rows are index arrays",
+    "totalAssets": 8195,
+    "topModules": {
+      "grading": 1593,
+      "scheduling": 1521,
+      "attendance": 611,
+      "student-records": 589,
+      "grades-and-transcripts": 544
+    },
+    "canonicalStyleVendors": [
+      "PowerSchool",
+      "Aeries",
+      "Skyward",
+      "Synergy",
+      "Focus"
+    ]
+  },
+  "items": [
+    {
+      "id": "S0",
+      "title": "Bootstrap: decide stack, scaffold app, extract design system from reference captures",
+      "surface": "navigation",
+      "dependsOn": [],
+      "files": [
+        "package.json",
+        "src/",
+        "db/",
+        ".gitignore"
+      ],
+      "screens": [
+        "chrome: header/nav/tabs/footer, table styles, form styles"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S1",
+      "title": "Shell + main navigation (old-fashioned SIS chrome)",
+      "surface": "navigation",
+      "dependsOn": [
+        "S0"
+      ],
+      "files": [
+        "src/app.js",
+        "src/views/layout.ejs",
+        "public/css/"
+      ],
+      "screens": [
+        "navigation"
+      ],
+      "refweight": 134,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S2",
+      "title": "Student records: search roster + student 360 (demographics, contacts, enrollment history, alerts)",
+      "surface": "student-records",
+      "dependsOn": [
+        "S1"
+      ],
+      "files": [
+        "src/routes/students.js",
+        "src/views/students/",
+        "db/seed.sql"
+      ],
+      "screens": [
+        "Find a student and understand their situation"
+      ],
+      "refweight": 589,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S3",
+      "title": "Enrollment: new student registration / admit-enroll-withdraw",
+      "surface": "enrollment",
+      "dependsOn": [
+        "S2"
+      ],
+      "files": [
+        "src/routes/enrollment.js",
+        "src/views/enrollment/"
+      ],
+      "screens": [
+        "Admit, enroll, move, or withdraw a student"
+      ],
+      "refweight": 117,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S4",
+      "title": "Scheduling: course catalog, sections, student schedules, conflict display",
+      "surface": "scheduling",
+      "dependsOn": [
+        "S3"
+      ],
+      "files": [
+        "src/routes/scheduling.js",
+        "src/views/scheduling/"
+      ],
+      "screens": [
+        "Build and repair schedules"
+      ],
+      "refweight": 1521,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S5",
+      "title": "Attendance: teacher grid + office corrections/mass entry",
+      "surface": "attendance",
+      "dependsOn": [
+        "S3"
+      ],
+      "files": [
+        "src/routes/attendance.js",
+        "src/views/attendance/"
+      ],
+      "screens": [
+        "Record and correct attendance"
+      ],
+      "refweight": 611,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S6",
+      "title": "Grading: assignment setup, categories/weights, score grid, missing/exempt, bulk fill, publish",
+      "surface": "grading",
+      "dependsOn": [
+        "S4"
+      ],
+      "files": [
+        "src/routes/grading.js",
+        "src/views/grading/"
+      ],
+      "screens": [
+        "Create assignments and enter scores rapidly"
+      ],
+      "refweight": 1593,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S7",
+      "title": "Grades & transcripts: final grades, GPA, transcript + report card preview/post",
+      "surface": "grades-and-transcripts",
+      "dependsOn": [
+        "S6"
+      ],
+      "files": [
+        "src/routes/grades.js",
+        "src/views/grades/"
+      ],
+      "screens": [
+        "Produce the academic record of record"
+      ],
+      "refweight": 544,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S8",
+      "title": "Reporting: parameter-dialog reports (roster, attendance summary, transcript batch), CSV/print",
+      "surface": "reporting",
+      "dependsOn": [
+        "S2",
+        "S5"
+      ],
+      "files": [
+        "src/routes/reports.js",
+        "src/views/reports/"
+      ],
+      "screens": [
+        "Build and distribute operational reports"
+      ],
+      "refweight": 316,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S9",
+      "title": "Administration: school year/terms, grade levels, attendance/grade codes, users + role matrix",
+      "surface": "administration",
+      "dependsOn": [
+        "S1"
+      ],
+      "files": [
+        "src/routes/admin.js",
+        "src/views/admin/"
+      ],
+      "screens": [
+        "Configure a school year and access"
+      ],
+      "refweight": 338,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "S10",
+      "title": "Stretch: discipline incidents + health encounters",
+      "surface": "discipline",
+      "dependsOn": [
+        "S2"
+      ],
+      "files": [
+        "src/routes/discipline.js",
+        "src/views/discipline/"
+      ],
+      "screens": [
+        "Record health, discipline, and support work"
+      ],
+      "refweight": 317,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    },
+    {
+      "id": "QA",
+      "title": "Final verification pass: every screen renders + writes work, Jev-vetted, BUILD-REPORT.md written",
+      "surface": "all",
+      "dependsOn": [
+        "S9"
+      ],
+      "files": [
+        "BUILD-REPORT.md"
+      ],
+      "screens": [
+        "all claimed screens"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": ""
+    }
+  ],
+  "metrics": {
+    "ticks": 0,
+    "firstPassVetPass": 0,
+    "firstPassVetTotal": 0,
+    "retries": 0,
+    "blockedCount": 0
+  },
+  "blockers": [],
+  "changelog": []
+}
