@@ -452,7 +452,7 @@
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Adds scrypt password hashes to app_users, a session table, login/logout and requireAuth/requireRole middleware. Coordinator wires app.js + header nav afterwards (shared files). Lane: flash-fleet."
+      "notes": "Adds scrypt password hashes to app_users, a session table, login/logout and requireAuth/requireRole middleware. Coordinator wires app.js + header nav afterwards (shared files). Lane: flash-fleet. | REPORT (flash-fleet, 57k tokens): exemplary. scrypt$salt$key format documented with a worked example; login 302 with HttpOnly+SameSite=Lax 12h cookie; /auth/me with/without cookie; logout clears; wrong password AND unknown user both return the same generic 200 message (no user enumeration); session create/delete proven in SQL; expired+inactive sessions rejected and rows deleted; middleware proven via a harness (requireAuth 302 with next=, requireRole 403 styled page); 4 idempotent boots with hashes unchanged. HANDOFFS: attachUser NOT wired into app.js (coordinator job) and src/views/admin/users.ejs still says 'passwords are out of scope' \u2014 copy its slice has now falsified. Boot-verify deferred to the post-wave pass."
     },
     {
       "id": "F2",
@@ -547,8 +547,17 @@
       ],
       "refweight": 0,
       "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT pending coordinator boot-verify (worker verification was unusually rigorous and my static pre-flight agrees).",
+        "notes": "4 tables/seed guarded; 0/429 formula mismatches against its documented deterministic math and banding; scores per assessment exactly match in-range student counts (60/139/101/129); POST ignored a client-sent false performance level and recomputed server-side; out-of-range score -> 400 with rollback and nothing written; CSV 200 text/csv with filename; idempotent across two boots; static pre-flight: renders resolve, fields match, shared files untouched. Honest limits: level dropdown is informational (server recomputes), blank input leaves a score untouched rather than clearing it."
+      },
+      "evidence": [
+        "worker report (formula audit 0/429 mismatches)",
+        "coordinator static pre-flight"
+      ],
       "failedTicks": 0,
       "notes": "State-assessment style scores with summaries; seeded synthetic data. Lane: flash-fleet."
     },
@@ -571,6 +580,33 @@
       "evidence": [],
       "failedTicks": 0,
       "notes": "Surfaced by F2's report: section_roster rows exist only for elementary sections (36-42) which have no grade assignments, while sections with scores (e.g. 1) have no roster rows. Consequence: no screen can show a student who is BOTH enrolled in a section AND graded in it, so teacher standings, portal grades and the grading->transcript path all render empty/em-dash states in the demo. Fix: an idempotent migration that assigns rosters to the sections that already have categories/assignments/scores (and a few attendance rows), so at least 3-4 sections are fully coherent end to end. Dispatch after wave 3 so migrations do not collide."
+    },
+    {
+      "id": "F8",
+      "title": "Auth integration: wire attachUser, nav tabs for wave-3 modules, role-gated nav, fix falsified admin copy",
+      "surface": "integration",
+      "dependsOn": [
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "F5",
+        "F6"
+      ],
+      "files": [
+        "src/app.js",
+        "src/views/partials/header.ejs",
+        "src/views/admin/users.ejs"
+      ],
+      "screens": [
+        "global chrome + access control"
+      ],
+      "refweight": 0,
+      "status": "queued",
+      "vet": null,
+      "evidence": [],
+      "failedTicks": 0,
+      "notes": "Coordinator-owned integration after wave 3: (1) insert app.use(attachUser) before the route auto-mount in src/app.js; (2) add nav tabs for Teacher, Portal, Communications, Fees, Assessment; (3) gate nav items by the signed-in user's roles/modules (app_roles.visible_modules) and wrap the sensitive module mounts in requireRole where appropriate; (4) update src/views/admin/users.ejs, which still claims passwords are out of scope \u2014 false since F1 landed. Closes knownGaps 1 and 2 (auth, role-gated nav)."
     }
   ],
   "metrics": {
@@ -677,6 +713,10 @@
     {
       "tick": 22,
       "note": "F2 reported (free lane success); new item F7 raised: seed coherence across roster/grades/attendance"
+    },
+    {
+      "tick": 22,
+      "note": "F1 + F6 reported; F8 raised (auth integration: wiring, nav tabs, role gating, falsified admin copy)"
     }
   ],
   "guidance": [

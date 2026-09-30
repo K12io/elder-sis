@@ -497,3 +497,18 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   fixed by an idempotent migration after wave 3 so migrations do not collide. This is exactly
   the class of problem per-slice verification cannot see: every slice passed, the system does
   not cohere. Boot-verify for F2 stays deferred until the wave's writers stop.
+- 2026-09-30 · tick 22c (coordinator) · **F1 (auth) and F6 (assessment) landed; both reports are the
+  strongest of the run, and both fed new integration work.** F1's verification was exemplary: the exact
+  `scrypt$salt$key` format with a worked example, login returning a 302 with an `HttpOnly; SameSite=Lax`
+  12-hour cookie, `/auth/me` with and without the cookie, logout clearing it, **wrong password and unknown
+  user both returning the same generic message** (no user enumeration), session create/delete proven in SQL,
+  expired and inactive sessions rejected *and deleted*, middleware proven through a real harness
+  (`requireAuth` -> 302 with `next=`, `requireRole` -> styled 403), and four idempotent boots with hashes
+  unchanged. F6 proved its own seed determinism with a **0/429 mismatch audit**, ignored a client-supplied
+  false performance level and recomputed server-side, and returned 400 with a rollback for an out-of-range
+  score. Two hand-offs became tracked work: F1 left `attachUser` unwired (coordinator job, by instruction)
+  and flagged that `src/views/admin/users.ejs` still says "passwords are out of scope" — copy its own slice
+  has now falsified. Both are folded into **F8 (auth integration)**: wire the middleware, add nav tabs for
+  the five new modules, gate nav by role/`visible_modules`, and fix the falsified copy — which also closes
+  knownGaps 1 and 2 (no auth; role visibility descriptive only). Per-slice verification cannot catch either
+  hand-off; this is the third cross-slice consistency find of the wave (after F2's seed incoherence).
