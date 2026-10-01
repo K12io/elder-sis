@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "deployed",
-  "tick": 36,
+  "tick": 38,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -844,7 +844,7 @@
     }
   ],
   "metrics": {
-    "ticks": 36,
+    "ticks": 38,
     "firstPassVetPass": 22,
     "firstPassVetTotal": 29,
     "retries": 3,
@@ -1003,6 +1003,14 @@
     {
       "tick": 36,
       "note": "Items 6-7 LIVE: https://elder.k12.io serving Elder 200s (healthz ok/db up 5/5). DNS record created by external-dns from ingress annotation (6 LB IPs); TLS cert-manager letsencrypt-prod issued CN=elder.k12.io valid 2026-10-01..12-30. Role gates verified live (teacher /admin 403, /teacher 200). CSV exports stream real rows."
+    },
+    {
+      "tick": 37,
+      "note": "CSS 404 on live fixed: Dockerfile never COPY'd public/ (app.js serves express.static(public)); the old image returned the HTML 404 page for /css/app.css -> strict-MIME browser error. Shipped c1a8b19; /css/app.css now 200 text/css 18,182 bytes."
+    },
+    {
+      "tick": 38,
+      "note": "Security: default-deny auth. All modules now requireAuth except auth/login flow; public = /, /healthz, static CSS. Anonymous routes 302 to /auth/login?next=<path> (query preserved). Role gates unchanged (teacher /admin 403). Verified locally; shipped live."
     }
   ],
   "guidance": [

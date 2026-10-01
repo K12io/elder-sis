@@ -50,12 +50,14 @@ app.get("/healthz", async (req, res) => {
 const ROUTES_DIR = path.join(__dirname, "routes");
 const ROUTE_ALIASES = { admin: ["/administration"] };
 
-// Modules that require a signed-in user, and which roles may open them.
-// Everything not listed stays public so the demo remains walkable end to end.
+// Default-deny: every module requires a signed-in user unless listed in
+// PUBLIC_MODULES. Open surfaces are only the landing page, /healthz (k8s probes),
+// static CSS and the auth flow itself. Role gates layer on top via GATED.
+const PUBLIC_MODULES = new Set(["auth"]);
 const GATED = {
-  admin: [requireAuth, requireRole("Administrator")],
-  fees: [requireAuth, requireRole("Administrator", "Registrar")],
-  discipline: [requireAuth, requireRole("Administrator", "Counselor", "Teacher", "Registrar")],
+  admin: [requireRole("Administrator")],
+  fees: [requireRole("Administrator", "Registrar")],
+  discipline: [requireRole("Administrator", "Counselor", "Teacher", "Registrar")],
 };
 {
   const files = readdirSync(ROUTES_DIR).filter((f) => f.endsWith(".js")).sort();
@@ -64,8 +66,9 @@ const GATED = {
     const mod = await import(path.join(ROUTES_DIR, file));
     const router = mod.default;
     if (!router) continue;
-    app.use(`/${name}`, ...(GATED[name] ?? []), router);
-    for (const alias of ROUTE_ALIASES[name] ?? []) app.use(alias, ...(GATED[name] ?? []), router);
+    const middleware = PUBLIC_MODULES.has(name) ? [] : [requireAuth, ...(GATED[name] ?? [])];
+    app.use(`/${name}`, ...middleware, router);
+    for (const alias of ROUTE_ALIASES[name] ?? []) app.use(alias, ...middleware, router);
   }
 }
 
