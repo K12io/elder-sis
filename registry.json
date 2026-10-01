@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 27,
+  "tick": 28,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -825,17 +825,28 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "in-progress",
-      "vet": null,
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 coordinator verification: class layer served, patterns present in rendered HTML, all routes still 200, behaviour preserved.",
+        "notes": "Visual fidelity pass against 15 screen-type captures (reference/captures-v1/) via the delta spec reference/v1-screen-deltas.md. Verified: all 14 new utility classes are in the served stylesheet (sis-bar, sis-resultsbar, sis-stepper, sis-status-ok/bad, sis-band, sis-rail, sis-accordion, sis-pill, sis-actionbar, sis-filters, sis-caret, sis-bar-actions, sis-button-primary-danger); the patterns appear in rendered HTML per screen (students results-bar, attendance grid bar+results-bar, master schedule stepper + 3 circular status icons, reports rail + results-bar + 3 grouped band headers on the attendance summary, grading setup 9 accordions, transcript bar + action bar, portal stepper, admin rail + accordions + pills on all four admin pages authenticated); every route still 200 (the 302s are correct auth gating for anonymous requests); CSV export still text/csv with the expected header; no client-side JavaScript added and all inert controls are noted in-page.",
+        "evidence": [
+          "reference/v1-screen-deltas.md",
+          "reference/captures-v1/ (15 captures)",
+          "coordinator tick-28 verification"
+        ]
+      },
       "evidence": [],
       "failedTicks": 0,
       "notes": "Lane: coordinator + flash-fleet. Harvest ~14 captures covering each screen type, review them, write a delta spec, then apply: criteria panels, tab strips, grid density, print views. | 15 screen-type captures harvested to reference/captures-v1/ (search criteria, profile, results grid, score grid, grading setup, attendance grid, attendance office, master schedule, transcript/report card, report parameters, admin table, portal, discipline, fees, assessment). Next: visual review -> delta spec -> application."
     }
   ],
   "metrics": {
-    "ticks": 27,
-    "firstPassVetPass": 21,
-    "firstPassVetTotal": 28,
+    "ticks": 28,
+    "firstPassVetPass": 22,
+    "firstPassVetTotal": 29,
     "retries": 3,
     "blockedCount": 0
   },
@@ -960,6 +971,10 @@
     {
       "tick": 27,
       "note": "D2+D3 verified done: 42/42 sections graded, 15,215 scores, 20,204 attendance rows, idempotent. V1 captures harvested (15 screen types)."
+    },
+    {
+      "tick": 28,
+      "note": "V1 verified done (screen fidelity applied and rendered); remaining: BUILD-REPORT refresh + final sweep"
     }
   ],
   "guidance": [
