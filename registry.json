@@ -1,8 +1,8 @@
 {
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
-  "status": "complete",
-  "tick": 34,
+  "status": "deployed",
+  "tick": 36,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -844,7 +844,7 @@
     }
   ],
   "metrics": {
-    "ticks": 34,
+    "ticks": 36,
     "firstPassVetPass": 22,
     "firstPassVetTotal": 29,
     "retries": 3,
@@ -995,6 +995,14 @@
     {
       "tick": 33,
       "note": "Item 5: DB 'elder' provisioned on shared k8s postgres (k12io DBs: k12_sis/k12io_production/sleeperhitlist_production; k12io prod moved to Neon). FRESH-DB BUG FOUND+FIXED in src/db.js: data migrations 30-35 INSERT..SELECT rows derived from base tables that JS seeds create only AFTER the migration pass, so a first-ever boot left roster/grades/attendance empty (0 rows). Historic 'idempotent' verdicts were measured on an already-populated DB - never on empty. Fix: fresh path runs two post-seed migration passes; boot2-symbol convergence proven (file 33's status messiness reshapes file 31's derived gradebook windows). Verified boot1==boot2 on empty DB: roster 919 / scores 18,051 (14,841 NUM, 2,127 M, 1,083 X) / attendance 19,848 / recipients 1,674 / 44,314 rows; cluster DB at steady state. BUILD-REPORT 2 + README numbers refreshed to deterministic values."
+    },
+    {
+      "tick": 35,
+      "note": "Item 6 SHIP: image timheckel/elder-sis:af99029 (linux/amd64 rebuild after arm64-only manifest broke pulls: 'no match for platform') pushed to Docker Hub; apply.sh rolled out on k12io-production; pod serving."
+    },
+    {
+      "tick": 36,
+      "note": "Items 6-7 LIVE: https://elder.k12.io serving Elder 200s (healthz ok/db up 5/5). DNS record created by external-dns from ingress annotation (6 LB IPs); TLS cert-manager letsencrypt-prod issued CN=elder.k12.io valid 2026-10-01..12-30. Role gates verified live (teacher /admin 403, /teacher 200). CSV exports stream real rows."
     }
   ],
   "guidance": [
