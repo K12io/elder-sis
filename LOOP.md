@@ -589,3 +589,17 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   limitations. Final totals: 15 routers, 100 route handlers, 63 views, 20 idempotent migrations.
   Run metrics: 22/29 first-pass, 3 retries, 0 blocked. Heartbeat cancelled; the run is complete
   and the repository is the deliverable.
+
+- 2026-10-01 · deploy loop · **ELDER LIVE at https://elder.k12.io.** All 8 deploy items done:
+  (1) recon of the k12io pattern (k3s + Traefik + cert-manager letsencrypt-prod + external-dns +
+  Docker Hub + secret-injection deploys) → reference/deploy-recon.md (kept local, repo is public);
+  (2) workers' orphans killed, product renamed **Elder**, pushed to github.com/K12io/elder-sis;
+  (3) Dockerfile (node:26-alpine, 270MB, /healthz probe contract fixed by verification);
+  (4) deploy/k3/{prod.yml,apply.sh,README} — server-side dry-run passed before applying;
+  (5) DB `elder` on k12io-postgres (k12io prod itself moved to Neon) — **fresh-DB bug found+fixed**
+  (data migrations drew from base tables JS seeds create only later; fresh path now does two
+  post-seed migration passes; boot1 == boot2 on an empty DB: 44,314 rows, scores 18,051);
+  (6) image timheckel/elder-sis:af99029 (linux/amd64 — first push was arm64-only and broke pulls);
+  (7) DNS via external-dns (6 LB IPs) + Let's Encrypt cert (valid 2026-10-01..12-30);
+  (8) live smoke of BUILD-REPORT §4: all routes 200, role gates 302/403/200, CSV exports stream
+  real rows. Registry status: deployed.
