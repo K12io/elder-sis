@@ -1,0 +1,130 @@
+# Elder (elder-sis) production Kubernetes deployment — mirrors the k12io pattern
+# (see reference/deploy-recon.md and k12io's packages/web/k3/prod.yml).
+#
+# Placeholders resolved at deploy time (sed/base64) by deploy/k3/apply.sh or CI —
+# NEVER commit real values:
+#   ELDER_DATABASE_URL_B64   -> base64 DATABASE_URL
+#   IMAGE_LABEL              -> image tag (e.g. git sha)
+#
+# Registry secret `k12iocreds` already exists in namespace default (created by the
+# k12io deploy) and is reused via imagePullSecrets — not redefined here.
+---
+# Application secrets (injected at deploy time)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: elder-prodenvs
+  namespace: default
+data:
+  DATABASE_URL: ELDER_DATABASE_URL_B64
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elder-prod
+  namespace: default
+  labels:
+    app: elder-prod
+spec:
+  # Single replica + Recreate on purpose: the app applies its idempotent
+  # migrations at boot. Recreate guarantees only one pod runs migrations at a
+  # time and the demo can tolerate a few seconds of restart downtime.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: elder-prod
+  template:
+    metadata:
+      labels:
+        app: elder-prod
+    spec:
+      imagePullSecrets:
+        - name: k12iocreds
+      containers:
+        - name: elder
+          image: timheckel/elder-sis:IMAGE_LABEL
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: elder-prodenvs
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elder-prod-service
+  namespace: default
+  labels:
+    app: elder-prod-service
+  annotations:
+    traefik.ingress.kubernetes.io/affinity: "true"
+    traefik.ingress.kubernetes.io/session-cookie-name: "sticky"
+spec:
+  type: ClusterIP
+  selector:
+    app: elder-prod
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+# Ingress: elder.k12.io — TLS via cert-manager (letsencrypt-prod), DNS via
+# external-dns (Cloudflare proxy disabled so ACME HTTP-01 reaches the cluster).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: elder-prod-ingress
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    external-dns.alpha.kubernetes.io/hostname: "elder.k12.io"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - elder.k12.io
+      secretName: elder-tls-cert
+  rules:
+    - host: elder.k12.io
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: elder-prod-service
+                port:
+                  number: 80
