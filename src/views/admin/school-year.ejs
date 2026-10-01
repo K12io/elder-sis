@@ -11,6 +11,13 @@
   <% } %>
 </div>
 
+<div class="sis-rail" style="margin:6px 0;width:auto;">
+  <a href="/admin/school-year" class="current">School Year</a>
+  <a href="/admin/codes">Codes</a>
+  <a href="/admin/users">Users</a>
+  <a href="/admin/roles">Roles</a>
+</div>
+
 <% if (message) { %>
   <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
     <span class="meta-strong">Saved:</span> <%= message %>
@@ -66,8 +73,11 @@
 </div>
 
 <div class="sis-box">
-  <div class="sis-box-title">Add Term</div>
-  <div class="sis-box-body">
+  <div class="sis-accordion">
+    <span>Add Term</span>
+    <span class="sis-accordion-chevron" title="Inert in this demo">&#9656;</span>
+  </div>
+  <div class="sis-accordion-body">
     <form action="/admin/school-year" method="post">
       <table class="sis-table kv">
         <tr>
@@ -84,11 +94,11 @@
         </tr>
         <tr>
           <th>&nbsp;</th>
-          <td><button type="submit" class="sis-button-go">Add term</button></td>
+          <td><button type="submit" class="sis-pill sis-pill-go">Add term</button></td>
         </tr>
       </table>
     </form>
-    <p class="fineprint">Dates use YYYY-MM-DD. New terms default to district-wide (all schools).</p>
+    <p class="fineprint">Dates use YYYY-MM-DD. New terms default to district-wide (all schools). Accordion rows render expanded; collapsing is inert in this demo (no client-side JavaScript).</p>
   </div>
 </div>
 

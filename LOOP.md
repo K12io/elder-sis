@@ -577,3 +577,15 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   screen-type captures are now harvested into `reference/captures-v1/` covering search criteria,
   profile, results grid, score grid, grading setup, attendance grid, office, master schedule,
   transcript, report parameters, admin table, portal, discipline, fees and assessment.
+- 2026-09-30 · tick 29 (coordinator) · **RUN CLOSED — 28 of 28 items done.** Final sweep green:
+  47 registered public routes all 200; role enforcement correct (anonymous `/admin` 302, teacher
+  `/admin` 403 while `/teacher` 200, admin `/fees` 200); four CSV exports return 200.
+  `BUILD-REPORT.md` rewritten for the operator's actual purpose — this app is the **legacy side of
+  a data-migration demo**, so the report now documents the extractable data inventory (~42,000
+  rows across 38 tables: 300 students/900 enrollments/15,215 scores/20,204 attendance rows/600 fee
+  assignments/1,676 announcement recipients...), the deliberate messiness a mapper must handle
+  (withdrawn students, mid-year entrants, duplicate names, NULL fields, missing score rows,
+  attendance gaps, partial payments, an inactive account), a 10-step demo script, and honest
+  limitations. Final totals: 15 routers, 100 route handlers, 63 views, 20 idempotent migrations.
+  Run metrics: 22/29 first-pass, 3 retries, 0 blocked. Heartbeat cancelled; the run is complete
+  and the repository is the deliverable.

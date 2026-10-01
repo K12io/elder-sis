@@ -26,6 +26,28 @@
   <div class="sis-box-body">
 
     <% var clashKeys = []; for (var p of periods) for (var t of teachers) if (teacherClash.has(p + ':' + t.id)) clashKeys.push(p + ':' + t.id); %>
+    <% var teacherIds = teachers.map(function (t) { return t.id; }); %>
+
+    <!-- P8: results bar above the grid -->
+    <div class="sis-resultsbar" style="margin-bottom:6px;">
+      <span class="sis-results-count"><%= sections.length %> section<%= sections.length === 1 ? '' : 's' %> &middot; <%= teachers.length %> teacher<%= teachers.length === 1 ? '' : 's' %></span>
+      <span class="sis-results-actions">
+        <a class="sis-btn-secondary" href="/scheduling/catalog" title="Open the course catalog">Catalog</a>
+      </span>
+      <div class="clear"></div>
+    </div>
+
+    <!-- P6: teacher stepper bar with real prev/next links (school filter preserved) -->
+    <div class="sis-stepper">
+      <a class="sis-step-arrow" href="/scheduling/master?school=<%= schoolId %>&amp;teacher=<%= teacherIds.length ? teacherIds[teacherIds.length - 1] : '' %>"
+         title="Previous teacher">&lsaquo;</a>
+      <span class="sis-step-label">Teacher</span>
+      <span class="sis-step-menu" title="teacher picker is not implemented in this demo">&#9662;</span>
+      <a class="sis-step-arrow" href="/scheduling/master?school=<%= schoolId %>&amp;teacher=<%= teacherIds.length ? teacherIds[0] : '' %>"
+         title="Next teacher">&rsaquo;</a>
+      &nbsp;<span class="fineprint"><%= teachers.length %> teacher<%= teachers.length === 1 ? '' : 's' %> at this school; the grid is school-scoped and the teacher picker is display-only in this demo.</span>
+      <div class="clear"></div>
+    </div>
 
     <% if (clashKeys.length) { %>
     <div class="sis-metabar" style="background:#fdf0ef; border-color:#c98a85; margin-bottom:6px;">
@@ -48,8 +70,10 @@
           <td class="num"><%= p %></td>
           <% teachers.forEach(function (t) { %>
           <% var isClash = teacherClash.has(p + ':' + t.id); %>
-          <td<% if (isClash) { %> style="background:#f8d7d5; border:2px solid #a94442;"<% } %>>
-            <% var here = sections.filter(function (s) { return s.teacher_id === t.id && s.period === p; }); %>
+          <% var here = sections.filter(function (s) { return s.teacher_id === t.id && s.period === p; }); %>
+          <td>
+            <% if (isClash) { %><span class="sis-status-bad" title="scheduling conflict">&#10005;</span>&nbsp;<% }
+               else if (here.length) { %><span class="sis-status-ok" title="in schedule">&#10003;</span>&nbsp;<% } %>
             <% here.forEach(function (s) { %>
               <div<% if (isClash) { %> class="sis-metabar" style="background:#fff3c4;"<% } %>>
                 <a href="/scheduling/section?section=<%= s.id %>"><%= s.course_name %></a>

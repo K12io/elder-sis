@@ -29,8 +29,11 @@
 <td class="col-left">
 
   <div class="sis-box">
-    <div class="sis-box-title">Assignments</div>
-    <div class="sis-box-body">
+    <div class="sis-accordion">
+      <span>Assignments</span>
+      <span class="sis-accordion-chevron" title="Inert in this demo">&#9656;</span>
+    </div>
+    <div class="sis-accordion-body">
       <table class="sis-table">
         <thead>
           <tr>
@@ -72,8 +75,11 @@
   </div>
 
   <div class="sis-box">
-    <div class="sis-box-title">New Assignment</div>
-    <div class="sis-box-body">
+    <div class="sis-accordion">
+      <span>New Assignment</span>
+      <span class="sis-accordion-chevron" title="Inert in this demo">&#9656;</span>
+    </div>
+    <div class="sis-accordion-body">
       <form method="post" action="/grading/setup">
         <input type="hidden" name="section" value="<%= section.id %>">
         <table class="kv">
@@ -92,9 +98,10 @@
           <tr><th>Points possible</th><td><input type="text" name="points" size="6" value="100"></td></tr>
           <tr><th>Due date</th><td><input type="text" name="due_on" size="12" placeholder="YYYY-MM-DD"></td></tr>
           <tr><th>Publish</th><td><input type="checkbox" name="published" value="1"> Release to students</td></tr>
-          <tr><th>&nbsp;</th><td><button type="submit" class="sis-button-go">Add Assignment</button></td></tr>
+          <tr><th>&nbsp;</th><td><button type="submit" class="sis-pill sis-pill-go">Add Assignment</button></td></tr>
         </table>
       </form>
+      <p class="fineprint">Accordion rows render expanded; collapsing is inert in this demo (no client-side JavaScript).</p>
     </div>
   </div>
 
@@ -102,8 +109,11 @@
 <td class="col-right">
 
   <div class="sis-box">
-    <div class="sis-box-title">Categories &amp; Weights</div>
-    <div class="sis-box-body">
+    <div class="sis-accordion">
+      <span>Categories &amp; Weights</span>
+      <span class="sis-accordion-chevron" title="Inert in this demo">&#9656;</span>
+    </div>
+    <div class="sis-accordion-body">
       <form method="post" action="/grading/categories">
         <input type="hidden" name="section" value="<%= section.id %>">
         <input type="hidden" name="action" value="save">
@@ -128,7 +138,7 @@
           </tbody>
         </table>
         <% if (categories.length) { %>
-          <p style="margin:6px 0;"><button type="submit" class="sis-button-go">Save Weights</button></p>
+          <p style="margin:6px 0;"><button type="submit" class="sis-pill sis-pill-go">Save Weights</button></p>
         <% } %>
       </form>
 
@@ -148,8 +158,9 @@
         <input type="text" name="name" size="14" required>
         <label>Weight:</label>
         <input type="text" name="weight" size="4" value="0">
-        <button type="submit" class="sis-button">Add</button>
+        <button type="submit" class="sis-pill">Add</button>
       </form>
+      <p class="fineprint">Accordion rows render expanded; collapsing is inert in this demo (no client-side JavaScript).</p>
     </div>
   </div>
 

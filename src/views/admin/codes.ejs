@@ -8,6 +8,13 @@
   &nbsp;|&nbsp; <span class="meta-label">Rules:</span> min &le; max, ranges may not overlap
 </div>
 
+<div class="sis-rail" style="margin:6px 0;width:auto;">
+  <a href="/admin/school-year">School Year</a>
+  <a href="/admin/codes" class="current">Codes</a>
+  <a href="/admin/users">Users</a>
+  <a href="/admin/roles">Roles</a>
+</div>
+
 <% if (message) { %>
   <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
     <span class="meta-strong">Saved:</span> <%= message %>
@@ -20,8 +27,11 @@
 <% } %>
 
 <div class="sis-box" style="margin-top:8px;">
-  <div class="sis-box-title">Grade Scale</div>
-  <div class="sis-box-body">
+  <div class="sis-accordion">
+    <span>Grade Scale</span>
+    <span class="sis-accordion-chevron" title="Inert in this demo">&#9656;</span>
+  </div>
+  <div class="sis-accordion-body">
     <form action="/admin/codes" method="post">
       <table class="sis-table">
         <thead>
@@ -57,10 +67,10 @@
         </tbody>
       </table>
       <p style="margin:6px 0 0;">
-        <button type="submit" class="sis-button-go">Save grade codes</button>
+        <button type="submit" class="sis-pill sis-pill-go">Save grade codes</button>
       </p>
     </form>
-    <p class="fineprint">Leave the bottom row blank to skip adding a new code. Percentages are stored with two decimals.</p>
+    <p class="fineprint">Leave the bottom row blank to skip adding a new code. Percentages are stored with two decimals. Accordion rows render expanded; collapsing is inert in this demo (no client-side JavaScript).</p>
   </div>
 </div>
 

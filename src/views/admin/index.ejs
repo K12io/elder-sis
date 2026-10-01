@@ -11,7 +11,23 @@
 
 <table class="layout">
 <tr>
-<td class="col-left">
+<td class="col-left" style="width:220px;vertical-align:top;">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Administration</div>
+    <div class="sis-box-body">
+      <div class="sis-rail">
+        <a href="/admin" class="current">Overview<span class="fineprint"> &mdash; all areas</span></a>
+        <a href="/admin/school-year">School Year<span class="fineprint"> &mdash; <%= counts.terms %> terms</span></a>
+        <a href="/admin/codes">Codes<span class="fineprint"> &mdash; <%= counts.codes %> codes</span></a>
+        <a href="/admin/users">Users<span class="fineprint"> &mdash; <%= counts.users %> users</span></a>
+        <a href="/admin/roles">Roles<span class="fineprint"> &mdash; <%= counts.roles %> roles</span></a>
+      </div>
+    </div>
+  </div>
+
+</td>
+<td class="col-right" style="vertical-align:top;">
 
   <div class="sis-box">
     <div class="sis-box-title">School Year</div>
@@ -30,9 +46,6 @@
          &nbsp;<span class="fineprint"><%= counts.codes %> codes</span></p>
     </div>
   </div>
-
-</td>
-<td class="col-right">
 
   <div class="sis-box">
     <div class="sis-box-title">Users</div>

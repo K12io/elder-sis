@@ -1,8 +1,8 @@
 {
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
-  "status": "open",
-  "tick": 28,
+  "status": "complete",
+  "tick": 29,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -844,7 +844,7 @@
     }
   ],
   "metrics": {
-    "ticks": 28,
+    "ticks": 29,
     "firstPassVetPass": 22,
     "firstPassVetTotal": 29,
     "retries": 3,
@@ -975,6 +975,10 @@
     {
       "tick": 28,
       "note": "V1 verified done (screen fidelity applied and rendered); remaining: BUILD-REPORT refresh + final sweep"
+    },
+    {
+      "tick": 29,
+      "note": "FINAL SWEEP green; BUILD-REPORT.md refreshed for the migration-demo purpose; RUN CLOSED (28/28)"
     }
   ],
   "guidance": [

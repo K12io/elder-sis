@@ -17,8 +17,7 @@
     .report-no-print { display: none !important; }
     .report-print-only { display: block !important; }
     .sis-metabar { border: none !important; }
-  }
-  .report-print-only { display: none; }
+  }  .report-print-only { display: none; }
   .report-actions { margin: 6px 0; }
   .report-actions .sis-button-go { text-decoration: none; display: inline-block; }
   .report-cols td { padding: 1px 10px 1px 2px; }
@@ -31,6 +30,15 @@
 </style>
 
 <div class="sis-page-title"><%= report.name %></div>
+
+<div class="report-no-print" style="margin:6px 0;">
+  <div class="sis-rail">
+    <% reports.forEach(function (rep) { %>
+      <a href="<%= rep.path %>"<%= rep.key === report.key ? ' class="current"' : '' %>><%= rep.name %></a>
+    <% }); %>
+    <a href="/reports">Saved reports</a>
+  </div>
+</div>
 
 <div class="sis-metabar">
   <span class="meta-label">Filters:</span>
@@ -56,8 +64,12 @@
 <% } %>
 
 <div class="sis-box report-no-print" style="margin-top:8px;">
-  <div class="sis-box-title">Report parameters</div>
-  <div class="sis-box-body">
+  <div class="sis-bar">
+    <span class="sis-bar-title">Report parameters</span>
+    <span class="sis-bar-actions"></span>
+    <span class="sis-caret" title="Inert in this demo">&#9662;</span>
+  </div>
+  <div class="sis-accordion-body">
     <form action="<%= report.path %>" method="get">
       <table class="sis-table kv">
         <tbody>
@@ -163,12 +175,15 @@
       </table>
       <button type="submit" class="sis-button-go">Run report</button>
     </form>
+    <p class="fineprint">The section-bar caret and the optional-columns panel below are shown expanded; collapsing is inert in this demo (no client-side JavaScript).</p>
   </div>
 </div>
 
-<div class="sis-box report-no-print">
-  <div class="sis-box-title">Optional columns</div>
-  <div class="sis-box-body">
+<div class="sis-box sis-accordion report-no-print">
+  <span>Optional columns</span>
+  <span class="sis-accordion-chevron" title="Inert in this demo">&#9656;</span>
+</div>
+<div class="sis-accordion-body report-no-print">
     <form action="<%= report.path %>" method="get">
       <!-- Re-submit current non-column params so the toggle is non-destructive. -->
       <% if (report.key === 'roster') { %>
@@ -208,7 +223,6 @@
       </table>
       <button type="submit" class="sis-button-go">Apply columns</button>
     </form>
-  </div>
 </div>
 
 <% if (note) { %>
@@ -218,24 +232,38 @@
 <% } %>
 
 <div class="sis-box">
-  <div class="sis-box-title"><%= report.name %> &mdash; Results</div>
-  <div class="sis-box-body">
-    <div class="report-actions report-no-print">
-      <a class="sis-button-go" href="<%= report.path %>?<%= queryString %>&format=csv">Export CSV</a>
-      &nbsp;
-      <a class="sis-button-go" href="<%= report.path %>?<%= queryString %>&print=1" target="_blank">Print view</a>
-    </div>
+  <div class="sis-bar">
+    <span class="sis-bar-title"><%= report.name %> &mdash; Results</span>
+    <span class="sis-bar-actions"></span>
+    <span class="sis-caret" title="Inert in this demo">&#9662;</span>
+  </div>
+  <div class="sis-accordion-body">
 
     <% if (printMode) { %>
     <p class="report-print-only"><strong><%= report.name %></strong> &mdash; generated from Valley View SIS. Use your browser's Print command to print this view.</p>
     <% } %>
 
-    <p class="fineprint">
-      <strong><%= rowCount %></strong> row<%= rowCount === 1 ? '' : 's' %> returned.
-    </p>
+    <div class="sis-resultsbar">
+      <span class="sis-results-count"><%= rowCount %> record<%= rowCount === 1 ? '' : 's' %></span>
+      <span class="sis-results-actions report-no-print">
+        <a class="sis-btn-secondary" href="<%= report.path %>?<%= queryString %>&format=csv">Export CSV</a>
+        <a class="sis-btn-secondary" href="<%= report.path %>?<%= queryString %>&print=1" target="_blank">Print view</a>
+      </span>
+    </div>
 
     <table class="sis-table">
       <thead>
+        <% if (report.key === 'attendance' && !(typeof breakdown !== 'undefined' && breakdown)) { %>
+        <tr>
+          <th colspan="4" class="sis-band">Student</th>
+          <th colspan="4" class="sis-band num">Attendance marks</th>
+          <th class="sis-band num">Rate</th>
+        </tr>
+        <% } else if (report.key === 'attendance') { %>
+        <tr>
+          <th colspan="<%= Math.max(1, columns.length) %>" class="sis-band">Attendance summary &mdash; student, marks, and code breakdown</th>
+        </tr>
+        <% } %>
         <tr>
           <% columns.forEach(function (c) { %>
           <th<%= c.num ? ' class="num"' : '' %>><%= c.label %></th>

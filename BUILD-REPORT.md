@@ -1,218 +1,140 @@
-# BUILD-REPORT — fake-sis
+# BUILD-REPORT — fake-sis (legacy reference SIS for data-migration demos)
 
-Fake, old-fashioned school Student Information System (SIS) for synthetic demo data.
-Express 4 + EJS + PostgreSQL, plain JavaScript on Node 26. Built by 12 module slices,
-followed by a final QA pass and one targeted attendance fix.
+A dense, old-fashioned school **Student Information System** built to sit *alongside* a newer
+SIS as the **legacy source system** in migration demonstrations: extract from here, map, load
+there, and adapt the mapping ad hoc as the new system's requirements move.
 
-This report is factual. It records what was verified in the final QA pass, what is a
-deliberate stub, and what remains a known limitation.
+Express + EJS + PostgreSQL, plain JavaScript on Node 26, server-rendered. **No client-side
+JavaScript, no bundler** — by design: a legacy system that behaves and looks like one.
 
----
-
-## Module summary
-
-| Module | Route prefix | Main screens | What works (verified 2026-09-30) | What is stubbed / limited |
-|---|---|---|---|---|
-| Home / shell | `/` | `home.ejs` | Landing page with links to every module; `content-type` and header nav render. | None. |
-| Health | `/healthz` | (JSON) | Returns 200; used to confirm DB connectivity at boot. | None. |
-| Students | `/students` | Roster list, student detail, quick search | List (300 students, 3 schools), filter by last name, detail page, quick search by name/State ID. | Detail edits persist only the fields the view posts; no admissions workflow. |
-| Enrollment | `/enrollment` | Landing, new enrollment, confirm, register, withdraw | New-enrollment form writes `students` + `enrollments`; withdraw sets status. | `enrollment_events` rows are written but there is no UI that lists them (see Gaps). |
-| Attendance | `/attendance` | Grid, office filter/correct, letters | Section grid rosters **exactly** the students in `section_roster` for the section; save upserts `attendance_daily` per student/section/date; office lists and corrects marks; mass apply; letters by absence threshold. | Mark-entry screen is text cells (code letters), not click-to-cycle. No bell-period scheduling. |
-| Grading | `/grading` | Setup, scores, student, publish | Categories per section, assignments, score entry, bulk entry, publish to `final_grades`. | Only 2 seeded categories (see Gaps). |
-| Grades | `/grades` | Landing, grade posting, GPA, transcript, corrections | Post final grades per section; GPA and transcript render for students with `final_grades`. | Corrections update grades; no audit trail screen beyond `grade_corrections` rows. |
-| Scheduling | `/scheduling` | Landing, catalog, master, student schedule, section | Course catalog, section master grid, per-student schedule, assign/unassign with period-conflict guard, bulk auto-assign fills `section_roster`. | Capacity is advisory only; auto-assign is greedy, not an optimizer. |
-| Reports | `/reports` | Landing, roster, attendance, transcript, contacts, saved reports | Roster/attendance/transcript/contacts render; `&format=csv` returns `text/csv`. | Saved reports store parameters only; no scheduler. |
-| Admin | `/admin` | School year, codes, users, roles | School-year switching, attendance codes, app users and role assignment, role module visibility. | Role visibility is descriptive only (see Gaps). |
-| Administration | `/administration` | Landing | Entry screen linking admin sub-areas. | Thin wrapper. |
-| Discipline | `/discipline` | Incidents, health | Incident logging and health encounters/flags screens render and accept POSTs. | Seeded incident/health tables start empty; no reporting dashboard. |
+**Scale:** 15 routers · **100 route handlers** · 63 EJS views · 20 migrations · 38 tables ·
+**~42,000 rows** of synthetic district data.
 
 ---
 
-## Verified data footprint (seeded)
-
-| Table | Rows |
-|---|---|
-| students | 300 |
-| schools | 3 |
-| terms | 4 |
-| sections | 42 |
-| teachers | 12 |
-| section_roster | 224 |
-| enrollments | 300 |
-| grade_scores | 37 |
-| final_grades | 30 |
-| app_users | 3 |
-| attendance_daily | 0 (empty until marks are saved) |
-| discipline_incidents | 0 (empty until logged) |
-| health_encounters | 0 (empty until logged) |
-
----
-
-## Run it from scratch
+## 1. Run it
 
 ```bash
-# 1. Install dependencies
-cd /Users/timheckel/Projects/node/fake-sis
-npm install
-
-# 2. Provide a database URL (not printed here; see .env / your environment)
-#    DATABASE_URL=postgres://user:pass@host:5432/fake_sis
-
-# 3. Boot (migrations + seed run automatically, idempotently, on start)
-npm start          # -> fake-sis listening on http://localhost:3000
-
-# 4. Smoke check
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/healthz   # 200
+cd ~/Projects/node/fake-sis
+npm install          # first time only
+npm start            # http://localhost:3000
 ```
 
-Migrations live in `db/migrations/*.sql` and are applied in filename order on boot;
-each is idempotent (`CREATE TABLE IF NOT EXISTS`), so re-running is safe.
+`DATABASE_URL` lives in `.env` (PostgreSQL 16). Migrations in `db/migrations/*.sql` apply
+automatically on boot, in filename order, inside one transaction, and are **idempotent** — every
+seed is guarded, so restarting never duplicates rows. That is the property that makes the demo
+repeatable: `npm start` twice and the row counts are identical.
 
-### Verify the attendance fix
+**Sign in** (demo password for every account: `demo1234`): `admin` (Administrator),
+`registrar` (Registrar), `teacher` (Teacher), plus 10 more — `h.benton`, `r.nader`, a nurse, a
+fees clerk, a vice principal, one **inactive** account for the rejection path.
 
-```bash
-# A section that HAS roster rows (42 here has 32) — count must match the DB
-curl -s "http://localhost:3000/attendance/grid?section=42" | grep -o "Roster:</span>.*students"
-psql "$DATABASE_URL" -c "SELECT count(*) FROM section_roster WHERE section_id=42;"
-
-# A section with NO roster rows shows the pointer message
-curl -s "http://localhost:3000/attendance/grid?section=1" | grep -o "No students assigned to this section[^<]*"
-```
-
-### Verify a report as CSV
-
-```bash
-curl -s -D - -o /dev/null "http://localhost:3000/reports/roster?school=1&grade=9&format=csv" | grep -i content-type
-# Content-Type: text/csv; charset=utf-8
-```
+Access model: everything is public except **`/admin`** (Administrator), **`/fees`**
+(Administrator|Registrar) and **`/discipline`** (any staff role). Those redirect to
+`/auth/login?next=<page>` when signed out and render a styled 403 when the role is wrong. The
+header nav hides modules the signed-in roles may not open.
 
 ---
 
-## QA pass — route sweep
+## 2. Data inventory (what a migration would be extracting)
 
-Every listed route returned HTTP 200. Tested against a live server on port 3000.
+| Domain | Rows | Notes |
+|---|---|---|
+| students | 300 | grades K–12 across 3 schools; 15 `Withdrawn`, 10 mid-year entrants, 2 duplicate-name pairs, 8 NULL middle names, 5 NULL DOBs |
+| enrollments | 900 | current term plus two prior years — longitudinal history |
+| section_roster | 936 | all 42 sections covered; every student in ≥1 section |
+| sections / courses / teachers | 42 / 20 / 12 | period, room, capacity, term |
+| grade_categories | 126 | 3 per section, weights total exactly 100 |
+| grade_assignments | 357 | ~8–10 per section, ~80% published |
+| grade_scores | 15,215 | 12,496 numeric, 1,790 `M` (missing), 929 `X` (exempt) |
+| attendance_daily | 20,204 | 22 school days (2026-09-01→09-30), P/T/A/E mix, 38 absence-heavy + 98 tardy-heavy students |
+| final_grades | 41 | written by the app's own "post grades" action — the demo's live write path |
+| student_contacts | 408 | every student covered; 3 deliberately missing a phone |
+| student_alerts | 68 | medical, custody, academic, behaviour, transport |
+| discipline_incidents / health_encounters / health_flags | 134 / 90 / 76 | spread across the term; 26 incidents not parent-notified |
+| app_users / app_roles / user_roles | 13 / 4 / 14 | every role represented; one multi-role user |
+| student_fees / fee_payments | 600 / 225 | $19,250 billed, $5,100 collected, $14,150 outstanding, 10 waivers |
+| assessments / assessment_scores | 6 / 669 | benchmark windows across grade bands |
+| announcements / announcement_recipients | 15 / 1,676 | audience targeting materialised per recipient, delivery tracked |
 
-| Route | Status |
-|---|---|
-| `/` | 200 |
-| `/healthz` | 200 |
-| `/students` | 200 |
-| `/students?last=Alvarez` | 200 |
-| `/students/1` | 200 |
-| `/students/search?q=rivera` | 200 |
-| `/enrollment` | 200 |
-| `/enrollment/new` | 200 |
-| `/attendance` | 200 |
-| `/attendance/grid?section=42` | 200 |
-| `/attendance/office` | 200 |
-| `/attendance/letters` | 200 |
-| `/grading` | 200 |
-| `/grading/setup?section=1` | 200 |
-| `/grading/scores?section=1` | 200 |
-| `/grades` | 200 |
-| `/grades/post?section=1` | 200 |
-| `/grades/gpa?student=235` | 200 |
-| `/grades/transcript?student=235` | 200 |
-| `/scheduling` | 200 |
-| `/scheduling/catalog` | 200 |
-| `/scheduling/master` | 200 |
-| `/scheduling/section?section=1` | 200 |
-| `/scheduling/student?student=1` | 200 |
-| `/reports` | 200 |
-| `/reports/roster?school=1&grade=9` | 200 |
-| `/reports/roster?school=1&grade=9&format=csv` | 200, `text/csv; charset=utf-8` |
-| `/admin` | 200 |
-| `/admin/school-year` | 200 |
-| `/admin/codes` | 200 |
-| `/admin/users` | 200 |
-| `/admin/roles` | 200 |
-| `/administration` | 200 |
-| `/discipline` | 200 |
-| `/discipline/incidents` | 200 |
-| `/discipline/health` | 200 |
-
-No non-200 responses. No defects found in the route sweep.
-
-### Attendance save path (verified, then cleaned up)
-
-- Section 42 grid rendered 32 student rows; `SELECT count(*) FROM section_roster WHERE section_id=42` returned 32.
-- The 108 Active students of the same school that are **not** in `section_roster` were absent from the rendered grid (0 inputs each; exactly 32 distinct `code_<id>_` inputs).
-- POSTing `section=42&date=2026-03-10&code_2_2026-03-10=A` returned 302 to `...&saved=1&n=1`.
-- The row appeared in `attendance_daily` (student_id=2, section_id=42, on_date=2026-03-10, code=A).
-- The probe row was then deleted; a follow-up count confirmed 0 remaining probe rows.
+**Deliberate messiness** (the point of a migration fixture): withdrawn students with exit dates,
+mid-year entries, duplicate names, NULLs in optional fields, missing score rows (~6% of
+assignment×student pairs), gaps in attendance (~2%), partial payments, and inactive accounts.
 
 ---
 
-## Gaps — disposition
+## 3. Screens (all server-rendered, all working)
 
-1. **No authentication/login anywhere.** Confirmed: no login, session, cookie, passport, or
-   auth middleware exists in `src/app.js` or any route. Every page is open. This is the
-   intended v1 design decision for a synthetic demo dataset — documented as an intentional
-   limitation, not fixed.
-2. **Role module-visibility in `/admin/roles` is descriptive only.** Confirmed by reading the
-   rendered page: it states plainly "Module visibility is descriptive only. The header
-   navigation is NOT driven by these checkboxes in this demo," and "This table is descriptive
-   ... not enforced anywhere yet." Documented; not fixed.
-3. **Grading ships few seeded categories.** Confirmed: only 2 seeded `grade_categories`
-   rows — `Tests` (weight 60) and `Homework` (weight 40) — plus `grade_assignments` and
-   `grade_scores`. The setup screen can add more. Documented.
-4. **`enrollment_events` rows are written but have no UI listing.** Confirmed: the table is
-   INSERTed from `src/routes/enrollment.js` (enroll and withdraw paths) but no route or view
-   reads it back. Documented as a known limitation.
-5. **Attendance roster approximation.** FIXED (see Part 1 / the attendance fix verification
-   above). The grid now rosters exactly the students in `section_roster` for the section,
-   ordered by last name, and shows "No students assigned to this section — assign them in
-   Scheduling" when a section has no roster rows.
-6. **Orphan `src/views/students/search.ejs` deleted.** Confirmed the `/students/search` route
-   renders `students/index` and nothing rendered the orphan view. After deletion,
-   `/students/search?q=rivera` still returns 200.
+| Module | Route | What works |
+|---|---|---|
+| Start Page | `/` | district overview with live counts |
+| Student Records | `/students`, `/students/:id` | criteria search (name/ID/grade/status), results grid, Student-360 (demographics, contacts, enrolment history, alerts), demographics edit |
+| Enrollment | `/enrollment` | recent enrolments, registration with duplicate detection, enrol/withdraw writing enrolment events |
+| Scheduling | `/scheduling` | course catalog, master schedule grid with clash detection, section rosters, student schedule + print, auto-assign |
+| Attendance | `/attendance` | teacher week grid, office corrections, mass entry, absence letters |
+| Grading | `/grading` | categories/weights, assignment setup, score grid (`.col-current` on the active column), missing/exempt codes, bulk fill, publish |
+| Grades & Transcripts | `/grades` | posting from scores, GPA + snapshots, transcript, report card, corrections |
+| Reports | `/reports` | four parameterised reports, column selection, CSV export, print views |
+| Administration | `/admin` | school year/terms, grade codes, users, roles (nav visibility is enforced) |
+| Communications | `/communications` | announcements, audience targeting, recipient materialisation, delivery log + CSV |
+| Fees | `/fees` | catalog, bulk assignment, payments/waivers, balances report + CSV |
+| Assessment | `/assessment` | score entry, per-school/grade summaries + CSV |
+| Discipline & Health | `/discipline` | incidents, encounters, flags, per-student views |
+| Teacher Workspace | `/teacher` | my classes, section standings, quick attendance save |
+| Family Portal | `/portal` | student search, schedule, grades, attendance summary, contacts, alerts, print sheet |
+| Auth | `/auth/login` | scrypt-hashed sessions, login/logout, `/auth/me` |
 
-Additional honest note surfaced during QA (not in the original gap list): `attendance_daily`,
-`discipline_incidents`, and `health_encounters` start **empty** — the write paths work, but no
-seed rows exist for them, so office filters, discipline lists, and health lists are blank on a
-fresh boot until a user posts data.
-
----
-
-## Run metrics (honest)
-
-- 12 module slices delivered (home/shell, students, enrollment, attendance, grading, grades,
-  scheduling, reports, admin, administration, discipline, health).
-- 1 final QA pass (this run): full route sweep, CSV content-type check, attendance-fix
-  end-to-end probe.
-- 1 fix delivered: attendance grid now uses real `section_roster` membership.
-- 1 orphan file removed: `src/views/students/search.ejs`.
-- Known limitations carried forward: 6 items in the Gaps section above.
+Visual language follows the reference capture corpus (`reference/captures/`,
+`reference/captures-v1/`): navy two-tier header with control cluster, dark-blue section bars with
+action buttons and carets, accordion setup rows, left rails, pill buttons, circular
+conflict/scheduled status icons, student steppers, results bars, grouped table header bands,
+dense 11px grids, print stylesheets. No JS means a few controls are deliberately inert and say so
+on-page.
 
 ---
 
-## How to demo (click-through)
+## 4. Demo script for a migration walkthrough
 
-1. Open `http://localhost:3000/` — the home page links every module.
-2. Go to **Students**, then **Find a student** (`/students/search?q=rivera`) and open a record.
-3. Go to **Enrollment → New Enrollment**, enroll a student, land on the confirm screen.
-4. Go to **Scheduling → Section** (pick section 42) and show the assigned roster (32 students).
-5. Go to **Scheduling → Student** (e.g. student 1) and show the period-conflict guard by
-   attempting a conflicting assignment.
-6. Go to **Attendance**, pick section 42, and open the Week Grid — note the roster count (32)
-   matches Scheduling. Type an `A` in a cell and **Save Week Attendance**.
-7. Go to **Attendance → Office** and confirm the saved mark appears; correct it and see
-   `updated_at` change.
-8. Go to **Attendance → Letters** and generate letters at a threshold of 3 absences.
-9. Go to **Grading**, pick a section, add a score, then **Grades → Post** and publish a final
-   grade; open **Grades → Transcript** for that student.
-10. Go to **Reports → Roster** with `&format=csv` in the URL to download a CSV, and finish in
-    **Admin → Roles** to read the descriptive-only module-visibility note.
+1. `npm start` → open http://localhost:3000. Note the density: every panel has data.
+2. **Pick a source record**: `/students` → search `Alvarez` → open a student → read demographics,
+   contacts, enrolment history and alerts. This is the "extract one entity with its satellites"
+   shape.
+3. **Show longitudinal history**: same student → enrolment history rows for the current term and
+   two prior years.
+4. **Show bulk grading data**: `/grading/scores?section=1` → the score grid with the active column
+   highlighted, missing/exempt codes in the cells.
+5. **Exercise the live write path**: on `/grades/post?section=1` press *Post final grades* — the
+   app computes weighted percents (categories must total 100) and writes `final_grades`. Read it
+   back on `/grades/transcript?student=<id>` and `/grades/gpa?student=<id>`.
+6. **Attendance story**: `/attendance/grid?section=1&date=2026-09-30` (a day of data),
+   `/attendance/office` (790 rows to correct), `/attendance/letters` (740 rows of students over
+   the absence threshold).
+7. **Messy-record cases for the mapper**: filter `/students` for withdrawn students, the two
+   duplicate-name pairs, students with NULL DOB, and contacts with no phone.
+8. **Role-gated surfaces**: browse `/admin` anonymously → redirected to login; sign in as
+   `teacher` → `/admin` is 403 while `/teacher` works; sign in as `admin` → both work.
+9. **Exports**: `/reports/roster?school=1&grade=9&format=csv`, `/fees/balances?format=csv`,
+   `/assessment/summary?assessment=2&format=csv` — the "extract to file" path.
+10. **Prove repeatability**: restart the server and re-run the row counts from §2 — identical.
 
 ---
 
-## Files changed by this QA pass
+## 5. Honest limitations
 
-| File | Change |
-|---|---|
-| `src/routes/attendance.js` | `loadRoster` now reads from `section_roster` for the section, ordered by last name, instead of all Active students of the section's school. |
-| `src/views/attendance/grid.ejs` | Empty-state message changed to "No students assigned to this section — assign them in Scheduling." |
-| `src/views/students/search.ejs` | Deleted (orphan; route renders `students/index`). |
-| `BUILD-REPORT.md` | This report (new). |
+- No password reset, MFA, or session revocation beyond logout; demo credentials are shared.
+- Role visibility drives the nav and three gated modules; per-route permissions beyond those three
+  are not modelled.
+- A few controls are inert by design (no JS): accordion headers, collapse carets, "fuzzy search",
+  "keep group", print buttons that would need scripting. Each says so on-page.
+- PDF generation is out of scope: printing uses browser print stylesheets, exports use CSV.
+- Blended fidelity: the chrome follows PowerSchool/Aeries-era patterns while individual screens
+  mimic whichever classic capture matched that screen type; a single-vendor match was not the goal.
+- Notification delivery is modelled in the database only (no email transport).
 
-No other source, schema, migration, partial, or run-state file was modified.
+## 6. Provenance
+
+Built by parallel worker agents across four waves (12 module slices → auth/teacher/portal/
+communications/fees/assessment → data population → visual fidelity), each slice owning one route
+file, one view directory and one idempotent migration, with every slice verified by execution
+(boot, curl, SQL) plus a coordinator pass. Run history, decisions (ADR-001…005), vet verdicts and
+metrics live in `LOOP.md` and `registry.json`.

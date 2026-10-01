@@ -17,6 +17,14 @@
 
 <% } else { %>
 
+<div class="sis-stepper">
+  <a class="sis-step-arrow" href="/portal/student?student=<%= student.id - 1 %>" title="Previous student id">&lsaquo;</a>
+  <span class="sis-step-label"><%= student.last_name %>, <%= student.first_name %></span>
+  <span class="sis-step-menu" title="Inert in this demo">&#9662;</span>
+  <a class="sis-step-arrow" href="/portal/student?student=<%= student.id + 1 %>" title="Next student id">&rsaquo;</a>
+  <span class="fineprint">&nbsp;steps by student id (neighbours may not exist; a missing id shows the friendly not-found page)</span>
+</div>
+
 <div class="sis-page-title">
   Student Portal &mdash; <%= student.last_name %>, <%= student.first_name %>
 </div>

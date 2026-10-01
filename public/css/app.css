@@ -233,6 +233,304 @@ td.col-right { width: 42%; }
 .sis-box-body { padding: 7px 8px; }
 .sis-box-body p { margin: 0 0 6px; }
 
+/* ================================================================
+   V1 screen-level fidelity pass (see reference/v1-screen-deltas.md,
+   patterns P1–P11). Reusable utility classes:
+     P1  .sis-bar + .sis-bar-actions + .sis-caret  (blue section bar)
+     P2  .sis-accordion + .sis-accordion-body      (gray chevron rows)
+     P3  .sis-rail                                  (left link rail)
+     P4  .sis-pill / .sis-pill-go / .sis-actionbar  (pill + icon bar)
+     P5  .sis-status-ok / .sis-status-bad           (circular status)
+     P6  .sis-stepper                               (‹ Name ▾ › bar)
+     P7  .sis-band                                  (grouped header band)
+     P8  .sis-resultsbar / .sis-filters             (count bar, filters)
+     P9  .sis-button-primary-danger(.sis-full)      (wide red primary)
+   All controls are server-rendered; nothing here needs JS.
+   ================================================================ */
+
+/* ---------- P1: blue collapsible-looking section bar ----------- */
+
+.sis-bar {
+  background: #2b5570;
+  border: 1px solid #1e3d55;
+  color: #fff;
+  padding: 3px 8px;
+  overflow: hidden;               /* clearfix for floats */
+  margin-bottom: 6px;
+}
+.sis-bar .sis-bar-title {
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  float: left;
+  padding-top: 1px;
+}
+/* right-aligned small white/near-white buttons inside the bar */
+.sis-bar-actions {
+  float: right;
+  white-space: nowrap;
+}
+.sis-bar-actions a,
+.sis-bar-actions button,
+.sis-bar-actions .sis-bar-btn {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 6px;
+  height: 16px;
+  line-height: 15px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #22415a;
+  background: #fbfcfc;
+  border: 1px solid #16293a;
+  text-decoration: none;
+  cursor: pointer;
+}
+.sis-bar-actions a:hover,
+.sis-bar-actions button:hover { background: #e7eff4; }
+/* inert right-floated collapse caret glyph */
+.sis-caret {
+  float: right;
+  margin-left: 6px;
+  color: #cfe0ec;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: default;
+  text-decoration: none;
+}
+
+/* ---------- P2: gray accordion row with chevron ----------------- */
+
+.sis-accordion {
+  background: #e4e8e9;
+  border: 1px solid #b3bcbf;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #23405a;
+  overflow: hidden;
+  cursor: default;
+}
+.sis-accordion .sis-accordion-chevron {
+  float: right;
+  color: #5c6f7c;
+  font-size: 11px;
+  font-weight: bold;
+}
+.sis-accordion-body {
+  border: 1px solid #b3bcbf;
+  border-top: none;
+  background: #fdfdfb;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+/* ---------- P3: left navigation rail ---------------------------- */
+
+.sis-rail {
+  width: 180px;
+  border: 1px solid #b3bcbf;
+  background: #f4f6f7;
+  padding: 4px;
+}
+.sis-rail a {
+  display: block;                 /* every rail link is block-level */
+  padding: 3px 6px;
+  margin-bottom: 2px;
+  font-size: 11px;
+  color: #1c4f8b;
+  background: #dbe7f1;
+  border: 1px solid #a9c1d6;
+  text-decoration: none;
+}
+.sis-rail a:hover { background: #cfe0ef; color: #b03000; }
+.sis-rail a.current {
+  background: #fdfdfb;            /* highlighted current item */
+  border: 1px solid #6d8ba3;
+  color: #14304a;
+  font-weight: bold;
+}
+
+/* ---------- P4: pill buttons + icon action bar ------------------ */
+
+.sis-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 1px 12px;
+  font-size: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  background: #e6e2da;
+  border: 1px solid #8d8d8d;
+  color: #1a1a1a;
+  cursor: pointer;
+  line-height: 16px;
+}
+.sis-pill:hover { background: #f0ede6; }
+.sis-pill-go {
+  background: #3f8f4a;
+  border-color: #2f7038;
+  color: #fff;
+}
+.sis-pill-go:hover { background: #367d41; color: #fff; }
+
+/* row of small white icon-buttons, 6px gaps */
+.sis-actionbar {
+  white-space: nowrap;
+  margin: 0 0 6px;
+}
+.sis-actionbar > a,
+.sis-actionbar > button,
+.sis-actionbar > form {
+  display: inline-block;
+  margin-right: 6px;              /* 6px gaps between icon buttons */
+  vertical-align: middle;
+}
+.sis-actionbar > form { margin: 0 6px 0 0; }
+.sis-actionbar .sis-iconbtn {
+  width: 22px;
+  height: 18px;
+  margin-left: 0;
+  background: #fbfcfc;
+  border: 1px solid #7f8f9a;
+  color: #22415a;
+}
+.sis-actionbar .sis-iconbtn:hover { background: #e7eff4; }
+
+/* ---------- P5: circular status icons --------------------------- */
+
+.sis-status-ok,
+.sis-status-bad {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: middle;
+}
+.sis-status-ok  { background: #3f8f4a; border: 1px solid #2c6d36; }
+.sis-status-bad { background: #c0392b; border: 1px solid #8f2b20; }
+
+/* ---------- P6: student/teacher stepper bar --------------------- */
+
+.sis-stepper {
+  background: #e4e8e9;
+  border: 1px solid #b3bcbf;
+  padding: 2px 8px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: #23405a;
+  overflow: hidden;
+}
+.sis-stepper .sis-step-arrow {
+  text-decoration: none;
+  font-weight: bold;
+  color: #1c4f8b;
+  padding: 0 5px;
+  font-size: 13px;
+  line-height: 16px;
+}
+.sis-stepper .sis-step-arrow:hover { color: #b03000; }
+.sis-stepper .sis-step-label {
+  font-weight: bold;
+  color: #14304a;
+  padding: 0 3px;
+}
+.sis-stepper .sis-step-menu { color: #5c6f7c; font-size: 10px; }
+
+/* ---------- P7: grouped table header band ----------------------- */
+
+table.sis-table th.sis-band {
+  background: #234a63;            /* slightly darker than the header row */
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- P8: filters row + results bar ----------------------- */
+
+.sis-filters {
+  padding: 3px 2px 5px;
+  font-size: 11px;
+}
+.sis-filters label,
+.sis-filters .sis-filter-item {
+  display: inline-block;
+  margin-right: 8px;              /* 8px gaps between items */
+  font-size: 11px;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+.sis-filters input[type="checkbox"] { vertical-align: middle; margin: 0 2px 0 0; }
+
+.sis-resultsbar {
+  background: #f1f3f3;
+  border: 1px solid #b3bcbf;
+  padding: 3px 8px;
+  overflow: hidden;
+  font-size: 11px;
+  color: #23405a;
+}
+.sis-resultsbar .sis-results-count {
+  float: left;
+  font-weight: bold;
+  padding-top: 1px;
+}
+.sis-resultsbar .sis-results-actions {
+  float: right;
+  white-space: nowrap;
+}
+/* highlighted secondary button for the results bar */
+.sis-resultsbar .sis-btn-secondary {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 8px;
+  height: 17px;
+  line-height: 16px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #14304a;
+  background: #d5e3ee;
+  border: 1px solid #6d8ba3;
+  text-decoration: none;
+  cursor: pointer;
+}
+.sis-resultsbar .sis-btn-secondary:hover { background: #c3d7e6; color: #14304a; }
+
+/* ---------- P9: wide red primary button ------------------------- */
+
+.sis-button-primary-danger,
+button.sis-button-primary-danger {
+  background: #c0392b;
+  border: 1px solid #8f2b20;
+  border-top-color: #d9705f;
+  color: #fff;
+  font-weight: bold;
+  padding: 2px 12px;
+  cursor: pointer;
+}
+.sis-button-primary-danger:hover { background: #a93226; }
+.sis-button-primary-danger.sis-full,
+button.sis-button-primary-danger.sis-full {
+  display: block;
+  width: 100%;                    /* span the whole panel */
+  padding: 3px 12px;
+  margin-top: 6px;
+}
+
+/* small inert link rail under a panel (recently viewed / other searches) */
+.sis-linkrail {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: #5b6b76;
+}
+.sis-linkrail a { font-size: 10px; }
+
 /* ---------- D5: accent & meta devices -------------------------
    .sis-metabar  — light-blue assignment/record meta strip above a grid
    .col-current  — salmon "current entry column" header + body tint

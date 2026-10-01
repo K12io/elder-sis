@@ -2,9 +2,16 @@
 
 <div class="sis-page-title">Attendance Grid</div>
 
+<div class="sis-bar">
+  <span class="sis-bar-title">Attendance &mdash; <%= section.course_name %> [<%= section.section_code %>] &middot; Week of <%= week[0] %> &ndash; <%= week[4] %></span>
+  <span class="sis-caret" title="collapse is not implemented in this demo">&#9662;</span>
+  <span class="sis-bar-actions">
+    <a href="/attendance/office?section=<%= section.id %>&amp;date=<%= date %>" title="Mass entry">Mass Entry</a>
+  </span>
+  <div class="clear"></div>
+</div>
+
 <div class="sis-metabar">
-  <span class="meta-label">Section:</span> <span class="meta-strong"><%= section.course_name %> [<%= section.section_code %>]</span>
-  &nbsp;|&nbsp;
   <span class="meta-label">Teacher:</span> <span class="meta-strong"><%= section.teacher_name %></span>
   &nbsp;|&nbsp;
   <span class="meta-label">School:</span> <span class="meta-strong"><%= section.school_name %></span>
@@ -13,9 +20,7 @@
   &nbsp;|&nbsp;
   <span class="meta-label">Room:</span> <span class="meta-strong"><%= section.room %></span>
   &nbsp;|&nbsp;
-  <span class="meta-label">Week of:</span> <span class="meta-strong"><%= week[0] %> &ndash; <%= week[4] %></span>
-  &nbsp;|&nbsp;
-  <span class="meta-label">Roster:</span> <span class="meta-strong"><%= roster.length %></span> students
+  <span class="meta-label">Date:</span> <span class="meta-strong"><%= date %></span>
 </div>
 
 <% if (saved !== null) { %>
@@ -30,6 +35,20 @@
 <input type="hidden" name="section" value="<%= section.id %>">
 <input type="hidden" name="date" value="<%= date %>">
 
+<!-- P10: results bar above the grid; Legend is a plain anchor to this page's #legend block -->
+<div class="sis-resultsbar" style="margin-top:8px;">
+  <span class="sis-results-count"><%= roster.length %> rostered student<%= roster.length === 1 ? '' : 's' %></span>
+  <span class="sis-results-actions">
+    <a class="sis-btn-secondary" href="#legend" title="Jump to the code legend below">Legend</a>
+    <a class="sis-btn-secondary" href="/attendance/office?section=<%= section.id %>" title="Mass entry is done from the Attendance Office screen">Fill Periods</a>
+  </span>
+  <div class="clear"></div>
+</div>
+<p class="fineprint" style="margin:4px 0;">
+  Fill-down across the week is done from the Attendance Office mass-entry screen; the Legend
+  button is a plain in-page link to the legend block below (no script).
+</p>
+
 <table class="sis-table" style="margin-top:8px;">
   <thead>
     <tr>
@@ -39,11 +58,12 @@
       <% weekdayLabels.forEach(function (lbl, i) { %>
       <th class="col-accent-blue" style="width:52px; text-align:center;"><%= lbl %><br><span style="font-weight:normal;"><%= week[i].slice(5) %></span></th>
       <% }); %>
+      <th style="width:28px;" title="Notes">&nbsp;</th>
     </tr>
   </thead>
   <tbody>
     <% if (roster.length === 0) { %>
-    <tr><td colspan="8">No students assigned to this section &mdash; assign them in Scheduling.</td></tr>
+    <tr><td colspan="9">No students assigned to this section &mdash; assign them in Scheduling.</td></tr>
     <% } %>
     <% roster.forEach(function (st, idx) { %>
     <tr>
@@ -60,6 +80,9 @@
                style="width:26px; text-align:center; text-transform:uppercase;">
       </td>
       <% }); %>
+      <td style="text-align:center;">
+        <a href="/attendance/office?student=<%= st.id %>" title="not implemented in this demo">&#128172;</a>
+      </td>
     </tr>
     <% }); %>
   </tbody>
@@ -70,7 +93,7 @@
   <a href="/attendance?date=<%= date %>&section=<%= section.id %>">&laquo; Back to Attendance</a>
 </p>
 
-<div class="sis-box" style="margin-top:8px;">
+<div class="sis-box" style="margin-top:8px;" id="legend">
   <div class="sis-box-title">Code Legend</div>
   <div class="sis-box-body">
     <% codes.forEach(function (c) { %>

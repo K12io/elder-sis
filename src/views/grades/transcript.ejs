@@ -13,6 +13,14 @@
 
 <div class="sis-page-title"><%= reportCard ? 'Report Card Preview' : 'Transcript of Record' %></div>
 
+<div class="sis-bar sis-transcript-noprint">
+  <span class="sis-bar-title">Transcript</span>
+  <span class="sis-bar-actions">
+    <a href="#" title="Use your browser's Print command">Print</a>
+  </span>
+  <span class="sis-caret" title="Inert in this demo">&#9662;</span>
+</div>
+
 <% if (typeof error !== 'undefined' && error) { %>
 <div class="sis-box">
   <div class="sis-box-title">Notice</div>
@@ -224,11 +232,16 @@
 
 <% } %>
 
-<p class="sis-transcript-noprint">
+<p class="sis-transcript-noprint sis-actionbar">
+  <a class="sis-button" href="#" title="Use your browser's Print command">Print</a>
   <% terms.forEach(function (t) { %>
-    <a href="/grades/transcript?student=<%= student.id %>&amp;term=<%= t.term_id %>">Report card: <%= t.term_name %></a> &nbsp;
+    <a href="/grades/transcript?student=<%= student.id %>&amp;term=<%= t.term_id %>">Report card: <%= t.term_name %></a>
   <% }); %>
   <a href="/grades/transcript?student=<%= student.id %>">Back to full transcript</a>
+</p>
+<p class="sis-transcript-noprint fineprint">
+  The Print button is inert in this demo (no client-side JavaScript); use your browser's
+  Print command &mdash; the transcript sheet is print-styled.
 </p>
 
 <% } %>

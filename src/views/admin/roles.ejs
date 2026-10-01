@@ -9,6 +9,13 @@
   The header navigation is NOT driven by these checkboxes in this demo.
 </div>
 
+<div class="sis-rail" style="margin:6px 0;width:auto;">
+  <a href="/admin/school-year">School Year</a>
+  <a href="/admin/codes">Codes</a>
+  <a href="/admin/users">Users</a>
+  <a href="/admin/roles" class="current">Roles</a>
+</div>
+
 <% if (message) { %>
   <div class="sis-metabar" style="border-color:#9dbf9d;background:#e5f2e5;">
     <span class="meta-strong">Saved:</span> <%= message %>
@@ -49,8 +56,11 @@
 </div>
 
 <div class="sis-box">
-  <div class="sis-box-title">Edit Module Visibility</div>
-  <div class="sis-box-body">
+  <div class="sis-accordion">
+    <span>Edit Module Visibility</span>
+    <span class="sis-accordion-chevron" title="Inert in this demo">&#9656;</span>
+  </div>
+  <div class="sis-accordion-body">
     <% roles.forEach(function (r) { %>
       <%
         var selected = (r.visible_modules || '').split(',').filter(Boolean);
@@ -78,7 +88,7 @@
           </tr>
           <tr>
             <th>&nbsp;</th>
-            <td><button type="submit" class="sis-button-go">Save visibility</button></td>
+            <td><button type="submit" class="sis-pill sis-pill-go">Save visibility</button></td>
           </tr>
         </table>
       </form>
@@ -88,7 +98,8 @@
     <% } %>
     <p class="fineprint">
       Not enforced: the SIS header renders every tab for every user regardless of these
-      settings. This screen records intent for a future permissions slice.
+      settings. This screen records intent for a future permissions slice. Accordion rows
+      render expanded; collapsing is inert in this demo (no client-side JavaScript).
     </p>
   </div>
 </div>

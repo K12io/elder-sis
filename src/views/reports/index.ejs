@@ -16,6 +16,25 @@
 </div>
 <% } %>
 
+<table class="layout">
+<tr>
+<td class="col-left" style="width:220px;vertical-align:top;">
+
+  <div class="sis-box">
+    <div class="sis-box-title">Reports</div>
+    <div class="sis-box-body">
+      <div class="sis-rail">
+        <% reports.forEach(function (rep) { %>
+          <a href="<%= rep.path %>"><%= rep.name %></a>
+        <% }); %>
+        <a href="/reports" class="current">Saved reports<span class="fineprint"> (<%= savedReports.length %>)</span></a>
+      </div>
+    </div>
+  </div>
+
+</td>
+<td class="col-right" style="vertical-align:top;">
+
 <div class="sis-box" style="margin-top:8px;">
   <div class="sis-box-title">Standard Reports</div>
   <div class="sis-box-body">
@@ -103,5 +122,9 @@
     <% } %>
   </div>
 </div>
+
+</td>
+</tr>
+</table>
 
 <%- include('../partials/footer') %>
