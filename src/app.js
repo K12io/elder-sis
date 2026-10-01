@@ -18,6 +18,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(attachUser);
 
 app.get("/", async (req, res) => {
+  // The app opens on the sign-in page for anonymous visitors; signed-in users
+  // land on the Start Page.
+  if (!req.user) return res.redirect("/auth/login?next=%2F");
   const [students, sections, teachers, term] = await Promise.all([
     query("SELECT count(*)::int AS n FROM students"),
     query("SELECT count(*)::int AS n FROM sections"),
