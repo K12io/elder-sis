@@ -1,0 +1,18 @@
+# Not needed in the image / must never enter it
+.env
+.git
+.github
+.ultra
+evidence
+reference
+node_modules
+loop-archive
+*.log
+*.tmp.*
+docker-compose.yml
+Dockerfile
+.dockerignore
+README.md
+BUILD-REPORT.md
+LOOP.md
+registry.json
