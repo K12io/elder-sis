@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "complete",
-  "tick": 29,
+  "tick": 34,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -844,7 +844,7 @@
     }
   ],
   "metrics": {
-    "ticks": 29,
+    "ticks": 34,
     "firstPassVetPass": 22,
     "firstPassVetTotal": 29,
     "retries": 3,
@@ -979,6 +979,22 @@
     {
       "tick": 29,
       "note": "FINAL SWEEP green; BUILD-REPORT.md refreshed for the migration-demo purpose; RUN CLOSED (28/28)"
+    },
+    {
+      "tick": 30,
+      "note": "Deploy phase item 1: reference/deploy-recon.md written (k12io pattern: k3s/Traefik, cert-manager letsencrypt-prod, external-dns Cloudflare, Docker Hub timheckel/*, secret-injection deploy)"
+    },
+    {
+      "tick": 31,
+      "note": "Items 2-3: product renamed Elder (chrome+README+BUILREPORT) pushed to github.com/K12io/elder-sis; Dockerfile (node:26-alpine, healthcheck fixed to ok/db contract) built+verified 270MB"
+    },
+    {
+      "tick": 32,
+      "note": "Item 4: deploy/k3/{prod.yml,apply.sh,README} \u2014 server-side dry-run passed on k12io-production; worker k12io-production-agents-wxa observed NotReady (unrelated)"
+    },
+    {
+      "tick": 33,
+      "note": "Item 5: DB 'elder' provisioned on shared k8s postgres (k12io DBs: k12_sis/k12io_production/sleeperhitlist_production; k12io prod moved to Neon). FRESH-DB BUG FOUND+FIXED in src/db.js: data migrations 30-35 INSERT..SELECT rows derived from base tables that JS seeds create only AFTER the migration pass, so a first-ever boot left roster/grades/attendance empty (0 rows). Historic 'idempotent' verdicts were measured on an already-populated DB - never on empty. Fix: fresh path runs two post-seed migration passes; boot2-symbol convergence proven (file 33's status messiness reshapes file 31's derived gradebook windows). Verified boot1==boot2 on empty DB: roster 919 / scores 18,051 (14,841 NUM, 2,127 M, 1,083 X) / attendance 19,848 / recipients 1,674 / 44,314 rows; cluster DB at steady state. BUILD-REPORT 2 + README numbers refreshed to deterministic values."
     }
   ],
   "guidance": [

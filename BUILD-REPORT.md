@@ -8,7 +8,8 @@ Express + EJS + PostgreSQL, plain JavaScript on Node 26, server-rendered. **No c
 JavaScript, no bundler** — by design: a legacy system that behaves and looks like one.
 
 **Scale:** 15 routers · **100 route handlers** · 63 EJS views · 20 migrations · 38 tables ·
-**~42,000 rows** of synthetic district data.
+**~44,000 rows** of synthetic district data (deterministic: the counts below are exactly what a
+fresh database produces on `npm start`, verified byte-identical across boots).
 
 ---
 
@@ -42,12 +43,12 @@ header nav hides modules the signed-in roles may not open.
 |---|---|---|
 | students | 300 | grades K–12 across 3 schools; 15 `Withdrawn`, 10 mid-year entrants, 2 duplicate-name pairs, 8 NULL middle names, 5 NULL DOBs |
 | enrollments | 900 | current term plus two prior years — longitudinal history |
-| section_roster | 936 | all 42 sections covered; every student in ≥1 section |
+| section_roster | 919 | all 42 sections covered; every student in ≥1 section |
 | sections / courses / teachers | 42 / 20 / 12 | period, room, capacity, term |
 | grade_categories | 126 | 3 per section, weights total exactly 100 |
 | grade_assignments | 357 | ~8–10 per section, ~80% published |
-| grade_scores | 15,215 | 12,496 numeric, 1,790 `M` (missing), 929 `X` (exempt) |
-| attendance_daily | 20,204 | 22 school days (2026-09-01→09-30), P/T/A/E mix, 38 absence-heavy + 98 tardy-heavy students |
+| grade_scores | 18,051 | 14,841 numeric, 2,127 `M` (missing), 1,083 `X` (exempt); ~6% of assignment×student pairs deliberately have no row |
+| attendance_daily | 19,848 | 22 school days (2026-09-01→09-30), P/T/A/E mix, absence-heavy and tardy-heavy students for sweep screens |
 | final_grades | 41 | written by the app's own "post grades" action — the demo's live write path |
 | student_contacts | 408 | every student covered; 3 deliberately missing a phone |
 | student_alerts | 68 | medical, custody, academic, behaviour, transport |
@@ -55,7 +56,7 @@ header nav hides modules the signed-in roles may not open.
 | app_users / app_roles / user_roles | 13 / 4 / 14 | every role represented; one multi-role user |
 | student_fees / fee_payments | 600 / 225 | $19,250 billed, $5,100 collected, $14,150 outstanding, 10 waivers |
 | assessments / assessment_scores | 6 / 669 | benchmark windows across grade bands |
-| announcements / announcement_recipients | 15 / 1,676 | audience targeting materialised per recipient, delivery tracked |
+| announcements / announcement_recipients | 15 / 1,674 | audience targeting materialised per recipient, delivery tracked |
 
 **Deliberate messiness** (the point of a migration fixture): withdrawn students with exit dates,
 mid-year entries, duplicate names, NULLs in optional fields, missing score rows (~6% of
@@ -107,8 +108,8 @@ on-page.
    app computes weighted percents (categories must total 100) and writes `final_grades`. Read it
    back on `/grades/transcript?student=<id>` and `/grades/gpa?student=<id>`.
 6. **Attendance story**: `/attendance/grid?section=1&date=2026-09-30` (a day of data),
-   `/attendance/office` (790 rows to correct), `/attendance/letters` (740 rows of students over
-   the absence threshold).
+   `/attendance/office` (bulk correction rows), `/attendance/letters` (students over the absence
+   threshold).
 7. **Messy-record cases for the mapper**: filter `/students` for withdrawn students, the two
    duplicate-name pairs, students with NULL DOB, and contacts with no phone.
 8. **Role-gated surfaces**: browse `/admin` anonymously → redirected to login; sign in as

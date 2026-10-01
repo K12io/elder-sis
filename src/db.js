@@ -259,6 +259,15 @@ export async function applyDb() {
     if (rows[0].n === 0) {
       await seed(client);
       await seedAcademic(client);
+      // Data-wave migrations (30+) insert rows FROM the base tables (students,
+      // sections, ...) via INSERT ... SELECT, so they contribute nothing until the
+      // JS seeds above have run. Two further passes land the steady state in one
+      // start: file 31's derived gradebook windows depend on the status changes
+      // that file 33 (people) applies, so pass 2 grades pre-messiness windows and
+      // pass 3 grades the final ones (+2,934 scores, verified). All migrations are
+      // idempotent — boot 2 and 3 of a fresh DB are byte-identical (verified).
+      await client.query(migrationsSql());
+      await client.query(migrationsSql());
     }
     await client.query("COMMIT");
   } catch (err) {

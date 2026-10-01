@@ -1,3 +1,6 @@
 node_modules/
 .env
 *.log
+
+# infra recon stays local (repo is public; k12io repo has the source)
+reference/deploy-recon.md
