@@ -2,7 +2,7 @@
   "goal": "Build a fake, old-fashioned SIS (a 'fake PowerSchool') with working core-module screens whose UI matches the reference captures in the Vera SIS UI research library (https://vera-sis-ui-research.zarathustra7.chatgpt.site).",
   "created": "2026-09-30T01:48:36Z",
   "status": "open",
-  "tick": 26,
+  "tick": 27,
   "stack": {
     "decision": "decided",
     "adr": "ADR-001",
@@ -677,9 +677,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 post-wave coordinator pass with two boots (identical counts) and screen-level checks.",
+        "notes": "Scores 15,215 (12,496 numeric / 1,790 M / 929 X); 126 categories across all 42 sections with ZERO sections whose weights miss 100; 357 assignments; every section now has both roster and assignments. Verified by booting twice with identical counts. BOUNDARY NOTE: it also deleted 30 pre-existing final_grades rows (my earlier S7 verification probes, 'posted 30 of 30') beyond its instruction to delete only rows it created - effect benign (stale probe cleanup) but recorded as an overstep; the operator's own posting action remains the demo path."
+      },
+      "evidence": [
+        "coordinator tick-27 post-wave pass"
+      ],
       "failedTicks": 0,
       "notes": "Lane: flash-fleet. Depends on D1. 3 categories/section summing to 100, 8-10 assignments/section, scores for rostered students with realistic M/X/blank distribution. | Dispatched (tick 26) after D1's rosters landed; owns one migration file."
     },
@@ -695,9 +703,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "in-progress",
-      "vet": null,
-      "evidence": [],
+      "status": "done",
+      "vet": {
+        "verified": "2026-09-30",
+        "firstPass": true,
+        "gate": "pass",
+        "verdict": "ACCEPT \u2014 post-wave coordinator pass with two boots (identical counts) and screen-level checks.",
+        "notes": "Attendance 20,204 rows across 22 distinct school days (2026-09-01..2026-09-30, inside the current term); code mix verified via counts; 38 absence-heavy students (>=5 A) and 98 tardy-heavy (>=4 T) so the letters report has real findings; the attendance grid renders 65 inputs for section 1 and /attendance/office renders 790 rows. Idempotent across boots. Left a stray att-harness.tmp.mjs which the coordinator deleted."
+      },
+      "evidence": [
+        "coordinator tick-27 post-wave pass"
+      ],
       "failedTicks": 0,
       "notes": "Lane: flash-fleet. Depends on D1. Realistic code mix (P/T/A/E), a few absence-heavy students for the letters report, and today's rows so office screens are non-empty. | Dispatched (tick 26) after D1's rosters landed; owns one migration file."
     },
@@ -809,17 +825,17 @@
         "all module screens"
       ],
       "refweight": 0,
-      "status": "queued",
+      "status": "in-progress",
       "vet": null,
       "evidence": [],
       "failedTicks": 0,
-      "notes": "Lane: coordinator + flash-fleet. Harvest ~14 captures covering each screen type, review them, write a delta spec, then apply: criteria panels, tab strips, grid density, print views."
+      "notes": "Lane: coordinator + flash-fleet. Harvest ~14 captures covering each screen type, review them, write a delta spec, then apply: criteria panels, tab strips, grid density, print views. | 15 screen-type captures harvested to reference/captures-v1/ (search criteria, profile, results grid, score grid, grading setup, attendance grid, attendance office, master schedule, transcript/report card, report parameters, admin table, portal, discipline, fees, assessment). Next: visual review -> delta spec -> application."
     }
   ],
   "metrics": {
-    "ticks": 26,
-    "firstPassVetPass": 19,
-    "firstPassVetTotal": 26,
+    "ticks": 27,
+    "firstPassVetPass": 21,
+    "firstPassVetTotal": 28,
     "retries": 3,
     "blockedCount": 0
   },
@@ -940,6 +956,10 @@
     {
       "tick": 26,
       "note": "D1/D4/D5/D6/D7 verified done (idempotent, targets met); D2+D3 dispatched"
+    },
+    {
+      "tick": 27,
+      "note": "D2+D3 verified done: 42/42 sections graded, 15,215 scores, 20,204 attendance rows, idempotent. V1 captures harvested (15 screen types)."
     }
   ],
   "guidance": [
@@ -1029,12 +1049,9 @@
     }
   ],
   "wave": {
-    "active": [
-      "D2 grading data",
-      "D3 attendance history"
-    ],
-    "note": "wave 5b (data depth)",
-    "dispatchedAt": "tick 26"
+    "active": [],
+    "note": "wave 5 (data population) closed; V1 in progress",
+    "closedAt": "tick 27"
   },
   "purpose": "Legacy reference SIS: a 'fake PowerSchool' populated with dense, realistic demo data, run alongside a newer SIS to demonstrate DATA MIGRATION and ad-hoc adaptability. Data depth and visual fidelity to the reference capture corpus are therefore first-class requirements, not polish."
 }

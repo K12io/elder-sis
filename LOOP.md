@@ -561,3 +561,19 @@ disjoint `files` lists or run in worktrees (ultra rule 1).
   claiming passwords were out of scope) and `admin/roles.ejs` (three "descriptive only" claims —
   module visibility now actually drives the nav). **This closes knownGaps 1 and 2.**
   Remaining wave 4: F7 (seed coherence) then the BUILD-REPORT refresh + final sweep.
+- 2026-09-30 · tick 27 (coordinator) · **DATA WAVE COMPLETE — the district is now genuinely
+  full.** D2 and D3 verified together in one post-wave pass: **42 of 42 sections** have both a
+  roster and assignments (was 1 of 42); grade data is **15,215 score rows** (12,496 numeric /
+  1,790 missing / 929 exempt) across **126 categories, all of which total 100** and **357
+  assignments**; attendance is **20,204 rows over 22 distinct school days** (2026-09-01..
+  2026-09-30, inside the current term) with **38 absence-heavy and 98 tardy-heavy students**, so
+  the attendance-letters screen reports real findings instead of an empty table. Screens that
+  were empty this morning now render data: score grid 240 inputs, attendance grid 65 inputs,
+  office 790 rows, letters 740 rows. Two boots produced identical counts, so the whole data
+  layer is idempotent. Two worker notes worth keeping: D2 deleted 30 pre-existing `final_grades`
+  rows (my own earlier S7 verification probes) beyond its instruction — benign, but an overstep
+  worth recording, and it leaves the operator's own "post grades" action as the demo path; D3
+  left a stray harness file which I removed. **V1 (visual fidelity) is the last item**: 15
+  screen-type captures are now harvested into `reference/captures-v1/` covering search criteria,
+  profile, results grid, score grid, grading setup, attendance grid, office, master schedule,
+  transcript, report parameters, admin table, portal, discipline, fees and assessment.
