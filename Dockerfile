@@ -11,9 +11,10 @@ ENV NODE_ENV=production \
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# App code + migrations
+# App code + migrations + static assets (public/css — express.static serves it)
 COPY src ./src
 COPY db ./db
+COPY public ./public
 
 USER node
 EXPOSE 3000
