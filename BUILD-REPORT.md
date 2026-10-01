@@ -1,4 +1,4 @@
-# BUILD-REPORT — fake-sis (legacy reference SIS for data-migration demos)
+# BUILD-REPORT — Elder (elder-sis): legacy reference SIS for data-migration demos
 
 A dense, old-fashioned school **Student Information System** built to sit *alongside* a newer
 SIS as the **legacy source system** in migration demonstrations: extract from here, map, load
@@ -15,7 +15,7 @@ JavaScript, no bundler** — by design: a legacy system that behaves and looks l
 ## 1. Run it
 
 ```bash
-cd ~/Projects/node/fake-sis
+cd ~/Projects/node/fake-sis   # product name: Elder / elder-sis
 npm install          # first time only
 npm start            # http://localhost:3000
 ```

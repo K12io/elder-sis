@@ -74,7 +74,7 @@ const port = Number(process.env.PORT) || 3000;
 await applyDb();
 
 app.listen(port, () => {
-  console.log(`fake-sis listening on http://localhost:${port}`);
+  console.log(`Elder (elder-sis) listening on http://localhost:${port}`);
 });
 
 export default app;

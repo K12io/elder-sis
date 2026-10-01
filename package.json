@@ -1,9 +1,9 @@
 {
-  "name": "fake-sis",
+  "name": "elder-sis",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Fake, old-fashioned school Student Information System (SIS) for synthetic demo data",
+  "description": "Elder — old-fashioned school Student Information System (SIS) for synthetic demo data",
   "main": "src/app.js",
   "scripts": {
     "start": "node --env-file=.env src/app.js"
