@@ -184,6 +184,22 @@ router.post("/:id", async (req, res, next) => {
   const dob = str(req.body.dob) || null;
   const status = str(req.body.status) || "Active";
 
+  if (dob && !/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+    return res.status(400).render("students/show", {
+      pageTitle: "Student Record",
+      activeTab: "students",
+      student: { id, first_name: firstName, middle_name: middleName, last_name: lastName, dob: "" },
+      contacts: [],
+      enrollments: [],
+      alerts: [],
+      grades: GRADES,
+      statuses: STATUSES,
+      intToGrade,
+      saved: false,
+      error: "Date of birth must be entered as YYYY-MM-DD.",
+    });
+  }
+
   if (!firstName || !lastName) {
     return res.status(400).render("students/show", {
       pageTitle: "Student Record",
@@ -200,13 +216,18 @@ router.post("/:id", async (req, res, next) => {
     });
   }
 
-  const r = await query(
-    `UPDATE students
-        SET first_name = $1, middle_name = $2, last_name = $3,
-            grade_level = $4, gender = $5, dob = $6, status = $7
-      WHERE id = $8`,
-    [firstName, middleName, lastName, grade, gender, dob, status, id]
-  );
+  let r;
+  try {
+    r = await query(
+      `UPDATE students
+          SET first_name = $1, middle_name = $2, last_name = $3,
+              grade_level = $4, gender = $5, dob = $6, status = $7
+        WHERE id = $8`,
+      [firstName, middleName, lastName, grade, gender, dob, status, id]
+    );
+  } catch (err) {
+    return next(err);
+  }
   if (r.rowCount === 0) {
     return res.status(404).render("students/404", {
       pageTitle: "Student Not Found",

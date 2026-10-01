@@ -5,6 +5,11 @@ import pg from "pg";
 
 const { Pool } = pg;
 
+// Return DATE columns (OID 1082) as raw 'YYYY-MM-DD' strings. Default pg parsing
+// yields JS Date objects, which display code turns into 'Mon Nov 19'-style junk
+// and which then round-trips into date columns as unparseable garbage.
+pg.types.setTypeParser(1082, (v) => v);
+
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   throw new Error(

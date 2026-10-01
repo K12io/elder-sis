@@ -75,6 +75,19 @@ const GATED = {
   }
 }
 
+// Safety net: a stray async error in a route must not kill the process —
+// unhandled rejections terminate Node 15+, which here means a 502ing pod.
+process.on("unhandledRejection", (err) => {
+  console.error("unhandledRejection (kept alive):", err && err.stack ? err.stack : err);
+});
+
+// Clean 500 for anything forwarded via next(err).
+app.use((err, req, res, next) => {
+  console.error("route error:", err && err.stack ? err.stack : err);
+  if (res.headersSent) return next(err);
+  res.status(500).type("text/plain").send("Internal Server Error");
+});
+
 const port = Number(process.env.PORT) || 3000;
 
 await applyDb();
