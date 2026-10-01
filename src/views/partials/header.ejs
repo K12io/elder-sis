@@ -40,8 +40,8 @@
   var cuRoles = cu ? (cu.roles || []).map(function (r) { return String(r).toLowerCase(); }) : [];
   var isAdmin = cuRoles.indexOf('administrator') !== -1;
   var visibleTabs = tabs.filter(function (t) {
+    if (!cu) return false; // default-deny: no menu until signed in
     if (t.pub) return true;
-    if (!cu) return false;
     if (isAdmin) return true;
     return (t.roles || []).some(function (r) { return cuRoles.indexOf(String(r).toLowerCase()) !== -1; });
   });
@@ -61,7 +61,10 @@
     <div id="topbar-title">Valley View Unified School District &mdash; Elder SIS</div>
   </div>
 
+  <% if (cu) { %>
   <!-- D1 tier 2: darker context/action strip + control cluster -->
+  <!-- Anonymous visitors get only the branding bar — no menu, school, term or
+       user context, and no quick-search or control-cluster shortcuts until sign-in. -->
   <div id="topbar-context">
     <div class="sis-control-cluster">
       <form class="quicksearch" action="/students/search" method="get">
@@ -110,5 +113,6 @@
     </ul>
     <div class="clear"></div>
   </div>
+  <% } %>
 
   <div id="content">
