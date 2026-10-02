@@ -153,6 +153,9 @@ router.post("/setup", async (req, res) => {
   if (!name) {
     return res.redirect(`/grading/setup?section=${sectionId}&notice=` + encodeURIComponent("Assignment name is required."));
   }
+  if (dueOn && !/^\d{4}-\d{2}-\d{2}$/.test(dueOn)) {
+    return res.redirect(`/grading/setup?section=${sectionId}&notice=` + encodeURIComponent("Due date must be a valid YYYY-MM-DD date."));
+  }
   await query(
     `INSERT INTO grade_assignments (section_id, category_id, name, points, due_on, published)
      VALUES ($1, $2, $3, $4, $5, $6)`,
